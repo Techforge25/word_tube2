@@ -1,0 +1,420 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:word_toob/app_providers/content_provider.dart';
+import 'package:word_toob/app_providers/main_dashboard_controller.dart';
+import 'package:word_toob/common/app_constants/route_strings.dart';
+import 'package:word_toob/views/theme/app_color.dart';
+import 'package:word_toob/views/widgets/custom_bottom_sheet.dart';
+import 'package:word_toob/views/widgets/custom_bottom_sheet_video.dart';
+import 'package:word_toob/views/widgets/video_thumbnail_fleet.dart';
+import 'dart:developer' as dev;
+
+class EditPopOver extends StatefulWidget {
+  final String title;
+  final String picture;
+  final int id;
+  final int index;
+  final int gridIndex;
+  final bool hide;
+  const EditPopOver({
+    super.key,
+    required this.title,
+    required this.picture,
+    required this.id,
+    required this.index,
+    required this.gridIndex,
+    required this.hide,
+  });
+
+  @override
+  State<EditPopOver> createState() => _EditPopOverState();
+}
+
+class _EditPopOverState extends State<EditPopOver> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(EditPopOver oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.title != oldWidget.title) {
+      dev.log("This is title:  ${widget.title}");
+    } else {
+      dev.log("this is not updating---------->");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double fontSize = context.height * 0.02;
+    dev.log('${widget.hide}');
+
+    return Consumer2<MainDashboardController, ContentProvider>(
+      builder: (context, mainDashboardController, contentProvider, child) =>
+          Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                GrayNavBarOnEdit(
+                  widget: widget,
+                  mainDashboardController: mainDashboardController,
+                  contentProvider: contentProvider,
+                ),
+                IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      const Gap(10),
+                      Column(
+                        children: [
+                          const Gap(10),
+                          mainDashboardController.isEditPressed
+                              ? SizedBox(
+                                  width: context.width * 0.1,
+                                  child: TextFormField(
+                                    onTapOutside: (e) {
+                                      FocusManager.instance.primaryFocus
+                                          ?.unfocus();
+                                    },
+
+                                    style: TextStyle(
+                                        fontSize: fontSize,
+                                        color: AppColor.appPrimaryColor),
+
+                                    controller: mainDashboardController
+                                        .editTitleTextEditingController,
+                                    // decoration: InputDecoration(),
+                                  ),
+                                )
+                              : Text(
+                                  widget.title,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                          color: AppColor.appPrimaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: fontSize),
+                                ),
+                          const Gap(10),
+                          if (widget.picture != "")
+                            GestureDetector(
+                              onTap: () {
+                                mainDashboardController.toggleBottomSheet();
+                              },
+                              child: mainDashboardController.imagePath == ""
+                                  ? widget.picture.contains("asset")
+                                      ? Image.asset(
+                                          widget.picture,
+                                          height: 120,
+                                          width: 120,
+                                        )
+                                      : Image.file(
+                                          File(
+                                            widget.picture,
+                                          ),
+                                          height: 120,
+                                          width: 120,
+                                        )
+                                  : Image.file(
+                                      File(mainDashboardController.imagePath),
+                                      height: 120,
+                                      width: 120,
+                                    ),
+                            ),
+                          const Gap(10),
+                          GestureDetector(
+                            onTap: () {
+                              mainDashboardController.toggleBottomSheet();
+                            },
+                            child: Text(
+                              "Edit Picture",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                      color: AppColor.appPrimaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: fontSize),
+                            ),
+                          ),
+                          const Gap(10),
+                          GestureDetector(
+                            onTap: () async {
+                              mainDashboardController.hideOrShowEachGrid(
+                                  contentProvider, widget.index,
+                                  hideTitle: !widget.hide,
+                                  hideImage: !widget.hide);
+                              Navigator.pop(context);
+
+                              // await contentProvider.updateListDataItem(id: widget.id, itemIndex: widget.index,hideTitle:!widget.hide);
+                              // mainDashboardController.setGridSizedModel(contentProvider.allGridSizedModel[mainDashboardController.gridIndex],mainDashboardController.gridIndex);
+                              dev.log("This is being pressed");
+                            },
+                            child: Text(
+                              widget.hide == false
+                                  ? "Hide Word"
+                                  : "Unhide word",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                      color: AppColor.appPrimaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: fontSize),
+                            ),
+                          ),
+                        ],
+                      ),
+                      VerticalDivider(
+                        color: AppColor.shadowColor2,
+                        thickness: 2,
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const Gap(10),
+                            Text(
+                              "${mainDashboardController.visibleVideos.length} Videos",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                      color: AppColor.appPrimaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: fontSize),
+                            ),
+                            const Gap(10),
+                            GestureDetector(
+                              onTap: () {
+                                mainDashboardController
+                                    .toggleBottomSheetVideo();
+                              },
+                              child: Text(
+                                "Add Videos",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      fontSize: fontSize,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ),
+                            Divider(
+                              color: AppColor.shadowColor2,
+                              thickness: 2,
+                            ),
+                            Column(
+                              children: List.generate(
+                                  mainDashboardController.visibleVideos.length,
+                                  (index) {
+                                final video = mainDashboardController
+                                    .visibleVideos[index];
+                                return Dismissible(
+                                  key: Key(index
+                                      .toString()), // Use a unique key for each item, such as a video ID or index
+                                  direction: DismissDirection
+                                      .startToEnd, // Swipe direction
+                                  background: Container(
+                                    color: Colors
+                                        .red, // Background color for the dismiss action
+                                    alignment: Alignment.centerRight,
+                                    padding: const EdgeInsets.only(right: 20),
+                                    child: const Icon(Icons.delete,
+                                        color: Colors.white),
+                                  ),
+                                  onDismissed: (direction) {
+                                    // Handle the removal of the video
+                                    setState(() {
+                                      mainDashboardController
+                                          .removeVideosFromList(index);
+                                    });
+                                  },
+                                  child: VideoUploadWidget(
+                                    isEditPressed:
+                                        mainDashboardController.isEditPressed,
+                                    onTapRemove: () {
+                                      mainDashboardController
+                                          .removeVideosFromList(index);
+                                    },
+                                    video: video,
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                          context, RouteStrings.videoPlayer,
+                                          arguments: video);
+                                    },
+                                  ),
+                                );
+                              }),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          if (mainDashboardController.showBottomSheetVideo)
+            GestureDetector(
+              onTap: () {
+                mainDashboardController.toggleBottomSheetOffVideo();
+              },
+              child: Container(
+                color: mainDashboardController.showBottomSheetVideo
+                    ? AppColor.black.withOpacity(0.5)
+                    : Colors.transparent,
+              ),
+            ),
+          if (mainDashboardController.showBottomSheetVideo)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: CustomBottomSheetVideo(
+                gridIndex: widget.gridIndex,
+                id: widget.id,
+                index: widget.index,
+              ),
+            ),
+          if (mainDashboardController.showBottomSheet)
+            GestureDetector(
+              onTap: () {
+                mainDashboardController.toggleBottomSheetOff();
+              },
+              child: Container(
+                color: mainDashboardController.showBottomSheet
+                    ? AppColor.black.withOpacity(0.5)
+                    : Colors.transparent,
+              ),
+            ),
+          if (mainDashboardController.showBottomSheet)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: CustomBottomSheet(
+                gridIndex: widget.gridIndex,
+                id: widget.id,
+                index: widget.index,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class GrayNavBarOnEdit extends StatelessWidget {
+  final MainDashboardController mainDashboardController;
+  final ContentProvider contentProvider;
+  const GrayNavBarOnEdit({
+    super.key,
+    required this.widget,
+    required this.mainDashboardController,
+    required this.contentProvider,
+  });
+
+  final EditPopOver widget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      width: double.infinity,
+      decoration: BoxDecoration(
+          color: AppColor.shadowColor2,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+          )),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (mainDashboardController.isEditPressed)
+            GestureDetector(
+              onTap: () async {
+                mainDashboardController.isEditPressedFun(false);
+                if (mainDashboardController
+                    .editTitleTextEditingController.text.isNotEmpty) {
+                  await contentProvider.updateListDataItem(
+                      id: widget.id,
+                      itemIndex: widget.index,
+                      title: mainDashboardController
+                          .editTitleTextEditingController.text);
+                  mainDashboardController.setGridSizedModel(
+                      contentProvider
+                          .allGridSizedModel[mainDashboardController.gridIndex],
+                      mainDashboardController.gridIndex);
+                  mainDashboardController.clearEditTitleControllerText();
+// ignore: use_build_context_synchronously
+                  Navigator.pop(context);
+                }
+              },
+              child: Text(
+                "Done",
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColor.blue,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            )
+          else
+            GestureDetector(
+              onTap: () {
+                mainDashboardController.isEditPressedFun(true);
+                mainDashboardController
+                    .setEditTitleControllerText(widget.title);
+              },
+              child: Text(
+                "Edit",
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColor.blue,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  widget.title,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColor.appPrimaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Text(
+              "cancel",
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColor.blue,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
