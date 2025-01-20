@@ -85,10 +85,9 @@ class _EditPopOverState extends State<EditPopOver> {
                               ? SizedBox(
                                   width: context.width * 0.1,
                                   child: TextFormField(
-                                    onTapOutside: (e) {
-                                      FocusManager.instance.primaryFocus
-                                          ?.unfocus();
-                                    },
+                                    onTapOutside: (e) => FocusManager
+                                        .instance.primaryFocus
+                                        ?.unfocus(),
 
                                     style: TextStyle(
                                         fontSize: fontSize,

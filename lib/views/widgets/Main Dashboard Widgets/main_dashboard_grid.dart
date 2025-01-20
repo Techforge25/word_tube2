@@ -77,8 +77,9 @@ class _GridViewWidgetState extends State<GridViewWidget>
           Column(
             children: [
               const Gap(5),
-              if (widget.value.findTheWord)
-                Align(
+              Visibility(
+                visible: widget.value.findTheWord,
+                child: Align(
                   alignment: Alignment.center,
                   child: Text(
                     "Find '${widget.value.gridSizedModel.listData?[widget.value.randomListIndex].title}'",
@@ -89,6 +90,8 @@ class _GridViewWidgetState extends State<GridViewWidget>
                         ),
                   ),
                 ),
+              ),
+              const Gap(5),
               Expanded(
                 child: GridView.builder(
                   // shrinkWrap: true,
@@ -157,13 +160,12 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                           ?.copyWith(
                                             color: AppColor.white,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: context.height *
-                                                0.028, // Adjust the font size if necessary
+                                            // Adjust the font size if necessary
+                                            fontSize: context.height * 0.028,
                                           ),
                                     ),
-                                    SizedBox(
-                                      height: context.height * 0.02,
-                                    ), // Add spacing between text and image
+                                    // Add spacing between text and image
+                                    SizedBox(height: context.height * 0.02),
                                     findTheWrongWord
                                         ? Flexible(
                                             child: grid.imagepath != null
@@ -201,11 +203,13 @@ class _GridViewWidgetState extends State<GridViewWidget>
                               builder: (context) => Stack(
                                 children: [
                                   GestureDetector(
-                                    onLongPress: () {
-                                      widget.value.hideOrShowEachGrid(
-                                          widget.contentProvider, index,
-                                          hideTitle: true, hideImage: true);
-                                    },
+                                    onLongPress: () =>
+                                        widget.value.hideOrShowEachGrid(
+                                      widget.contentProvider,
+                                      index,
+                                      hideTitle: true,
+                                      hideImage: true,
+                                    ),
                                     onTap: () {
                                       // value.setItemOnEditState(index,context,title: "Happy",picture: MyAssets.happy );
                                       widget.value.setItemOnEditState(

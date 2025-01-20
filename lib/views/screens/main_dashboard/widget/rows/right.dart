@@ -56,11 +56,13 @@ class RightRow extends StatelessWidget {
           onTap: () {
             value.setEdit(true);
           },
-          child: Text("Edit",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: fontSize,
-                  )),
+          child: Text(
+            "Edit",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: fontSize,
+                ),
+          ),
         ),
         Gap(sizeWidth),
         SettingButton(

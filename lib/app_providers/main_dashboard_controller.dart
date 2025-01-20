@@ -299,7 +299,7 @@ class MainDashboardController extends ChangeNotifier {
     dev.log("grid index model $_gridIndex");
     dev.log("grid index list data $index");
 
-    if (_gridSizedModel.id != null) {
+    if (_gridSizedModel.id != null && _editPressedYello) {
       await contentProvider.updateListDataItem(
         itemIndex: index,
         hideImage: hideImage,
