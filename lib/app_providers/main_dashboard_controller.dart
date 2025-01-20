@@ -135,9 +135,7 @@ class MainDashboardController extends ChangeNotifier {
   /// listen method.
   ///
 
-  void stopListening() async {
-    await speechToText.stop();
-  }
+  void stopListening() async => await speechToText.stop();
 
   void onSpeechResult(SpeechRecognitionResult result) {
     lastWords = result.recognizedWords;
@@ -292,8 +290,12 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> hideOrShowEachGrid(ContentProvider contentProvider, int index,
-      {required bool hideImage, required bool hideTitle}) async {
+  Future<void> hideOrShowEachGrid(
+    ContentProvider contentProvider,
+    int index, {
+    required bool hideImage,
+    required bool hideTitle,
+  }) async {
     dev.log("grid index model $_gridIndex");
     dev.log("grid index list data $index");
 

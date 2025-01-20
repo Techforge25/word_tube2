@@ -29,6 +29,7 @@ class MainDashboard extends StatefulWidget {
 }
 
 class _MainDashboardState extends State<MainDashboard> {
+  // ignore: prefer_final_fields
   TextEditingController _controler = TextEditingController();
 
   final _contentProvider = sl<ContentProvider>();
@@ -160,26 +161,23 @@ class _MainDashboardState extends State<MainDashboard> {
         body: Consumer2<MainDashboardController, ContentProvider>(
           builder: (context, mainDashBoarState, contentState, child) =>
               GestureDetector(
-            onTap: () {
-              FocusScope.of(context).unfocus();
-            },
+            onTap: () => FocusScope.of(context).unfocus(),
             child: Column(
               children: [
-                if (!mainDashBoarState.editPressedYello)
-                  NormalNavBar(
-                    addMap: addMap,
-                    sizeWidth: sizeWidth,
-                    value: mainDashBoarState,
-                    contentProvider: contentState,
-                    menuController: MenuController(),
-                  )
-                else
-                  EditWidget(
-                    sizeWidth: sizeWidth,
-                    controler: _controler,
-                    value: mainDashBoarState,
-                    contentProvider: contentState,
-                  ),
+                !mainDashBoarState.editPressedYello
+                    ? NormalNavBar(
+                        addMap: addMap,
+                        sizeWidth: sizeWidth,
+                        value: mainDashBoarState,
+                        contentProvider: contentState,
+                        menuController: MenuController(),
+                      )
+                    : EditWidget(
+                        sizeWidth: sizeWidth,
+                        controler: _controler,
+                        value: mainDashBoarState,
+                        contentProvider: contentState,
+                      ),
                 GridViewWidget(
                   value: mainDashBoarState,
                   contentProvider: contentState,
@@ -217,31 +215,54 @@ class LeftRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        PlusButton(addMap: addMap, iconSize: iconSize),
+        PlusButton(
+          addMap: addMap,
+          iconSize: iconSize,
+          fontSize: fontSize,
+        ),
         Gap(sizeWidth),
         MyBoardsButton(
-            menuController: menuController2,
-            contentProvider: contentProvider,
-            value: value,
-            fontSize: fontSize),
+          menuController: menuController2,
+          contentProvider: contentProvider,
+          value: value,
+          fontSize: fontSize,
+        ),
         Gap(sizeWidth),
-        GestureDetector(
-          onTap: () {
-            value.setSpeechToText(context);
-          },
-          child: Container(
+        IconButton(
+          onPressed: () => value.setSpeechToText(context),
+          splashRadius: 100,
+          icon: Container(
             decoration: BoxDecoration(
-                color: value.speechToTextCheck
-                    ? AppColor.blue
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(20)),
+              color:
+                  value.speechToTextCheck ? AppColor.blue : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
             padding: const EdgeInsets.all(5),
-            child: Icon(Icons.mic,
-                size: iconSize,
-                color:
-                    value.speechToTextCheck ? AppColor.white : AppColor.blue),
+            child: Icon(
+              Icons.mic,
+              size: iconSize,
+              color: value.speechToTextCheck ? AppColor.white : AppColor.blue,
+            ),
           ),
         ),
+        // GestureDetector(
+        //   onTap: () {
+        //     value.setSpeechToText(context);
+        //   },
+        //   child: Container(
+        //     decoration: BoxDecoration(
+        //       color:
+        //           value.speechToTextCheck ? AppColor.blue : Colors.transparent,
+        //       shape: BoxShape.circle,
+        //     ),
+        //     padding: const EdgeInsets.all(5),
+        //     child: Icon(
+        //       Icons.mic,
+        //       size: iconSize,
+        //       color: value.speechToTextCheck ? AppColor.white : AppColor.blue,
+        //     ),
+        //   ),
+        // ),
         Gap(sizeWidth),
         if (value.lottie || value.speechToTextCheck)
           Lottie.asset(
@@ -277,14 +298,16 @@ class CenterTitle extends StatelessWidget {
 }
 
 class PlusButton extends StatelessWidget {
+  final List<Map<String, dynamic>> addMap;
+  final double iconSize;
+  final double fontSize;
+
   const PlusButton({
     super.key,
     required this.addMap,
     required this.iconSize,
+    required this.fontSize,
   });
-
-  final List<Map<String, dynamic>> addMap;
-  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -301,6 +324,7 @@ class PlusButton extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: AppColor.blue,
                             fontWeight: FontWeight.bold,
+                            fontSize: fontSize,
                           ),
                     ),
                   ),
@@ -359,7 +383,13 @@ class MyBoardsButton extends StatelessWidget {
             menuController.close();
           },
           visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-          title: Text(contentProvider.allGridSizedModel[index].title ?? ""),
+          title: Text(
+            contentProvider.allGridSizedModel[index].title ?? "",
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
         );
       }),
       titleWidget: Text(
@@ -401,7 +431,13 @@ class RightRow extends StatelessWidget {
             return ListTile(
               onTap: gameMap[index]["onTap"],
               visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-              title: Text(gameMap[index]["name"]),
+              title: Text(
+                gameMap[index]["name"],
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: fontSize + 4,
+                      color: AppColor.appPrimaryColor.withOpacity(0.5),
+                    ),
+              ),
             );
           }),
           titleWidget: Text(
@@ -465,6 +501,11 @@ class HelpButton extends StatelessWidget {
 }
 
 class SettingButton extends StatefulWidget {
+  final double fontSize;
+  final MenuController gameMenuController;
+  final double gap;
+  final MainDashboardController value;
+
   const SettingButton({
     super.key,
     required this.fontSize,
@@ -472,11 +513,6 @@ class SettingButton extends StatefulWidget {
     required this.value,
     required this.gameMenuController,
   });
-
-  final double fontSize;
-  final MenuController gameMenuController;
-  final double gap;
-  final MainDashboardController value;
 
   @override
   State<SettingButton> createState() => _SettingButtonState();
@@ -492,7 +528,7 @@ class _SettingButtonState extends State<SettingButton> {
       menuItems: [
         CustomMenuItemButton(
           child: Container(
-            width: context.width * 0.73,
+            width: context.width * 0.35,
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: Center(
               child: Column(
@@ -501,20 +537,23 @@ class _SettingButtonState extends State<SettingButton> {
                   Text(
                     "Settings",
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 20, color: AppColor.appPrimaryColor),
+                          fontSize: widget.fontSize + 5,
+                          fontWeight: FontWeight.w800,
+                          color: AppColor.appPrimaryColor,
+                        ),
                   ),
+                  Divider(),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Gap(25),
-                      Text("Tiles",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                  fontSize: widget.fontSize + 8,
-                                  color: AppColor.appPrimaryColor
-                                      .withOpacity(0.5))),
+                      Text(
+                        "Tiles",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: widget.fontSize + 4,
+                              color: AppColor.appPrimaryColor.withOpacity(0.5),
+                            ),
+                      ),
                       Gap(widget.gap),
 
                       Container(
@@ -530,13 +569,18 @@ class _SettingButtonState extends State<SettingButton> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Symbols & Word",
+                                  Flexible(
+                                    child: Text(
+                                      "Symbols & Word",
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium
                                           ?.copyWith(
-                                              fontSize: widget.fontSize + 10,
-                                              color: AppColor.appPrimaryColor)),
+                                            fontSize: widget.fontSize + 4,
+                                            color: AppColor.appPrimaryColor,
+                                          ),
+                                    ),
+                                  ),
                                   widget.value.settingsWordOnlyShow == 1
                                       ? const Icon(
                                           Icons.check,
@@ -556,13 +600,18 @@ class _SettingButtonState extends State<SettingButton> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Word Only",
+                                  Flexible(
+                                    child: Text(
+                                      "Word Only",
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium
                                           ?.copyWith(
-                                              fontSize: widget.fontSize + 10,
-                                              color: AppColor.appPrimaryColor)),
+                                            fontSize: widget.fontSize + 4,
+                                            color: AppColor.appPrimaryColor,
+                                          ),
+                                    ),
+                                  ),
                                   widget.value.settingsWordOnlyShow == 2
                                       ? const Icon(
                                           Icons.check,
@@ -676,31 +725,31 @@ class _SettingButtonState extends State<SettingButton> {
                       // ),
                       // Gap(gap),
 
-                      Text("GAME OPTIONS",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                  fontSize: widget.fontSize + 8,
-                                  color: AppColor.appPrimaryColor
-                                      .withOpacity(0.5))),
-                      Gap(widget.gap),
+                      // Text("GAME OPTIONS",
+                      //     style: Theme.of(context)
+                      //         .textTheme
+                      //         .bodyMedium
+                      //         ?.copyWith(
+                      //             fontSize: widget.fontSize + 8,
+                      //             color: AppColor.appPrimaryColor
+                      //                 .withOpacity(0.5))),
+                      // Gap(widget.gap),
 
-                      GestureDetector(
-                        onTap: () {
-                          menuController.close();
-                          widget.gameMenuController.open();
-                        },
-                        child: Text("Find The Word",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                    fontSize: widget.fontSize + 10,
-                                    color: AppColor.appPrimaryColor
-                                        .withOpacity(0.5))),
-                      ),
-                      Gap(widget.gap),
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     menuController.close();
+                      //     widget.gameMenuController.open();
+                      //   },
+                      //   child: Text("Find The Word",
+                      //       style: Theme.of(context)
+                      //           .textTheme
+                      //           .bodyMedium
+                      //           ?.copyWith(
+                      //               fontSize: widget.fontSize + 10,
+                      //               color: AppColor.appPrimaryColor
+                      //                   .withOpacity(0.5))),
+                      // ),
+                      // Gap(widget.gap),
 
                       GestureDetector(
                         onTap: () {
@@ -710,14 +759,17 @@ class _SettingButtonState extends State<SettingButton> {
                               'Download now and join the adventure: ${AppKeys.appStore}\n'
                               'For more info visit: http://wordtoob.com/index.html');
                         },
-                        child: Text("Share",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                    fontSize: widget.fontSize + 10,
-                                    color: AppColor.appPrimaryColor
-                                        .withOpacity(0.5))),
+                        child: Text(
+                          "Share",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                fontSize: widget.fontSize + 4,
+                                color:
+                                    AppColor.appPrimaryColor.withOpacity(0.5),
+                              ),
+                        ),
                       ),
                     ],
                   ),

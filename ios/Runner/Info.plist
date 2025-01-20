@@ -50,6 +50,12 @@
     <string>We need to access your photo library to pick images for the app.</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>We need to save images to your photo library.</string>
+<!-- Access Microphone -->
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>recognize speech</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Need microphone access for uploading audio</string>
+<!-- Access Microphone -->
     <key>NSAppTransportSecurity</key>
     <dict>
       <key>NSAllowsArbitraryLoads</key>

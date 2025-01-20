@@ -43,8 +43,17 @@ class NormalNavBar extends StatelessWidget {
       }
     ];
 
-    double fontSize = context.height * 0.025;
-    double iconSize = context.height * 0.04;
+    late double fontSize;
+    late double iconSize;
+    Orientation orientation = MediaQuery.orientationOf(context);
+    if (orientation == Orientation.landscape) {
+      fontSize = context.width * 0.015;
+      iconSize = context.width * 0.025;
+    } else {
+      fontSize = context.height * 0.025;
+      iconSize = context.height * 0.04;
+    }
+
     double gap = 15;
 
     return Container(
@@ -55,22 +64,24 @@ class NormalNavBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           LeftRow(
-              addMap: addMap,
-              menuController2: menuController2,
-              iconSize: iconSize,
-              sizeWidth: sizeWidth,
-              contentProvider: contentProvider,
-              value: value,
-              fontSize: fontSize),
+            addMap: addMap,
+            menuController2: menuController2,
+            iconSize: iconSize,
+            sizeWidth: sizeWidth,
+            contentProvider: contentProvider,
+            value: value,
+            fontSize: fontSize,
+          ),
           CenterTitle(value: value, fontSize: fontSize),
           if (!value.findTheWord)
             RightRow(
-                menuController: menuController,
-                gameMap: gameMap,
-                fontSize: fontSize,
-                sizeWidth: sizeWidth,
-                value: value,
-                gap: gap)
+              menuController: menuController,
+              gameMap: gameMap,
+              fontSize: fontSize,
+              sizeWidth: sizeWidth,
+              value: value,
+              gap: gap,
+            )
           else
             FindTheWordRow(
               fontSize: fontSize,
