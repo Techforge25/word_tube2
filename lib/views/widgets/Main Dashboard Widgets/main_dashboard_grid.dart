@@ -282,13 +282,15 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                                         ),
                                                   ),
                                                 ),
+                                                // Add spacing between text and image
                                                 SizedBox(
-                                                    height: context.height *
-                                                        0.02), // Add spacing between text and image
+                                                  height: context.height * 0.02,
+                                                ),
                                                 if (widget.value
                                                         .settingsWordOnlyShow ==
                                                     1)
                                                   Flexible(
+                                                    flex: 3,
                                                     child: grid.imagepath !=
                                                             null
                                                         ? grid.imagepath!
