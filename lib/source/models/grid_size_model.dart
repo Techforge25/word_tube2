@@ -38,8 +38,8 @@ class GridSizeModel {
       listData = localDetails.getListData(localDetails.listDataJson);
       title = localDetails.title;
       hideModel = localDetails.hideModel;
-      currentSelected = localDetails.currentSelected ?? false;
-      duplicateCount = localDetails.duplicateCount ?? 1;
+      currentSelected = localDetails.currentSelected;
+      duplicateCount = localDetails.duplicateCount;
       id = localDetails.id;
     } catch (e) {
       dev.log("GridSizeModel.fromLocal: $e");

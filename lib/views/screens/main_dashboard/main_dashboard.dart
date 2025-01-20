@@ -139,11 +139,9 @@ class _MainDashboardState extends State<MainDashboard> {
       },
       {
         "name": "Duplicate Board",
-        "onTap": () {
-          _contentProvider.saveGridSizedModel(
-            gridSizedModel: _mainDashBoard.duplicateGridSizedModel,
-          );
-        }
+        "onTap": () => _contentProvider.saveGridSizedModel(
+              gridSizedModel: _mainDashBoard.duplicateGridSizedModel,
+            )
       }
     ];
 
