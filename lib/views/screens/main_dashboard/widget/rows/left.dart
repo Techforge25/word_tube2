@@ -3,8 +3,8 @@ import 'package:gap/gap.dart';
 import 'package:lottie/lottie.dart';
 import 'package:word_toob/app_providers/content_provider.dart';
 import 'package:word_toob/app_providers/main_dashboard_controller.dart';
-import 'package:word_toob/views/screens/main_dashboard/widegt/button/board.dart';
-import 'package:word_toob/views/screens/main_dashboard/widegt/button/plus.dart';
+import 'package:word_toob/views/screens/main_dashboard/widget/button/board.dart';
+import 'package:word_toob/views/screens/main_dashboard/widget/button/plus.dart';
 import 'package:word_toob/views/theme/app_color.dart';
 
 class LeftRow extends StatelessWidget {

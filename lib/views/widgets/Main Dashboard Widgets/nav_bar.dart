@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/app_providers/content_provider.dart';
 import 'package:word_toob/app_providers/main_dashboard_controller.dart';
-import 'package:word_toob/views/screens/main_dashboard/widegt/button/setting.dart';
-import 'package:word_toob/views/screens/main_dashboard/widegt/center_tile.dart';
-import 'package:word_toob/views/screens/main_dashboard/widegt/rows/left.dart';
-import 'package:word_toob/views/screens/main_dashboard/widegt/rows/right.dart';
+import 'package:word_toob/views/screens/main_dashboard/widget/button/setting.dart';
+import 'package:word_toob/views/screens/main_dashboard/widget/center_tile.dart';
+import 'package:word_toob/views/screens/main_dashboard/widget/rows/left.dart';
+import 'package:word_toob/views/screens/main_dashboard/widget/rows/right.dart';
 import 'package:word_toob/views/theme/app_color.dart';
 
 class NormalNavBar extends StatelessWidget {

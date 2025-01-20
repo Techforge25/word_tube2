@@ -50,7 +50,6 @@ class _GridViewWidgetState extends State<GridViewWidget>
   void dispose() {
     // Dispose the controller when the widget is removed
     _controller.dispose();
-
     super.dispose();
   }
 
@@ -84,9 +83,10 @@ class _GridViewWidgetState extends State<GridViewWidget>
                   child: Text(
                     "Find '${widget.value.gridSizedModel.listData?[widget.value.randomListIndex].title}'",
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColor.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: context.height * 0.03),
+                          color: AppColor.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: context.height * 0.03,
+                        ),
                   ),
                 ),
               Expanded(
@@ -110,101 +110,93 @@ class _GridViewWidgetState extends State<GridViewWidget>
 
                     if (widget.value.findTheWord ||
                         widget.value.freePlay == false) {
-                      return Stack(
-                        children: [
-                          Builder(
-                            builder: (context) => InkWell(
-                              onTap: () {
-                                if (widget.value.targetFindWord == grid.title) {
-                                  widget.value.setFindWordImage(true);
-                                  widget.value.setFoundSuccess(true);
-                                  _onImageTap(MyAssets.correct);
-                                } else {
-                                  widget.value.setFindTheWordWrongList(index);
-                                  widget.value.setFindWordImage(true);
-                                  _onImageTap(MyAssets.wrong);
-                                }
-                              },
-                              child: Container(
-                                  margin: EdgeInsets.symmetric(
-                                    horizontal: 2,
-                                    vertical: 1,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: findTheWrongWord
-                                        ? AppColor.cardColor
-                                        : AppColor.transparent,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        color: findTheWrongWord
-                                            ? Colors.white
-                                            : Colors.transparent,
-                                        width: 2),
-                                  ),
-                                  child: Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: context.height * 0.02,
-                                          horizontal: context.width * 0.02),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            findTheWrongWord
-                                                ? grid.title ?? '?'
-                                                : "",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(
-                                                  color: AppColor.white,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: context.height *
-                                                      0.028, // Adjust the font size if necessary
-                                                ),
+                      return Builder(
+                        builder: (context) => InkWell(
+                          onTap: () {
+                            if (widget.value.targetFindWord == grid.title) {
+                              widget.value.setFindWordImage(true);
+                              widget.value.setFoundSuccess(true);
+                              _onImageTap(MyAssets.correct);
+                            } else {
+                              widget.value.setFindTheWordWrongList(index);
+                              widget.value.setFindWordImage(true);
+                              _onImageTap(MyAssets.wrong);
+                            }
+                          },
+                          child: Container(
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 2,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: findTheWrongWord
+                                  ? AppColor.cardColor
+                                  : AppColor.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: findTheWrongWord
+                                    ? Colors.white
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: context.height * 0.02,
+                                  horizontal: context.width * 0.02,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      findTheWrongWord ? grid.title ?? '?' : "",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColor.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: context.height *
+                                                0.028, // Adjust the font size if necessary
                                           ),
-                                          SizedBox(
-                                              height: context.height *
-                                                  0.02), // Add spacing between text and image
-                                          findTheWrongWord
-                                              ? Flexible(
-                                                  child: grid.imagepath != null
-                                                      ? grid.imagepath!
-                                                              .contains(
-                                                                  "assets")
-                                                          ? Image.asset(
-                                                              grid.imagepath!,
-                                                              height: context
-                                                                      .height *
-                                                                  0.5,
-                                                              width: 100,
-                                                            )
-                                                          : Image.file(
-                                                              File(grid
-                                                                  .imagepath!),
-                                                              height: context
-                                                                      .height *
-                                                                  0.5,
-                                                              width: 100,
-                                                            )
-                                                      : Container(),
-                                                )
-                                              : Container(),
-                                        ],
-                                      ),
                                     ),
-                                  )),
+                                    SizedBox(
+                                      height: context.height * 0.02,
+                                    ), // Add spacing between text and image
+                                    findTheWrongWord
+                                        ? Flexible(
+                                            child: grid.imagepath != null
+                                                ? grid.imagepath!
+                                                        .contains("assets")
+                                                    ? Image.asset(
+                                                        grid.imagepath!,
+                                                        height: context.height *
+                                                            0.5,
+                                                        width: 100,
+                                                      )
+                                                    : Image.file(
+                                                        File(grid.imagepath!),
+                                                        height: context.height *
+                                                            0.5,
+                                                        width: 100,
+                                                      )
+                                                : Container(),
+                                          )
+                                        : Container(),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                        ],
+                        ),
                       );
                     } else {
                       return CommonFunctions.getCheckforGridShow(
-                              isEditPressedYellow:
-                                  widget.value.editPressedYello,
-                              hideImage: grid.hideImage ?? false,
-                              hideTitle: grid.hidetitle ?? false)
+                        isEditPressedYellow: widget.value.editPressedYello,
+                        hideImage: grid.hideImage ?? false,
+                        hideTitle: grid.hidetitle ?? false,
+                      )
                           ? Builder(
                               builder: (context) => Stack(
                                 children: [
@@ -329,9 +321,11 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                       builder: (context) => GestureDetector(
                                         onLongPress: () {
                                           widget.value.hideOrShowEachGrid(
-                                              widget.contentProvider, index,
-                                              hideTitle: false,
-                                              hideImage: false);
+                                            widget.contentProvider,
+                                            index,
+                                            hideTitle: false,
+                                            hideImage: false,
+                                          );
                                         },
 
                                         // onTap: () {

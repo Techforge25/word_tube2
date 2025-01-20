@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:word_toob/app_providers/main_dashboard_controller.dart';
-import 'package:word_toob/views/screens/main_dashboard/widegt/button/help.dart';
-import 'package:word_toob/views/screens/main_dashboard/widegt/button/setting.dart';
+import 'package:word_toob/views/screens/main_dashboard/widget/button/help.dart';
+import 'package:word_toob/views/screens/main_dashboard/widget/button/setting.dart';
 import 'package:word_toob/views/theme/app_color.dart';
 import 'package:word_toob/views/widgets/custom_menu_widget.dart';
 

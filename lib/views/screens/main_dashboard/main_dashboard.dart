@@ -12,7 +12,7 @@ import 'package:word_toob/views/widgets/Main%20Dashboard%20Widgets/main_dashboar
 import 'package:word_toob/views/widgets/Main%20Dashboard%20Widgets/nav_bar.dart';
 import '../../../common/app_constants/general.dart';
 import '../../../source/models/grid_size_model.dart';
-import 'widegt/button/edit.dart';
+import 'widget/button/edit.dart';
 
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
