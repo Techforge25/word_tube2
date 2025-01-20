@@ -379,13 +379,16 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setItemOnEditState(int index, BuildContext context,
-      {required String title,
-      required String picture,
-      required int id,
-      required bool hide,
-      required List<String> videoPath,
-      required int gridIndex}) {
+  void setItemOnEditState(
+    int index,
+    BuildContext context, {
+    required String title,
+    required String picture,
+    required int id,
+    required bool hide,
+    required List<String> videoPath,
+    required int gridIndex,
+  }) {
     if (_editPressedYello) {
       // _itemClickedOnEditState = index;
       _itemClickeBool = true;
@@ -394,18 +397,19 @@ class MainDashboardController extends ChangeNotifier {
       _isEditPressed = false;
       _imagePath = '';
       AppUtility.popOver(
-          context,
-          EditPopOver(
-            title: title,
-            picture: picture,
-            index: index,
-            id: id,
-            gridIndex: gridIndex,
-            hide: hide,
-          ),
-          direct: PopoverDirection.top,
-          heightSize: context.height * 1.2,
-          widthSize: context.width * 0.9);
+        context,
+        EditPopOver(
+          title: title,
+          picture: picture,
+          index: index,
+          id: id,
+          gridIndex: gridIndex,
+          hide: hide,
+        ),
+        direct: PopoverDirection.bottom,
+        heightSize: context.height * 1.2,
+        widthSize: context.width * 0.9,
+      );
       _videos.clear();
       _videos.addAll(videoPath);
       notifyListeners();

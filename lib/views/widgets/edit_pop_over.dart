@@ -52,7 +52,14 @@ class _EditPopOverState extends State<EditPopOver> {
 
   @override
   Widget build(BuildContext context) {
-    double fontSize = context.height * 0.02;
+    Orientation orientation = MediaQuery.orientationOf(context);
+    late double fontSize;
+    if (orientation == Orientation.landscape) {
+      fontSize = context.width * 0.02;
+    } else {
+      fontSize = context.height * 0.02;
+    }
+
     dev.log('${widget.hide}');
 
     return Consumer2<MainDashboardController, ContentProvider>(

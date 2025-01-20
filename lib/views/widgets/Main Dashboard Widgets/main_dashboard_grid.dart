@@ -217,15 +217,17 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                     onTap: () {
                                       // value.setItemOnEditState(index,context,title: "Happy",picture: MyAssets.happy );
                                       widget.value.setItemOnEditState(
-                                          hide: grid.hidetitle ?? false,
-                                          index,
-                                          context,
-                                          title: grid.title ?? '',
-                                          picture: grid.imagepath ?? "",
-                                          id: widget.value.gridSizedModel.id ??
-                                              -1,
-                                          videoPath: grid.videosPath ?? [],
-                                          gridIndex: widget.value.gridIndex);
+                                        hide: grid.hidetitle ?? false,
+                                        index,
+                                        context,
+                                        title: grid.title ?? '',
+                                        picture: grid.imagepath ?? "",
+                                        id: widget.value.gridSizedModel.id ??
+                                            -1,
+                                        videoPath: grid.videosPath ?? [],
+                                        gridIndex: widget.value.gridIndex,
+                                      );
+
                                       if (!widget.value.editPressedYello) {
                                         if (grid.videosPath?.isNotEmpty ??
                                             false) {
@@ -267,19 +269,22 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  grid.title ?? '?',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodySmall
-                                                      ?.copyWith(
-                                                        color: AppColor.white,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: context
-                                                                .height *
-                                                            0.028, // Adjust the font size if necessary
-                                                      ),
+                                                Flexible(
+                                                  child: Text(
+                                                    grid.title ?? '?',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.copyWith(
+                                                          color: AppColor.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          // Adjust the font size if necessary
+                                                          fontSize:
+                                                              context.height *
+                                                                  0.028,
+                                                        ),
+                                                  ),
                                                 ),
                                                 SizedBox(
                                                     height: context.height *

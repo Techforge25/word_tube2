@@ -979,20 +979,24 @@ abstract class AppUtility {
     }*/
   }
 
-  static void popOver(BuildContext context, Widget List,
-      {double heightSize = 400,
-      PopoverDirection direct = PopoverDirection.top,
-      double widthSize = 120,
-      List<Widget>? listWidget,
-      Widget? title}) async {
+  static void popOver(
+    BuildContext context,
+    Widget List, {
+    double heightSize = 400,
+    PopoverDirection direct = PopoverDirection.top,
+    double widthSize = 120,
+    List<Widget>? listWidget,
+    Widget? title,
+  }) async {
     await showPopover(
       context: context,
       bodyBuilder: (context) => List,
       onPop: () => dev.log('Popover was popped!'),
-      width: widthSize,
-      height: heightSize,
+      width: 500, //widthSize,
+      height: 250, //heightSize,
       arrowHeight: 15,
       arrowWidth: 14,
+      direction: direct,
     );
   }
 
