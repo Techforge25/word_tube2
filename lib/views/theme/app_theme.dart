@@ -1,7 +1,8 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:word_toob/common/utils/app_utility.dart';
 import 'package:word_toob/views/theme/app_color.dart';
-
 
 abstract class AppTheme {
   const AppTheme._();
@@ -219,9 +220,7 @@ ThemeData _buildShrineTheme() {
         primary: AppColor.appPrimaryColor,
         secondary: AppColor.lightSecondaryColor,
       ),
-      dividerTheme: const DividerThemeData(
-          color: AppColor.lightDividerColor
-      ),
+      dividerTheme: const DividerThemeData(color: AppColor.lightDividerColor),
       listTileTheme: const ListTileThemeData(
           shape: RoundedRectangleBorder(side: BorderSide.none),
           textColor: AppColor.black),
@@ -229,56 +228,52 @@ ThemeData _buildShrineTheme() {
         elevation: 0.0,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
-            side: const BorderSide(color: AppColor.borderColor)
-        ),
+            side: const BorderSide(color: AppColor.borderColor)),
       ),
-
       datePickerTheme: const DatePickerThemeData(
         backgroundColor: AppColor.lightScaffoldBGColor,
         surfaceTintColor: AppColor.lightScaffoldBGColor,
+
         ///complete date view
         headerHeadlineStyle: TextStyle(
-          // fontFamily: AppTheme.latoFont,
+            // fontFamily: AppTheme.latoFont,
             fontWeight: FontWeight.w500,
             fontSize: 10,
             color: AppColor.fontColor,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
+
         ///select date
         headerHelpStyle: TextStyle(
-          // fontFamily: AppTheme.latoFont,
+            // fontFamily: AppTheme.latoFont,
             fontWeight: FontWeight.w500,
             fontSize: 10,
             color: AppColor.fontColor,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
         weekdayStyle: TextStyle(
-          // fontFamily: AppTheme.latoFont,
+            // fontFamily: AppTheme.latoFont,
             fontWeight: FontWeight.w500,
             fontSize: 10.0,
             color: AppColor.lightTextColor2,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
         dayStyle: TextStyle(
             fontFamily: AppTheme.Pacifico,
             fontWeight: FontWeight.w400,
             fontSize: 06.0,
             color: AppColor.lightTextColor2,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
         yearStyle: TextStyle(
             fontFamily: AppTheme.Pacifico,
             fontWeight: FontWeight.w400,
             fontSize: 10.0,
             color: AppColor.lightTextColor2,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
       ),
+
       ///InputDecorationTheme
       inputDecorationTheme: InputDecorationTheme(
           iconColor: AppColor.black,
@@ -290,8 +285,7 @@ ThemeData _buildShrineTheme() {
               fontSize: 14.0,
               color: AppColor.errorBorderColor,
               letterSpacing: AppTheme._letterSpacing,
-              overflow: TextOverflow.ellipsis
-          ),
+              overflow: TextOverflow.ellipsis),
           //contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppUtility.defaultBorderRadius),
@@ -312,13 +306,12 @@ ThemeData _buildShrineTheme() {
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppUtility.defaultBorderRadius),
             borderSide: const BorderSide(color: AppColor.lightBorderColor),
-          )
-      ),
+          )),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColor.appPrimaryColor,
           textStyle: const TextStyle(
-            // fontFamily: AppTheme.latoFont,
+              // fontFamily: AppTheme.latoFont,
               fontWeight: FontWeight.w900,
               color: AppColor.white,
               fontSize: 20.0),
@@ -337,19 +330,17 @@ ThemeData _buildShrineTheme() {
           elevation: 0.0,
           centerTitle: true,
           toolbarHeight: kToolbarHeight,
-          backgroundColor: AppColor.appPrimaryColor
-          ,
+          backgroundColor: AppColor.appPrimaryColor,
           titleTextStyle: TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.w700,
-              color: AppColor.white)
-      ),
+              color: AppColor.white)),
       iconTheme: const IconThemeData(color: AppColor.fontColor),
       bottomAppBarTheme: const BottomAppBarTheme(
           color: AppColor.lightBottomAppbarColor,
           surfaceTintColor: AppColor.lightBottomIconColor,
-          shadowColor: AppColor.lightBottomIndicatorColor
-      ),
+          shadowColor: AppColor.lightBottomIndicatorColor),
+
       ///restore textTheme
       hintColor: AppColor.lightTextColorH, // AppColor.lightTextColorH,
       textTheme: const TextTheme(
@@ -359,48 +350,42 @@ ThemeData _buildShrineTheme() {
             fontSize: 38.0,
             color: AppColor.fontColor,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
         titleMedium: TextStyle(
             fontFamily: AppTheme.Inter,
             fontWeight: FontWeight.w400,
             fontSize: 32.0,
             color: AppColor.fontColor,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
         titleSmall: TextStyle(
             fontFamily: AppTheme.Inter,
             fontWeight: FontWeight.w400,
             fontSize: 22.0,
             color: AppColor.fontColor,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
         bodyLarge: TextStyle(
             fontFamily: AppTheme.Inter,
             fontWeight: FontWeight.w900,
             fontSize: 19.0,
             color: AppColor.fontColor,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
         bodyMedium: TextStyle(
             fontFamily: AppTheme.Inter,
             fontWeight: FontWeight.w600,
             fontSize: 16.0,
             color: AppColor.fontColor,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
+            overflow: TextOverflow.ellipsis),
         bodySmall: TextStyle(
             fontFamily: AppTheme.Inter,
             fontWeight: FontWeight.w400,
             fontSize: 13.0,
             color: AppColor.fontColor,
             letterSpacing: AppTheme._letterSpacing,
-            overflow: TextOverflow.ellipsis
-        ),
-      )//.apply(displayColor: AppColor.black),
-  );
+            overflow: TextOverflow.ellipsis),
+      ) //.apply(displayColor: AppColor.black),
+      );
 }

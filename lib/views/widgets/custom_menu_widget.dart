@@ -7,61 +7,52 @@ class CustomMenuAnchor extends StatelessWidget {
   final Color backgroundColor;
   final MenuController? menuController;
 
-
-   CustomMenuAnchor({
-    Key? key,
-
+  const CustomMenuAnchor({
+    super.key,
     required this.menuItems,
-    required this.titleWidget,  this.menuController,  this.backgroundColor=AppColor.white,
-  }) : super(key: key);
+    required this.titleWidget,
+    this.menuController,
+    this.backgroundColor = AppColor.white,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
-
-
       controller: menuController,
-
-      style: MenuStyle(
-
-
-        backgroundColor: WidgetStateProperty.all(backgroundColor)
-      ),
+      style:
+          MenuStyle(backgroundColor: WidgetStateProperty.all(backgroundColor)),
       builder: (context, controller, child) => GestureDetector(
-        onTap: () {
-          if (controller.isOpen) {
-            controller.close();
-          } else {
-            controller.open();
-          }
-        },
-        child: titleWidget
-      ),
-      menuChildren:menuItems,
+          onTap: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          child: titleWidget),
+      menuChildren: menuItems,
     );
   }
 }
-
 
 class CustomMenuItemButton extends StatelessWidget {
   final Widget child;
   final VoidCallback? onPressed;
 
   const CustomMenuItemButton({
-    Key? key,
+    super.key,
     required this.child,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return MenuItemButton(
-
-
       style: ButtonStyle(
-        textStyle: WidgetStateProperty.resolveWith((states) => TextStyle(color: Colors.white),),
-
-        padding:WidgetStateProperty.all(EdgeInsetsDirectional.all(10)),
+        textStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(color: Colors.white),
+        ),
+        padding: WidgetStateProperty.all(EdgeInsetsDirectional.all(10)),
         backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
         foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
       ),
@@ -70,5 +61,3 @@ class CustomMenuItemButton extends StatelessWidget {
     );
   }
 }
-
-

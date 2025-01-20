@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BottomSheetContent extends StatelessWidget {
+  const BottomSheetContent({super.key});
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
