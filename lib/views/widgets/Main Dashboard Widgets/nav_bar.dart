@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/app_providers/content_provider.dart';
 import 'package:word_toob/app_providers/main_dashboard_controller.dart';
-import 'package:word_toob/views/screens/main_dashboard.dart';
+import 'package:word_toob/views/screens/main_dashboard/widegt/button/setting.dart';
+import 'package:word_toob/views/screens/main_dashboard/widegt/center_tile.dart';
+import 'package:word_toob/views/screens/main_dashboard/widegt/rows/left.dart';
+import 'package:word_toob/views/screens/main_dashboard/widegt/rows/right.dart';
 import 'package:word_toob/views/theme/app_color.dart';
 
 class NormalNavBar extends StatelessWidget {
@@ -73,22 +76,21 @@ class NormalNavBar extends StatelessWidget {
             fontSize: fontSize,
           ),
           CenterTitle(value: value, fontSize: fontSize),
-          if (!value.findTheWord)
-            RightRow(
-              menuController: menuController,
-              gameMap: gameMap,
-              fontSize: fontSize,
-              sizeWidth: sizeWidth,
-              value: value,
-              gap: gap,
-            )
-          else
-            FindTheWordRow(
-              fontSize: fontSize,
-              sizeWidth: sizeWidth,
-              mainDashboardController: value,
-              menuController: menuController,
-            )
+          !value.findTheWord
+              ? RightRow(
+                  menuController: menuController,
+                  gameMap: gameMap,
+                  fontSize: fontSize,
+                  sizeWidth: sizeWidth,
+                  value: value,
+                  gap: gap,
+                )
+              : FindTheWordRow(
+                  fontSize: fontSize,
+                  sizeWidth: sizeWidth,
+                  mainDashboardController: value,
+                  menuController: menuController,
+                )
         ],
       ),
     );
