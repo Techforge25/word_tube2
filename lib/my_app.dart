@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:word_toob/app_providers/app_setting_provider.dart';
-import 'package:word_toob/app_providers/content_provider.dart';
-import 'package:word_toob/app_providers/main_dashboard_controller.dart';
-import 'package:word_toob/common/app_constants/app_strings.dart';
-import 'package:word_toob/common/app_constants/route_strings.dart';
-import 'package:word_toob/common/route_generator.dart';
-import 'package:word_toob/common/utils/app_utility.dart';
-import 'package:word_toob/dependency_inject.dart';
-import 'package:word_toob/views/theme/app_theme.dart';
+import 'package:word_toob/src/app_providers/app_setting_provider.dart';
+import 'package:word_toob/src/app_providers/content_provider.dart';
+import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
+import 'package:word_toob/src/common/app_constants/app_strings.dart';
+import 'package:word_toob/src/common/app_constants/route_strings.dart';
+import 'package:word_toob/src/common/route_generator.dart';
+import 'package:word_toob/src/common/utils/app_utility.dart';
+import 'package:word_toob/src/dependency_inject.dart';
+
+import 'src/views/theme/app_theme.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
