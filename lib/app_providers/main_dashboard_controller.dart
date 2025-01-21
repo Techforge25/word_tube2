@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
-import 'package:popover/popover.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:word_toob/app_providers/content_provider.dart';
@@ -331,6 +330,7 @@ class MainDashboardController extends ChangeNotifier {
   void removeVideosFromList(int index) {
     dismissedVideos.add(_videos[index]);
     _videos.removeAt(index);
+    dev.log('$index');
     notifyListeners();
   }
 
@@ -396,6 +396,7 @@ class MainDashboardController extends ChangeNotifier {
       _showBottomSheet = false;
       _isEditPressed = false;
       _imagePath = '';
+
       AppUtility.popOver(
         context,
         EditPopOver(
@@ -406,9 +407,8 @@ class MainDashboardController extends ChangeNotifier {
           gridIndex: gridIndex,
           hide: hide,
         ),
-        direct: PopoverDirection.bottom,
-        heightSize: context.height * 1.2,
-        widthSize: context.width * 0.9,
+        heightSize: context.height * 0.4,
+        widthSize: context.width * 0.75,
       );
       _videos.clear();
       _videos.addAll(videoPath);

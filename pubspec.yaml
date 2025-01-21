@@ -67,6 +67,7 @@ dependencies:
   change_app_package_name: ^1.4.0
   rename_app: ^1.6.1
   flutter_launcher_icons: ^0.14.1
+  flutter_slidable: ^3.1.2
 
 
 

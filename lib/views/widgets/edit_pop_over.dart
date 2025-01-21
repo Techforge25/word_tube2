@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -223,26 +224,42 @@ class _EditPopOverState extends State<EditPopOver> {
                                   (index) {
                                 final video = mainDashboardController
                                     .visibleVideos[index];
-                                return Dismissible(
+                                return Slidable(
                                   key: Key(index
                                       .toString()), // Use a unique key for each item, such as a video ID or index
-                                  direction: DismissDirection
-                                      .startToEnd, // Swipe direction
-                                  background: Container(
-                                    color: Colors
-                                        .red, // Background color for the dismiss action
-                                    alignment: Alignment.centerRight,
-                                    padding: const EdgeInsets.only(right: 20),
-                                    child: const Icon(Icons.delete,
-                                        color: Colors.white),
+                                  // direction: DismissDirection
+                                  //     .startToEnd, // Swipe direction
+                                  // background: Container(
+                                  //   color: Colors
+                                  //       .red, // Background color for the dismiss action
+                                  //   alignment: Alignment.centerRight,
+                                  //   padding: const EdgeInsets.only(right: 20),
+                                  //   child: const Icon(Icons.delete,
+                                  //       color: Colors.white),
+                                  // ),
+                                  // onDismissed: (direction) {
+
+                                  // },
+                                  endActionPane: ActionPane(
+                                    motion: const ScrollMotion(),
+                                    dismissible:
+                                        DismissiblePane(onDismissed: () {}),
+                                    extentRatio: 0.25,
+                                    children: [
+                                      SlidableAction(
+                                        onPressed: (context) {
+                                          // Handle the removal of the video
+                                          mainDashboardController
+                                              .removeVideosFromList(index);
+                                        },
+                                        backgroundColor: Color(0xFFFE4A49),
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.delete,
+                                        flex: 1,
+                                        label: 'Delete',
+                                      ),
+                                    ],
                                   ),
-                                  onDismissed: (direction) {
-                                    // Handle the removal of the video
-                                    setState(() {
-                                      mainDashboardController
-                                          .removeVideosFromList(index);
-                                    });
-                                  },
                                   child: VideoUploadWidget(
                                     isEditPressed:
                                         mainDashboardController.isEditPressed,
@@ -251,11 +268,11 @@ class _EditPopOverState extends State<EditPopOver> {
                                           .removeVideosFromList(index);
                                     },
                                     video: video,
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                          context, RouteStrings.videoPlayer,
-                                          arguments: video);
-                                    },
+                                    onTap: () => Navigator.pushNamed(
+                                      context,
+                                      RouteStrings.videoPlayer,
+                                      arguments: video,
+                                    ),
                                   ),
                                 );
                               }),

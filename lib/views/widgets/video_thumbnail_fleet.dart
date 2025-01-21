@@ -101,12 +101,13 @@ class VideoUploadWidget extends StatefulWidget {
   final VoidCallback onTapRemove;
   final bool isEditPressed;
 
-  const VideoUploadWidget(
-      {super.key,
-      required this.video,
-      required this.onTap,
-      required this.onTapRemove,
-      required this.isEditPressed});
+  const VideoUploadWidget({
+    super.key,
+    required this.video,
+    required this.onTap,
+    required this.onTapRemove,
+    required this.isEditPressed,
+  });
 
   @override
   State<VideoUploadWidget> createState() => _VideoUploadWidgetState();
