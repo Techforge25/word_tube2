@@ -243,6 +243,9 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                               .speak(grid.title ?? "");
                                           var rand = Random().nextInt(
                                               grid.videosPath?.length ?? 0 + 1);
+
+                                          dev.log(grid.videosPath!.length
+                                              .toString());
                                           Navigator.pushNamed(
                                               context, RouteStrings.videoPlayer,
                                               arguments:
@@ -264,7 +267,15 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                           borderRadius:
                                               BorderRadius.circular(10),
                                           border: Border.all(
-                                              color: Colors.white, width: 2),
+                                            color:
+                                                widget.value.editPressedYello &&
+                                                        (grid.videosPath
+                                                                ?.isNotEmpty ??
+                                                            false)
+                                                    ? Colors.green
+                                                    : Colors.white,
+                                            width: 2,
+                                          ),
                                         ),
                                         child: Center(
                                           child: Padding(
@@ -347,16 +358,19 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                             hideImage: false,
                                           );
                                         },
-
-                                        // onTap: () {
-                                        //   widget.value.setItemOnEditState(
-                                        //       hide: grid.hidetitle??false,
-                                        //       gridIndex: widget.value.gridIndex,
-                                        //       index,context,title: grid.title??"",
-                                        //       picture:grid.imagepath??"",
-                                        //       id:  widget.value.gridSizedModel.id??-1, videoPath: grid.videosPath??[]);
-                                        //
-                                        // },
+                                        onTap: () {
+                                          widget.value.setItemOnEditState(
+                                              hide: grid.hidetitle ?? false,
+                                              gridIndex: widget.value.gridIndex,
+                                              index,
+                                              context,
+                                              title: grid.title ?? "",
+                                              picture: grid.imagepath ?? "",
+                                              id: widget.value.gridSizedModel
+                                                      .id ??
+                                                  -1,
+                                              videoPath: grid.videosPath ?? []);
+                                        },
                                         child: Container(
                                           margin: EdgeInsets.symmetric(
                                               horizontal: 2, vertical: 1),
