@@ -828,89 +828,88 @@ abstract class AppUtility {
     required String title,
     required List<GridSizeModel> list,
   }) {
+    late double fontSize;
+
+    Orientation orientation = MediaQuery.orientationOf(context);
+    if (orientation == Orientation.landscape) {
+      fontSize = context.width * 0.015;
+    } else {
+      fontSize = context.height * 0.025;
+    }
+
     showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              elevation: 5,
-              contentPadding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              content: Builder(
-                builder: (context) => Consumer<MainDashboardController>(
-                  builder: (context, value, child) => SizedBox(
-                    height: context.height * 0.4,
-                    width: context.width * 0.25,
-                    child: Column(
-                      children: [
-                        GrayContainerWidget(
-                          blueButton: "Cancel",
-                          title: title,
-                          blueButtonOnTap: () {
+      context: context,
+      builder: (context) => AlertDialog(
+        elevation: 5,
+        contentPadding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        content: Builder(
+          builder: (context) => Consumer<MainDashboardController>(
+            builder: (context, value, child) => SizedBox(
+              height: context.height * 0.4,
+              width: context.width * 0.25,
+              child: Column(
+                children: [
+                  GrayContainerWidget(
+                    blueButton: "Cancel",
+                    title: title,
+                    blueButtonOnTap: () => Navigator.pop(context),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      children: list.asMap().entries.map((entry) {
+                        int index = entry.key; // The index
+                        var item = entry.value; // The item
+
+                        return TextButton(
+                          onPressed: () async {
+                            GridSizeModel model = GridSizeModel(
+                              gridSizeX: item.gridSizeX,
+                              hideModel: false,
+                              title: item.title,
+                              gridSizeY: item.gridSizeY,
+                              listData: List.generate(
+                                item.listData?.length ?? 0,
+                                (i) => GridModel(),
+                              ),
+                            );
+
+                            // value.setGridSize(item.gridSizeX ?? 1, item.gridSizeY ?? 2);
+                            // value.setGridSizedModel(model,index);
+
+                            await contentProvider.saveGridSizedModel(
+                                gridSizedModel: model);
+                            value.setGridSizedModel(
+                                contentProvider.allGridSizedModel.last,
+                                contentProvider.allGridSizedModel.length - 1);
+                            dev.log(
+                                "This is gridsizemodel when adding${contentProvider.allGridSizedModel.last.toJson()}");
+                            dev.log(
+                                "This is last index when adding${contentProvider.allGridSizedModel.length}");
+
                             Navigator.pop(context);
                           },
-                        ),
-                        Expanded(
-                          child: ListView(
-                            children: list.asMap().entries.map((entry) {
-                              int index = entry.key; // The index
-                              var item = entry.value; // The item
-
-                              return GestureDetector(
-                                onTap: () async {
-                                  GridSizeModel model = GridSizeModel(
-                                    gridSizeX: item.gridSizeX,
-                                    hideModel: false,
-                                    title: item.title,
-                                    gridSizeY: item.gridSizeY,
-                                    listData: List.generate(
-                                        item.listData?.length ?? 0,
-                                        (i) => GridModel()),
-                                  );
-
-                                  // value.setGridSize(item.gridSizeX ?? 1, item.gridSizeY ?? 2);
-                                  // value.setGridSizedModel(model,index);
-
-                                  await contentProvider.saveGridSizedModel(
-                                      gridSizedModel: model);
-                                  value.setGridSizedModel(
-                                      contentProvider.allGridSizedModel.last,
-                                      contentProvider.allGridSizedModel.length -
-                                          1);
-                                  dev.log(
-                                      "This is gridsizemodel when adding${contentProvider.allGridSizedModel.last.toJson()}");
-                                  dev.log(
-                                      "This is last index when adding${contentProvider.allGridSizedModel.length}");
-
-                                  Navigator.pop(context);
-                                },
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 8),
-                                    width: double.infinity,
-                                    child: Text(
-                                      textAlign: TextAlign.left,
-                                      item.title ?? "",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: AppColor.appPrimaryColor,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                          child: Text(
+                            textAlign: TextAlign.left,
+                            item.title ?? "",
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColor.appPrimaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: fontSize + 2,
                                     ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
                           ),
-                        ),
-                      ],
+                        );
+                      }).toList(),
                     ),
                   ),
-                ),
+                ],
               ),
-            ));
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   static showTransparentDialog(BuildContext context,
@@ -1045,6 +1044,7 @@ class GrayContainerWidget extends StatelessWidget {
   final String blueButton;
   final String title;
   final VoidCallback blueButtonOnTap;
+
   const GrayContainerWidget({
     super.key,
     required this.blueButton,
@@ -1054,6 +1054,15 @@ class GrayContainerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    late double fontSize;
+
+    Orientation orientation = MediaQuery.orientationOf(context);
+    if (orientation == Orientation.landscape) {
+      fontSize = context.width * 0.015;
+    } else {
+      fontSize = context.height * 0.025;
+    }
+
     return Container(
       padding: const EdgeInsets.all(8),
       width: double.infinity,
@@ -1066,30 +1075,26 @@ class GrayContainerWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          GestureDetector(
-            onTap: blueButtonOnTap,
+          TextButton(
+            onPressed: blueButtonOnTap,
             child: Text(
               blueButton,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColor.blue,
-                    fontSize: 15,
+                    fontSize: fontSize - 2,
                     fontWeight: FontWeight.w600,
                   ),
             ),
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColor.appPrimaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ],
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColor.appPrimaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSize + 2,
+                  ),
             ),
           ),
         ],
