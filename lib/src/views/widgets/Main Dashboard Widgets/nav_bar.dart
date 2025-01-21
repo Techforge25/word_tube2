@@ -69,24 +69,24 @@ class NormalNavBar extends StatelessWidget {
           LeftRow(
             addMap: addMap,
             menuController2: menuController2,
-            iconSize: iconSize,
             sizeWidth: sizeWidth,
             contentProvider: contentProvider,
             value: value,
-            fontSize: fontSize,
+            iconSize: iconSize + 2,
+            fontSize: fontSize + 2,
           ),
-          CenterTitle(value: value, fontSize: fontSize),
+          CenterTitle(value: value, fontSize: fontSize + 6),
           !value.findTheWord
               ? RightRow(
                   menuController: menuController,
                   gameMap: gameMap,
-                  fontSize: fontSize,
+                  fontSize: fontSize + 2,
                   sizeWidth: sizeWidth,
                   value: value,
                   gap: gap,
                 )
               : FindTheWordRow(
-                  fontSize: fontSize,
+                  fontSize: fontSize + 2,
                   sizeWidth: sizeWidth,
                   mainDashboardController: value,
                   menuController: menuController,

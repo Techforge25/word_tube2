@@ -153,10 +153,13 @@ class ContentProvider extends ChangeNotifier {
       await getAllGridSizeModel();
       if (contenProvider.allGridSizedModel.isEmpty) {
         await iAppRepository.saveAllGridSizedModel(
-            gridSizedModelList: gridSizedModelList);
+          gridSizedModelList: gridSizedModelList,
+        );
       }
+
       await getAllGridSizeModel();
       notifyListeners();
+
       saveAllGridSizeModelStatus = Status.loaded;
     } on Exception catch (e) {
       saveAllGridSizeModelStatus = Status.error;

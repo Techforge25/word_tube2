@@ -30,7 +30,9 @@ class _MainDashboardState extends State<MainDashboard> {
 
   void saveData() {
     _contentProvider.saveAllGridSizedModel(
-        gridSizedModelList: gridModelList, contenProvider: _contentProvider);
+      gridSizedModelList: gridModelList,
+      contenProvider: _contentProvider,
+    );
   }
 
   @override

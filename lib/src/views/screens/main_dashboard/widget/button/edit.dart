@@ -4,12 +4,14 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
-import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 
 class EditWidget extends StatefulWidget {
   final MainDashboardController value;
   final ContentProvider contentProvider;
+  final double sizeWidth;
+  final TextEditingController _controler;
+
   const EditWidget({
     super.key,
     required this.sizeWidth,
@@ -18,9 +20,6 @@ class EditWidget extends StatefulWidget {
     required this.contentProvider,
   }) : _controler = controler;
 
-  final double sizeWidth;
-  final TextEditingController _controler;
-
   @override
   State<EditWidget> createState() => _EditWidgetState();
 }
@@ -28,72 +27,74 @@ class EditWidget extends StatefulWidget {
 class _EditWidgetState extends State<EditWidget> {
   @override
   Widget build(BuildContext context) {
-    double fontSize = context.height * 0.025;
-    double iconSize = context.height * 0.04;
+    // double fontSize = context.height * 0.025;
+    // double iconSize = context.height * 0.04;
+    late double fontSize;
+    late double iconSize;
+    Orientation orientation = MediaQuery.orientationOf(context);
+    if (orientation == Orientation.landscape) {
+      fontSize = context.width * 0.015;
+      iconSize = context.width * 0.025;
+    } else {
+      fontSize = context.height * 0.025;
+      iconSize = context.height * 0.04;
+    }
+
     return Container(
+      height: context.height * 0.12,
       color: AppColor.yellow,
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppUtility.horizontalPadding * 0.5,
-          vertical: AppUtility.verticalPadding * 0.3),
-      child: SizedBox(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              onTap: () async {
-                await widget.value.setHideButton(widget.contentProvider);
-              },
-              child: Text(
-                "Hide All",
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: fontSize,
-                    color: AppColor.appPrimaryColor),
-              ),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextButton(
+            onPressed: () async =>
+                await widget.value.setHideButton(widget.contentProvider),
+            child: Text(
+              "Hide All",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: fontSize + 2,
+                  color: AppColor.appPrimaryColor),
             ),
-            Gap(widget.sizeWidth + 20),
-            GestureDetector(
-              onTap: () async {
-                await widget.value.showAllButton(widget.contentProvider);
-              },
+          ),
+          Gap(widget.sizeWidth + 20),
+          TextButton(
+              onPressed: () async =>
+                  await widget.value.showAllButton(widget.contentProvider),
               child: Text(
                 "Show All",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: fontSize,
+                    fontSize: fontSize + 2,
                     color: AppColor.appPrimaryColor),
+              )),
+          Gap(widget.sizeWidth + 60),
+          Flexible(
+            child: CupertinoSearchTextField(
+              padding: const EdgeInsets.all(5),
+              prefixIcon: Icon(
+                Icons.search,
+                size: iconSize + 2,
               ),
+              style: TextStyle(fontSize: fontSize + 3),
+              decoration: BoxDecoration(
+                  color: AppColor.white,
+                  borderRadius: BorderRadius.circular(10)),
+              controller: widget._controler,
             ),
-            Gap(widget.sizeWidth + 60),
-            Flexible(
-              child: CupertinoSearchTextField(
-                padding: const EdgeInsets.all(5),
-                prefixIcon: Icon(
-                  Icons.search,
-                  size: iconSize + 2,
-                ),
-                style: TextStyle(fontSize: fontSize + 3),
-                decoration: BoxDecoration(
-                    color: AppColor.white,
-                    borderRadius: BorderRadius.circular(10)),
-                controller: widget._controler,
-              ),
-            ),
-            Gap(widget.sizeWidth + 60),
-            GestureDetector(
-              onTap: () async {
-                widget.value.setDone();
-              },
+          ),
+          Gap(widget.sizeWidth + 60),
+          TextButton(
+              onPressed: () async => widget.value.setDone(),
               child: Text(
                 "Done",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: fontSize,
+                    fontSize: fontSize + 2,
                     color: AppColor.appPrimaryColor),
-              ),
-            )
-          ],
-        ),
+              ))
+        ],
       ),
     );
   }

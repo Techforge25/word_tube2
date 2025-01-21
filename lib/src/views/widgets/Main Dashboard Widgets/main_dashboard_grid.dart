@@ -1,18 +1,16 @@
 import 'dart:io';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-
 import '../../../app_providers/content_provider.dart';
 import '../../../app_providers/main_dashboard_controller.dart';
 import '../../../common/app_constants/assets.dart';
-import '../../../common/app_constants/general.dart';
 import '../../../common/app_constants/route_strings.dart';
 import '../../../common/utils/common_functions.dart';
 import '../../../source/models/grid_model.dart';
 import '../../theme/app_color.dart';
+import 'dart:developer' as dev;
 
 class GridViewWidget extends StatefulWidget {
   final MainDashboardController value;
@@ -71,6 +69,16 @@ class _GridViewWidgetState extends State<GridViewWidget>
 
   @override
   Widget build(BuildContext context) {
+    late double fontSize;
+    // late double iconSize;
+    Orientation orientation = MediaQuery.orientationOf(context);
+    if (orientation == Orientation.landscape) {
+      fontSize = context.height * 0.025;
+      // iconSize = context.width * 0.025;
+    } else {
+      fontSize = context.height * 0.025;
+      // iconSize = context.height * 0.04;
+    }
     return Expanded(
       child: Stack(
         children: [
@@ -86,7 +94,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColor.black,
                           fontWeight: FontWeight.bold,
-                          fontSize: context.height * 0.03,
+                          fontSize: fontSize + 4,
                         ),
                   ),
                 ),
@@ -100,7 +108,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
                       ScrollViewKeyboardDismissBehavior.onDrag,
 
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: widget.value.gridSizedModel.gridSizeY ?? 2,
+                    crossAxisCount: widget.value.gridSizedModel.gridSizeY ?? 4,
                     childAspectRatio: 1,
                   ),
                   itemCount: widget.value.gridSizedModel.listData?.length,
@@ -127,8 +135,8 @@ class _GridViewWidgetState extends State<GridViewWidget>
                             }
                           },
                           child: Container(
-                            margin: EdgeInsets.symmetric(
-                              horizontal: 2,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 5,
                               vertical: 1,
                             ),
                             decoration: BoxDecoration(
@@ -154,6 +162,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                   children: [
                                     Text(
                                       findTheWrongWord ? grid.title ?? '?' : "",
+                                      maxLines: 2,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -161,7 +170,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                             color: AppColor.white,
                                             fontWeight: FontWeight.bold,
                                             // Adjust the font size if necessary
-                                            fontSize: context.height * 0.028,
+                                            fontSize: fontSize,
                                           ),
                                     ),
                                     // Add spacing between text and image
@@ -175,17 +184,19 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                                         grid.imagepath!,
                                                         height: context.height *
                                                             0.5,
-                                                        width: 100,
+                                                        width: context.height *
+                                                            0.5,
                                                       )
                                                     : Image.file(
                                                         File(grid.imagepath!),
                                                         height: context.height *
                                                             0.5,
-                                                        width: 100,
+                                                        width: context.height *
+                                                            0.5,
                                                       )
-                                                : Container(),
+                                                : SizedBox(),
                                           )
-                                        : Container(),
+                                        : SizedBox(),
                                   ],
                                 ),
                               ),
@@ -241,7 +252,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                           widget.value.flutterTts
                                               .speak(grid.title ?? "");
 
-                                          printLog("Error occured no item  ");
+                                          dev.log("Error occured no item  ");
                                         }
                                       }
                                     },
@@ -258,9 +269,9 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                         child: Center(
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(
-                                                vertical: context.height * 0.02,
-                                                horizontal:
-                                                    context.width * 0.02),
+                                              vertical: context.height * 0.02,
+                                              horizontal: context.width * 0.02,
+                                            ),
                                             child: Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
@@ -268,17 +279,16 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                                 Flexible(
                                                   child: Text(
                                                     grid.title ?? '?',
+                                                    maxLines: 2,
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .bodySmall
                                                         ?.copyWith(
                                                           color: AppColor.white,
+                                                          // Adjust the font size if necessary
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          // Adjust the font size if necessary
-                                                          fontSize:
-                                                              context.height *
-                                                                  0.028,
+                                                          fontSize: fontSize,
                                                         ),
                                                   ),
                                                 ),
@@ -301,7 +311,9 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                                                 height: context
                                                                         .height *
                                                                     0.5,
-                                                                width: 100,
+                                                                width: context
+                                                                        .height *
+                                                                    0.5,
                                                               )
                                                             : Image.file(
                                                                 File(grid
@@ -309,7 +321,9 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                                                 height: context
                                                                         .height *
                                                                     0.5,
-                                                                width: 100,
+                                                                width: context
+                                                                        .height *
+                                                                    0.5,
                                                               )
                                                         : Container(),
                                                   )
