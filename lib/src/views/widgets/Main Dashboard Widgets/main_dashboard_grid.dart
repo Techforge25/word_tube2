@@ -241,7 +241,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                         gridIndex: widget.value.gridIndex,
                                       );
 
-                                      widget.value.setLottie();
+                                      // widget.value.setLottie();
                                       widget.value.flutterTts
                                           .speak(grid.title ?? "");
 
