@@ -73,7 +73,13 @@ class _GridViewWidgetState extends State<GridViewWidget>
     // late double iconSize;
     Orientation orientation = MediaQuery.orientationOf(context);
     if (orientation == Orientation.landscape) {
-      fontSize = context.height * 0.025;
+      dev.log(context.height.toString());
+      if (context.height > 500) {
+        fontSize = context.height * 0.025;
+      } else {
+        fontSize = (context.height * 0.025) + 4;
+      }
+
       // iconSize = context.width * 0.025;
     } else {
       fontSize = context.height * 0.025;
