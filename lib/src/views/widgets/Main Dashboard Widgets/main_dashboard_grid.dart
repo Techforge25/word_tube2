@@ -116,6 +116,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
                     crossAxisCount: widget.value.gridSizedModel.gridSizeY ?? 4,
                     childAspectRatio: 1,
                   ),
+
                   itemCount: widget.value.gridSizedModel.listData?.length,
                   itemBuilder: (context, index) {
                     final GridModel grid =
@@ -240,12 +241,13 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                         gridIndex: widget.value.gridIndex,
                                       );
 
+                                      widget.value.setLottie();
+                                      widget.value.flutterTts
+                                          .speak(grid.title ?? "");
+
                                       if (!widget.value.editPressedYello) {
                                         if (grid.videosPath?.isNotEmpty ??
                                             false) {
-                                          widget.value.setLottie();
-                                          widget.value.flutterTts
-                                              .speak(grid.title ?? "");
                                           var rand = Random().nextInt(
                                               grid.videosPath?.length ?? 0 + 1);
 
@@ -256,10 +258,6 @@ class _GridViewWidgetState extends State<GridViewWidget>
                                               arguments:
                                                   grid.videosPath?[rand]);
                                         } else {
-                                          widget.value.setLottie();
-                                          widget.value.flutterTts
-                                              .speak(grid.title ?? "");
-
                                           dev.log("Error occured no item  ");
                                         }
                                       }

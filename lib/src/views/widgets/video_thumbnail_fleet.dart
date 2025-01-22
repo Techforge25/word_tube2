@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:get/get.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
@@ -286,15 +287,18 @@ class _VideoPlayerViewState extends State<VideoPlayerView> {
         });
     }
 
-    _controller.addListener(() {
-      setState(() {
-        if (!_hasNavigated &&
-            _controller.value.position >= _controller.value.duration) {
-          Navigator.of(context).pop();
+    _controller.addListener(() async {
+      // setState(() {
+      if (!_hasNavigated &&
+          _controller.value.position >= _controller.value.duration) {
+        await Future.delayed(Duration(milliseconds: 1250), () {
           _hasNavigated = true; // Ensure this only happens once
+// ignore: use_build_context_synchronously
+          Navigator.of(context).pop();
           dev.log("going back----------->");
-        }
-      });
+        });
+      }
+      // });
     });
   }
 
