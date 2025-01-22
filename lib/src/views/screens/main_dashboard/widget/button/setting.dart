@@ -258,8 +258,8 @@ class _SettingButtonState extends State<SettingButton> {
                       // ),
                       // Gap(widget.gap),
 
-                      GestureDetector(
-                        onTap: () {
+                      TextButton(
+                        onPressed: () {
                           menuController.close();
                           Share.share('Welcome to Word Toob! 📚✨ \n'
                               'Whether you’re a beginner or an expert, Word Toob makes learning languages fun and addictive! 🌍🎉 \n'
@@ -286,9 +286,13 @@ class _SettingButtonState extends State<SettingButton> {
           ),
         )
       ],
-      titleWidget: Text("Settings",
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold, fontSize: widget.fontSize)),
+      titleWidget: Text(
+        "Settings",
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: widget.fontSize,
+            ),
+      ),
     );
   }
 }

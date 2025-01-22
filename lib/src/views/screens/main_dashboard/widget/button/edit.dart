@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -80,21 +78,22 @@ class _EditWidgetState extends State<EditWidget> {
               ),
               cursorColor: AppColor.yellow,
               maxLines: 1,
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(context.height * 0.02),
               controller: widget.controler,
             ),
           ),
           Gap(widget.sizeWidth + 60),
           TextButton(
-              onPressed: () async =>
-                  widget.value.setDone(widget.contentProvider),
-              child: Text(
-                "Done",
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            onPressed: () async => widget.value.setDone(widget.contentProvider),
+            child: Text(
+              "Done",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: fontSize + 2,
-                    color: AppColor.appPrimaryColor),
-              ))
+                    color: AppColor.appPrimaryColor,
+                  ),
+            ),
+          ),
         ],
       ),
     );

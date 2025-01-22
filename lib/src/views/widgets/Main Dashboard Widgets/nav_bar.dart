@@ -114,34 +114,36 @@ class FindTheWordRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () {
+        TextButton(
+          onPressed: () {
             mainDashboardController.setCurrentIndex();
             mainDashboardController.clearFindTheWrongList();
           },
-          child: Text("Repeat",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.bold, fontSize: fontSize)),
+          child: Text(
+            "Repeat",
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.bold, fontSize: fontSize),
+          ),
         ),
         SizedBox(
           width: sizeWidth,
         ),
-        GestureDetector(
-          onTap: () {
+        TextButton(
+          onPressed: () {
             mainDashboardController.setRandomIndex();
             mainDashboardController.clearFindTheWrongList();
           },
-          child: Text("Skip",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.bold, fontSize: fontSize)),
+          child: Text(
+            "Skip",
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.bold, fontSize: fontSize),
+          ),
         ),
-        SizedBox(
-          width: sizeWidth,
-        ),
+        SizedBox(width: sizeWidth),
         SettingButton(
             fontSize: fontSize,
             gap: 5,

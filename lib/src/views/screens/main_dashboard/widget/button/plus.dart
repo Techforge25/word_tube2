@@ -18,22 +18,20 @@ class PlusButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomMenuAnchor(
         menuItems: List.generate(
-            addMap.length,
-            (index) => GestureDetector(
-                  onTap: addMap[index]["onTap"],
-                  child: ListTile(
-                    tileColor:
-                        index == 0 ? AppColor.shadowColor : AppColor.white,
-                    title: Text(
-                      addMap[index]["name"],
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppColor.blue,
-                            fontWeight: FontWeight.bold,
-                            fontSize: fontSize,
-                          ),
-                    ),
+          addMap.length,
+          (index) => ListTile(
+            onTap: addMap[index]["onTap"],
+            tileColor: index == 0 ? AppColor.shadowColor : AppColor.white,
+            title: Text(
+              addMap[index]["name"],
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColor.blue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSize,
                   ),
-                )),
+            ),
+          ),
+        ),
         titleWidget: Icon(
           Icons.add,
           size: iconSize,
