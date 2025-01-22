@@ -148,6 +148,7 @@ class _MainDashboardState extends State<MainDashboard> {
 
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(),
         body: Consumer2<MainDashboardController, ContentProvider>(
           builder: (context, mainDashBoarState, contentState, child) =>
               GestureDetector(

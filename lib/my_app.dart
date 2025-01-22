@@ -36,13 +36,25 @@ class _MyAppState extends State<MyApp> {
       child: Consumer<AppSettingsProvider>(
         builder: (_, appSettings, child) => MaterialApp(
           debugShowCheckedModeBanner: false,
-          builder: (context, child) =>
-              ResponsiveBreakpoints.builder(child: child!, breakpoints: [
-            const Breakpoint(start: 0, end: 450, name: MOBILE),
-            const Breakpoint(start: 451, end: 800, name: TABLET),
-            const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-            const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-          ]),
+          builder: (context, child) => ResponsiveBreakpoints.builder(
+            child: child!,
+            breakpointsLandscape: [
+              const Breakpoint(start: 0, end: 450, name: MOBILE),
+              const Breakpoint(start: 451, end: 800, name: TABLET),
+              const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+              const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+            ],
+            landscapePlatforms: [
+              ResponsiveTargetPlatform.iOS,
+              ResponsiveTargetPlatform.android,
+            ],
+            breakpoints: [
+              const Breakpoint(start: 0, end: 450, name: MOBILE),
+              const Breakpoint(start: 451, end: 800, name: TABLET),
+              const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+              const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+            ],
+          ),
           title: AppString.appName,
           theme: AppTheme.lightTheme,
           navigatorKey: AppUtility.navigatorKey,
