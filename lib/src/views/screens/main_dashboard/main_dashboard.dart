@@ -22,9 +22,6 @@ class MainDashboard extends StatefulWidget {
 }
 
 class _MainDashboardState extends State<MainDashboard> {
-  // ignore: prefer_final_fields
-  TextEditingController _controler = TextEditingController();
-
   final _contentProvider = sl<ContentProvider>();
   final _mainDashBoard = sl<MainDashboardController>();
 
@@ -167,7 +164,7 @@ class _MainDashboardState extends State<MainDashboard> {
                       )
                     : EditWidget(
                         sizeWidth: sizeWidth,
-                        controler: _controler,
+                        controler: _mainDashBoard.boradTitleController,
                         value: mainDashBoarState,
                         contentProvider: contentState,
                       ),

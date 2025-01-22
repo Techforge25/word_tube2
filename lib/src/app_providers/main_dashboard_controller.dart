@@ -19,6 +19,8 @@ class MainDashboardController extends ChangeNotifier {
   TextEditingController editTitleTextEditingController =
       TextEditingController();
 
+  TextEditingController boradTitleController = TextEditingController();
+
   int _gridSizeX = 1;
 
   BuildContext? _contextForSpeechToText;
@@ -198,6 +200,9 @@ class MainDashboardController extends ChangeNotifier {
   setGridSizedModel(GridSizeModel grid, int index) {
     _gridSizedModel = grid;
     _gridIndex = index;
+
+// setting the borad title so it can be change easily
+    boradTitleController.text = grid.title ?? '';
     notifyListeners();
   }
 
@@ -364,10 +369,20 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setDone() {
+  void setDone(ContentProvider c) {
     _editPressedYello = false;
-    // _itemClickedOnEditState=null;
     _itemClickeBool = false;
+
+// updating boardname
+    if (_gridSizedModel.id != null) {
+      _gridSizedModel.title = boradTitleController.text.toString();
+      c.updateGridSizeModelData(
+        id: _gridSizedModel.id ?? 0,
+        title: boradTitleController.text,
+      );
+    }
+
+    // _itemClickedOnEditState=null;
     notifyListeners();
   }
 

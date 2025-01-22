@@ -13,13 +13,16 @@ class CenterTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: Text(value.gridSizedModel.title ?? "",
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(fontWeight: FontWeight.bold, fontSize: fontSize)),
+    // Placeing the title value to the textfield so it can be editable.
+    // Reason: To adding this code here because we didn't find the getter function in the init state.
+    value.boradTitleController.text = value.gridSizedModel.title ?? "";
+
+    return Text(
+      value.gridSizedModel.title ?? "",
+      style: Theme.of(context)
+          .textTheme
+          .bodyMedium
+          ?.copyWith(fontWeight: FontWeight.bold, fontSize: fontSize),
     );
   }
 }

@@ -144,9 +144,10 @@ class ContentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future saveAllGridSizedModel(
-      {required List<GridSizeModel> gridSizedModelList,
-      required ContentProvider contenProvider}) async {
+  Future saveAllGridSizedModel({
+    required List<GridSizeModel> gridSizedModelList,
+    required ContentProvider contenProvider,
+  }) async {
     saveAllGridSizeModelStatus = Status.loading;
     notifyListeners();
     try {

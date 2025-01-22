@@ -28,11 +28,15 @@ class MyBoardsButton extends StatelessWidget {
         return ListTile(
           onTap: () {
             value.setGridSize(
-                contentProvider.allGridSizedModel[index].gridSizeX ?? 1,
-                contentProvider.allGridSizedModel[index].gridSizeY ?? 2);
+              contentProvider.allGridSizedModel[index].gridSizeX ?? 1,
+              contentProvider.allGridSizedModel[index].gridSizeY ?? 2,
+            );
             value.setGridSizedModel(
-                contentProvider.allGridSizedModel[index], index);
-            dev.log("${index}it is index");
+              contentProvider.allGridSizedModel[index],
+              index,
+            );
+
+            dev.log("$index", name: "Index");
 
             int count =
                 contentProvider.allGridSizedModel[index].duplicateCount + 1;

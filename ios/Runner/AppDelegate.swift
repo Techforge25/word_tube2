@@ -8,6 +8,21 @@ import AVFoundation
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         GeneratedPluginRegistrant.register(with: self)
+        let controller = window?.rootViewController as! FlutterViewController
+        let speechChannel = FlutterMethodChannel(
+            name: "com.example.app/speech",
+            binaryMessenger: controller.binaryMessenger
+        )
+
+        speechChannel.setMethodCallHandler { (call, result) in
+            if call.method == "speakText", let args = call.arguments as? [String: Any], let text = args["text"] as? String {
+                SpeechSynthesizer.speakText(text)
+                result("Success")
+            } else {
+                result(FlutterError(code: "INVALID_ARGUMENT", message: "Text not provided", details: nil))
+            }
+        }
+
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
@@ -16,7 +31,7 @@ import AVFoundation
         _ application: UIApplication,
         supportedInterfaceOrientationsFor window: UIWindow?
     ) -> UIInterfaceOrientationMask {
-        return .landscape // Change to .portrait, .landscape .all if needed
+        return .all // Change to .portrait, .landscape .all if needed
     }
 }
 @objc class SpeechSynthesizer: NSObject {

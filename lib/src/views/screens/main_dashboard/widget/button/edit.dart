@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -10,15 +12,15 @@ class EditWidget extends StatefulWidget {
   final MainDashboardController value;
   final ContentProvider contentProvider;
   final double sizeWidth;
-  final TextEditingController _controler;
+  final TextEditingController controler;
 
   const EditWidget({
     super.key,
     required this.sizeWidth,
-    required TextEditingController controler,
     required this.value,
     required this.contentProvider,
-  }) : _controler = controler;
+    required this.controler,
+  });
 
   @override
   State<EditWidget> createState() => _EditWidgetState();
@@ -30,14 +32,12 @@ class _EditWidgetState extends State<EditWidget> {
     // double fontSize = context.height * 0.025;
     // double iconSize = context.height * 0.04;
     late double fontSize;
-    late double iconSize;
+
     Orientation orientation = MediaQuery.orientationOf(context);
     if (orientation == Orientation.landscape) {
       fontSize = context.width * 0.015;
-      iconSize = context.width * 0.025;
     } else {
       fontSize = context.height * 0.025;
-      iconSize = context.height * 0.04;
     }
 
     return Container(
@@ -60,33 +60,34 @@ class _EditWidgetState extends State<EditWidget> {
           ),
           Gap(widget.sizeWidth + 20),
           TextButton(
-              onPressed: () async =>
-                  await widget.value.showAllButton(widget.contentProvider),
-              child: Text(
-                "Show All",
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: fontSize + 2,
-                    color: AppColor.appPrimaryColor),
-              )),
+            onPressed: () async =>
+                await widget.value.showAllButton(widget.contentProvider),
+            child: Text(
+              "Show All",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: fontSize + 2,
+                  color: AppColor.appPrimaryColor),
+            ),
+          ),
           Gap(widget.sizeWidth + 60),
           Flexible(
-            child: CupertinoSearchTextField(
-              padding: const EdgeInsets.all(5),
-              prefixIcon: Icon(
-                Icons.search,
-                size: iconSize + 2,
-              ),
-              style: TextStyle(fontSize: fontSize + 3),
+            child: CupertinoTextField(
+              style: TextStyle(fontSize: fontSize + 4),
               decoration: BoxDecoration(
-                  color: AppColor.white,
-                  borderRadius: BorderRadius.circular(10)),
-              controller: widget._controler,
+                color: AppColor.white,
+                borderRadius: BorderRadius.circular(7.5),
+              ),
+              cursorColor: AppColor.yellow,
+              maxLines: 1,
+              padding: EdgeInsets.all(20),
+              controller: widget.controler,
             ),
           ),
           Gap(widget.sizeWidth + 60),
           TextButton(
-              onPressed: () async => widget.value.setDone(),
+              onPressed: () async =>
+                  widget.value.setDone(widget.contentProvider),
               child: Text(
                 "Done",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
