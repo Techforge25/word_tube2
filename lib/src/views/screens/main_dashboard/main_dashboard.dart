@@ -147,6 +147,8 @@ class _MainDashboardState extends State<MainDashboard> {
     double sizeWidth = context.width * 0.02;
 
     return SafeArea(
+      top: false,
+      bottom: false,
       child: Scaffold(
         body: Consumer2<MainDashboardController, ContentProvider>(
           builder: (context, mainDashBoarState, contentState, child) =>
