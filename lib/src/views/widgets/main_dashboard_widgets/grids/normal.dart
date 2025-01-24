@@ -15,6 +15,7 @@ Widget basicGrid({
   required GridModel grid,
   required int index,
   required double fontSize,
+  double? size,
 }) {
   return Builder(
     builder: (context) => Stack(
@@ -56,8 +57,8 @@ Widget basicGrid({
           },
           child: Container(
               margin: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-              // height: context.height * 0.25,
-              // width: context.height * 0.25,
+              height: size,
+              width: size,
               decoration: BoxDecoration(
                 color: AppColor.cardColor,
                 borderRadius: BorderRadius.circular(10),

@@ -8,8 +8,8 @@ import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/dependency_inject.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
-import 'package:word_toob/src/views/widgets/Main%20Dashboard%20Widgets/main_dashboard_grid.dart';
-import 'package:word_toob/src/views/widgets/Main%20Dashboard%20Widgets/nav_bar.dart';
+import 'package:word_toob/src/views/widgets/main_dashboard_widgets/main_dashboard_grid.dart';
+import 'package:word_toob/src/views/widgets/main_dashboard_widgets/nav_bar.dart';
 import '../../../common/app_constants/general.dart';
 import '../../../source/models/grid_size_model.dart';
 import 'widget/button/edit.dart';
@@ -50,7 +50,7 @@ class _MainDashboardState extends State<MainDashboard> {
       {
         "name": "Emotions",
         "gridSizeX": 4,
-        "gridSizeY": 4,
+        "gridSizeY": 2,
       },
       {
         "name": "First 25 Words",

@@ -14,6 +14,7 @@ Widget gameGridCard({
   required int index,
   void Function()? onTap,
   required double fontSize,
+  double? size,
 }) {
   final findTheWrongWord = !value.findTheWordWrongList.contains(index);
   return Builder(
@@ -31,6 +32,8 @@ Widget gameGridCard({
       //   }
       // },
       child: Container(
+        height: size,
+        width: size,
         padding: EdgeInsets.symmetric(
           horizontal: 5,
           vertical: 1,
