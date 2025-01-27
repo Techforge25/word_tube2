@@ -52,10 +52,8 @@ class RightRow extends StatelessWidget {
           ),
         ),
         Gap(sizeWidth),
-        GestureDetector(
-          onTap: () {
-            value.setEdit(true);
-          },
+        TextButton(
+          onPressed: () => value.setEdit(true),
           child: Text(
             "Edit",
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(

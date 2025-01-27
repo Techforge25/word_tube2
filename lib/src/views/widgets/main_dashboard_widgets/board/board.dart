@@ -10,7 +10,7 @@ Widget gridBoard({
   required MainDashboardController value,
   required ContentProvider contentProvider,
   required double fontSize,
-  required void Function(String title, int index) onTap,
+  required void Function(String title, int index, GridModel grid) onTap,
 }) {
   return GridView.builder(
     // shrinkWrap: true,
@@ -120,7 +120,7 @@ Widget gridBoard({
           grid: grid,
           index: index,
           fontSize: fontSize,
-          onTap: () => onTap(grid.title ?? '', index),
+          onTap: () => onTap(grid.title ?? '', index, grid),
         );
       } else {
         return CommonFunctions.getCheckforGridShow(

@@ -27,6 +27,10 @@ class MyBoardsButton extends StatelessWidget {
           List.generate(contentProvider.allGridSizedModel.length, (index) {
         return ListTile(
           onTap: () {
+// setting playing mode off
+            value.setFindTheWord(false);
+            value.setRandomListIndex(0);
+
             value.setGridSize(
               contentProvider.allGridSizedModel[index].gridSizeX ?? 1,
               contentProvider.allGridSizedModel[index].gridSizeY ?? 2,

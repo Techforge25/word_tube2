@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_final_fields
 
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -81,6 +82,8 @@ class MainDashboardController extends ChangeNotifier {
   int _randomListIndex = 0;
   int get randomListIndex => _randomListIndex;
 
+  void setRandomListIndex(int i) => _randomListIndex = i;
+
   List<String> _videos = [];
   List<String> get videos => _videos;
 
@@ -123,8 +126,17 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
+  double _soundLevel = 0.0;
+  double get soundLevel => _soundLevel;
+
   void startListening(BuildContext context) async {
-    await speechToText.listen(onResult: onSpeechResult);
+    await speechToText.listen(
+      onResult: (result) => onSpeechResult(result, context),
+      onSoundLevelChange: (level) {
+        _soundLevel = level;
+        notifyListeners();
+      },
+    );
     _contextForSpeechToText = context;
     notifyListeners();
   }
@@ -137,7 +149,7 @@ class MainDashboardController extends ChangeNotifier {
 
   void stopListening() async => await speechToText.stop();
 
-  void onSpeechResult(SpeechRecognitionResult result) {
+  void onSpeechResult(SpeechRecognitionResult result, BuildContext context) {
     lastWords = result.recognizedWords;
     dev.log(lastWords);
     int index = gridSizedModel.listData
@@ -154,6 +166,9 @@ class MainDashboardController extends ChangeNotifier {
     } else {
       dev.log("No match found for: $lastWords");
     }
+
+    // ignore: use_build_context_synchronously
+    Future.delayed(Duration(milliseconds: 1500), () => startListening(context));
   }
 
   ///Text to speech
@@ -169,9 +184,11 @@ class MainDashboardController extends ChangeNotifier {
   int? _currentWordEnd;
   int? get currentWordEnd => _currentWordEnd;
 
-  void initTextToSpeech() {
+  Future<void> initTextToSpeech() async {
+    await flutterTts.setSharedInstance(true);
     flutterTts.setVolume(1.0);
     flutterTts.setPitch(1.0);
+    await flutterTts.setLanguage("en-US");
 
     _flutterTts.setProgressHandler((text, start, end, word) {
       _currentWordStart = start;
@@ -456,16 +473,18 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setRandomIndex() {
+  Future<void> setRandomIndex() async {
     _randomListIndex = Random().nextInt(gridSizedModel.listData!.length - 1);
     _targetFindWord = gridSizedModel.listData?[_randomListIndex].title ?? "";
+    await flutterTts.awaitSynthCompletion(true);
     flutterTts.speak("Find $_targetFindWord");
 
     notifyListeners();
   }
 
-  void setCurrentIndex() {
+  Future<void> setCurrentIndex() async {
     _targetFindWord = gridSizedModel.listData?[_randomListIndex].title ?? "";
+    await flutterTts.awaitSynthCompletion(true);
     flutterTts.speak("Find $_targetFindWord");
 
     notifyListeners();

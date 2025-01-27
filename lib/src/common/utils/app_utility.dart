@@ -14,7 +14,6 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
@@ -675,50 +674,50 @@ abstract class AppUtility {
     return null;
   }
 
-  static Future<DateTime?> showDateTimePicker(BuildContext context,
-      {required DateTime currentDate}) async {
-    DateTime? date = await showOmniDateTimePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: currentDate.subtract(const Duration(days: 3650)),
-        lastDate: currentDate.add(const Duration(days: 3650)),
-        is24HourMode: true,
-        isShowSeconds: false,
-        minutesInterval: 1,
-        secondsInterval: 1,
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-        constraints: const BoxConstraints(
-          maxWidth: 350,
-          maxHeight: 650,
-        ),
-        transitionBuilder: (context, anim1, anim2, child) {
-          return FadeTransition(
-            opacity: anim1.drive(
-              Tween(
-                begin: 0,
-                end: 1,
-              ),
-            ),
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 200),
-        barrierDismissible: true,
-        selectableDayPredicate: (dateTime) {
-          return true;
-          // Disable 25th Feb 2023
-          // if (dateTime == DateTime(2023, 2, 25)) {
-          //   return false;
-          // } else {
-          //   return true;
-          // }
-        },
-        theme: Theme.of(context).copyWith());
-    if (date != null) {
-      return date;
-    }
-    return null;
-  }
+  // static Future<DateTime?> showDateTimePicker(BuildContext context,
+  //     {required DateTime currentDate}) async {
+  //   DateTime? date = await showOmniDateTimePicker(
+  //       context: context,
+  //       initialDate: DateTime.now(),
+  //       firstDate: currentDate.subtract(const Duration(days: 3650)),
+  //       lastDate: currentDate.add(const Duration(days: 3650)),
+  //       is24HourMode: true,
+  //       isShowSeconds: false,
+  //       minutesInterval: 1,
+  //       secondsInterval: 1,
+  //       borderRadius: const BorderRadius.all(Radius.circular(16)),
+  //       constraints: const BoxConstraints(
+  //         maxWidth: 350,
+  //         maxHeight: 650,
+  //       ),
+  //       transitionBuilder: (context, anim1, anim2, child) {
+  //         return FadeTransition(
+  //           opacity: anim1.drive(
+  //             Tween(
+  //               begin: 0,
+  //               end: 1,
+  //             ),
+  //           ),
+  //           child: child,
+  //         );
+  //       },
+  //       transitionDuration: const Duration(milliseconds: 200),
+  //       barrierDismissible: true,
+  //       selectableDayPredicate: (dateTime) {
+  //         return true;
+  //         // Disable 25th Feb 2023
+  //         // if (dateTime == DateTime(2023, 2, 25)) {
+  //         //   return false;
+  //         // } else {
+  //         //   return true;
+  //         // }
+  //       },
+  //       theme: Theme.of(context).copyWith());
+  //   if (date != null) {
+  //     return date;
+  //   }
+  //   return null;
+  // }
 
   // static showCustomDialog(BuildContext context,{String? icon, required String title, required String message, required String buttonText, Function? onTap}) async {
   //   return await showGeneralDialog(

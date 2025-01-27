@@ -18,7 +18,6 @@ class RouteGenerator {
         return SwipeLeftAnimationRoute(
             widget:
                 ResponsiveWrap(child: VideoPlayerView(url: args as String)));
-
       default:
         return _errorRoute();
     }
@@ -45,15 +44,16 @@ class ResponsiveWrap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaxWidthBox(
-      maxWidth: 1200,
-      //background: Container(color: Colors.red),
+      maxWidth: 2000,
+      // background: Container(color: Colors.red),
+
       child: ResponsiveScaledBox(
         width: ResponsiveValue<double>(context,
-            defaultValue: 450,
+            defaultValue: 500,
             conditionalValues: [
-              const Condition.equals(name: MOBILE, value: 450),
-              const Condition.between(start: 800, end: 1100, value: 830),
-              const Condition.between(start: 1000, end: 1200, value: 1030),
+              // const Condition.equals(name: MOBILE, value: 1000),
+              const Condition.between(start: 400, end: 850, value: 430),
+              const Condition.between(start: 850, end: 2000, value: 1200),
             ]).value,
         child:
             BouncingScrollWrapper.builder(context, child, dragWithMouse: true),

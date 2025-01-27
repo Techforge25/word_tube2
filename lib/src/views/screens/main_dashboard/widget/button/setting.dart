@@ -259,12 +259,14 @@ class _SettingButtonState extends State<SettingButton> {
                       // Gap(widget.gap),
 
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           menuController.close();
-                          Share.share('Welcome to Word Toob! 📚✨ \n'
-                              'Whether you’re a beginner or an expert, Word Toob makes learning languages fun and addictive! 🌍🎉 \n'
-                              'Download now and join the adventure: ${AppKeys.appStore}\n'
-                              'For more info visit: http://wordtoob.com/index.html');
+                          final box = context.findRenderObject() as RenderBox?;
+                          await Share.share(
+                            'Welcome to Word Toob! 📚✨\nWhether you’re a beginner or an expert, Word Toob makes learning languages fun and addictive! 🌍🎉 \nDownload now and join the adventure: ${AppKeys.appStore}\nFor more info visit: http://wordtoob.com/index.html',
+                            sharePositionOrigin:
+                                box!.localToGlobal(Offset.zero) & box.size,
+                          );
                         },
                         child: Text(
                           "Share",

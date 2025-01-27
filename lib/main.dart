@@ -5,8 +5,10 @@ import 'package:word_toob/my_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
 
   await setup();
   runApp(const MyApp());
