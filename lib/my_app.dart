@@ -8,7 +8,6 @@ import 'package:word_toob/src/common/app_constants/route_strings.dart';
 import 'package:word_toob/src/common/route_generator.dart';
 import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/dependency_inject.dart';
-
 import 'src/views/theme/app_theme.dart';
 
 class MyApp extends StatefulWidget {
