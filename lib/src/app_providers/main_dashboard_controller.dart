@@ -168,7 +168,7 @@ class MainDashboardController extends ChangeNotifier {
     }
 
     // ignore: use_build_context_synchronously
-    Future.delayed(Duration(milliseconds: 1500), () => startListening(context));
+    Future.delayed(Duration(milliseconds: 1000), () => startListening(context));
   }
 
   ///Text to speech
@@ -198,14 +198,26 @@ class MainDashboardController extends ChangeNotifier {
     _flutterTts.getVoices.then((data) {
       try {
         List<Map> voices = List<Map>.from(data);
-        _voices =
-            voices.where((voice) => voice["name"].contains("en")).toList();
+
+        // _voices = voices.where((voice) => voice["name"].contains("en")).toList();
+
+// Setting the TTS voice so when ever the user click on a tile it will only say in a english accent.
+        _voices = voices.where((v) {
+          if (v['locale'] == 'en-US' && v['gender'] == 'male') {
+            return true;
+          } else if (v['locale'] == 'en-US' && v['gender'] == 'female') {
+            return true;
+          } else {
+            return false;
+          }
+        }).toList();
+
         _currentVoice = _voices.first;
 
         setVoice(_currentVoice!);
         notifyListeners();
       } catch (e) {
-        dev.log('$e');
+        dev.log('$e', name: 'Voice TTS Error');
       }
     });
   }
