@@ -35,15 +35,13 @@ class CustomBottomSheetVideo extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  GestureDetector(
+                  InkWell(
                     onTap: () async {
                       var video = await AppUtility.videoFromCamera();
                       printLog("index of each grid model$index");
-                      printLog("index of each grid model$index");
+                      printLog("index of each grid model: $index");
 
-                      controller.addVideoToList(
-                        video!.path,
-                      );
+                      controller.addVideoToList(video!.path);
                       await contentProvider.updateListDataItem(
                           id: controller.gridSizedModel.id ?? -1,
                           itemIndex: index,
@@ -69,9 +67,7 @@ class CustomBottomSheetVideo extends StatelessWidget {
                       var video = await AppUtility.videoFromGallery();
                       dev.log(video!.path, name: 'Video Path');
 
-                      controller.addVideoToList(
-                        video.path,
-                      );
+                      controller.addVideoToList(video.path);
                       contentProvider.updateListDataItem(
                           id: id,
                           itemIndex: index,
@@ -98,13 +94,11 @@ class CustomBottomSheetVideo extends StatelessWidget {
             ),
             const Gap(3),
             GestureDetector(
-              onTap: () {
-                controller.toggleBottomSheetOffVideo();
-              },
+              onTap: () => controller.toggleBottomSheetOffVideo(),
               child: Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: Colors.white,

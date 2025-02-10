@@ -216,20 +216,21 @@ class _EditPopOverState extends State<EditPopOver> {
                                         fontSize: fontSize),
                               ),
                               const Gap(10),
-                              GestureDetector(
-                                onTap: () {
-                                  mainDashboardController
-                                      .toggleBottomSheetVideo();
-                                },
-                                child: Text(
-                                  "Add Videos",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        fontSize: fontSize,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              Visibility(
+                                visible: mainDashboardController.isEditPressed,
+                                child: TextButton(
+                                  onPressed: () => mainDashboardController
+                                      .toggleBottomSheetVideo(),
+                                  child: Text(
+                                    "Add Videos",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          fontSize: fontSize,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
                                 ),
                               ),
                               Divider(
@@ -244,8 +245,8 @@ class _EditPopOverState extends State<EditPopOver> {
                                       .visibleVideos[index];
                                   if (mainDashboardController.isEditPressed) {
                                     return Slidable(
-                                      key: Key(index
-                                          .toString()), // Use a unique key for each item, such as a video ID or index
+                                      key: Key(index.toString()),
+                                      // Use a unique key for each item, such as a video ID or index
                                       // direction: DismissDirection
                                       //     .startToEnd, // Swipe direction
                                       // background: Container(
@@ -399,8 +400,8 @@ class GrayNavBarOnEdit extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (mainDashboardController.isEditPressed)
-            GestureDetector(
-              onTap: () async {
+            TextButton(
+              onPressed: () async {
                 mainDashboardController.isEditPressedFun(false);
                 if (mainDashboardController
                     .editTitleTextEditingController.text.isNotEmpty) {
@@ -428,8 +429,8 @@ class GrayNavBarOnEdit extends StatelessWidget {
               ),
             )
           else
-            GestureDetector(
-              onTap: () {
+            TextButton(
+              onPressed: () {
                 mainDashboardController.isEditPressedFun(true);
                 mainDashboardController
                     .setEditTitleControllerText(widget.title);
@@ -452,14 +453,15 @@ class GrayNavBarOnEdit extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColor.appPrimaryColor,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
             child: Text(
               "Cancel",
               textAlign: TextAlign.center,
