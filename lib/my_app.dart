@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:word_toob/src/app_providers/app_setting_provider.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
@@ -18,6 +19,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  @override
+  initState() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
+    super.initState();
+  }
+
   final _appSettingsProvider = sl<AppSettingsProvider>();
   final _mainDashboardController = sl<MainDashboardController>();
   final _contentProvider = sl<ContentProvider>();
