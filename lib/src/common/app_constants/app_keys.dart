@@ -11,11 +11,7 @@ abstract class AppKeys {
   static const userId = "userId";
   static const boardingScreen = "boardingScreen";
 
-
-  static const String playStoreUrl = "https://play.google.com/store/apps/details?id=com.wordtoob.wordtube2";
+  static const String playStoreUrl =
+      "https://play.google.com/store/apps/details?id=com.wordtoob.wordtube2";
   static const String appStore = "https://www.apple.com/app-store/";
-
-
-
 }
-

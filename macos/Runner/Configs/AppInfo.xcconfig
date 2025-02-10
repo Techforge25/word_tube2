@@ -8,7 +8,7 @@
 PRODUCT_NAME = word_toob
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.wordtoob.wordToob
+PRODUCT_BUNDLE_IDENTIFIER = com.wordtoob.wordtube2
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 com.wordtoob. All rights reserved.
