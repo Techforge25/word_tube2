@@ -20,7 +20,7 @@ Widget basicGrid({
   return Builder(
     builder: (context) => Stack(
       children: [
-        GestureDetector(
+        InkWell(
           onLongPress: () => value.hideOrShowEachGrid(
             contentProvider,
             index,
@@ -63,8 +63,7 @@ Widget basicGrid({
                 color: AppColor.cardColor,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: value.editPressedYello &&
-                          (grid.videosPath?.isNotEmpty ?? false)
+                  color: grid.videosPath?.isNotEmpty ?? false
                       ? Colors.green
                       : Colors.white,
                   width: 2,

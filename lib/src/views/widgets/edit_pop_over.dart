@@ -107,7 +107,7 @@ class _EditPopOverState extends State<EditPopOver> {
                                       ),
                                     )
                                   : Text(
-                                      widget.title,
+                                      widget.title == '' ? '?' : widget.title,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -118,31 +118,39 @@ class _EditPopOverState extends State<EditPopOver> {
                                           ),
                                     ),
                               const Gap(10),
-                              Visibility(
-                                visible: widget.picture != "",
-                                child: GestureDetector(
-                                  onTap: () {
+                              InkWell(
+                                onTap: () {
+                                  if (mainDashboardController.isEditPressed) {
                                     mainDashboardController.toggleBottomSheet();
-                                  },
-                                  child: mainDashboardController.imagePath == ""
-                                      ? widget.picture.contains("asset")
-                                          ? Image.asset(
-                                              widget.picture,
-                                              height: context.width * 0.25,
-                                              width: context.width * 0.25,
-                                            )
-                                          : Image.file(
-                                              File(widget.picture),
-                                              height: context.width * 0.25,
-                                              width: context.width * 0.25,
-                                            )
-                                      : Image.file(
-                                          File(mainDashboardController
-                                              .imagePath),
-                                          height: 120,
-                                          width: 120,
+                                  }
+                                },
+                                child: widget.picture == "" &&
+                                        mainDashboardController.imagePath == ''
+                                    ? Container(
+                                        width: context.width * 0.25,
+                                        height: context.width * 0.25,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(),
                                         ),
-                                ),
+                                      )
+                                    : mainDashboardController.imagePath == ""
+                                        ? widget.picture.contains("asset")
+                                            ? Image.asset(
+                                                widget.picture,
+                                                height: context.width * 0.25,
+                                                width: context.width * 0.25,
+                                              )
+                                            : Image.file(
+                                                File(widget.picture),
+                                                height: context.width * 0.25,
+                                                width: context.width * 0.25,
+                                              )
+                                        : Image.file(
+                                            File(mainDashboardController
+                                                .imagePath),
+                                            height: context.width * 0.25,
+                                            width: context.width * 0.25,
+                                          ),
                               ),
                               const Gap(10),
                               Visibility(

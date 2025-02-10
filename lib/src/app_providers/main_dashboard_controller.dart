@@ -130,13 +130,19 @@ class MainDashboardController extends ChangeNotifier {
   double get soundLevel => _soundLevel;
 
   void startListening(BuildContext context) async {
-    await speechToText.listen(
-      onResult: (result) => onSpeechResult(result, context),
-      onSoundLevelChange: (level) {
-        _soundLevel = level;
-        notifyListeners();
-      },
-    );
+    try {
+      await speechToText.listen(
+        onResult: (result) => onSpeechResult(result, context),
+        listenFor: Duration(seconds: 1),
+        onSoundLevelChange: (level) {
+          _soundLevel = level;
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      dev.log('$e', name: 'Microphone Error');
+    }
+
     _contextForSpeechToText = context;
     notifyListeners();
   }
@@ -150,6 +156,7 @@ class MainDashboardController extends ChangeNotifier {
   void stopListening() async => await speechToText.stop();
 
   void onSpeechResult(SpeechRecognitionResult result, BuildContext context) {
+    dev.log('Start', name: 'Microphone Error');
     lastWords = result.recognizedWords;
     dev.log(lastWords);
     int index = gridSizedModel.listData
@@ -166,6 +173,8 @@ class MainDashboardController extends ChangeNotifier {
     } else {
       dev.log("No match found for: $lastWords");
     }
+
+    _speechToTextCheck = false;
 
     // ignore: use_build_context_synchronously
     Future.delayed(Duration(milliseconds: 1000), () => startListening(context));
