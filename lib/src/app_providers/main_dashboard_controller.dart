@@ -24,8 +24,6 @@ class MainDashboardController extends ChangeNotifier {
 
   int _gridSizeX = 1;
 
-  BuildContext? _contextForSpeechToText;
-
   int get gridSizeX => _gridSizeX;
 
   int _gridSizeY = 2;
@@ -133,7 +131,7 @@ class MainDashboardController extends ChangeNotifier {
     try {
       await speechToText.listen(
         onResult: (result) => onSpeechResult(result, context),
-        listenFor: Duration(seconds: 1),
+        listenFor: Duration(hours: 1),
         onSoundLevelChange: (level) {
           _soundLevel = level;
           notifyListeners();
@@ -143,7 +141,6 @@ class MainDashboardController extends ChangeNotifier {
       dev.log('$e', name: 'Microphone Error');
     }
 
-    _contextForSpeechToText = context;
     notifyListeners();
   }
 
@@ -153,31 +150,59 @@ class MainDashboardController extends ChangeNotifier {
   /// listen method.
   ///
 
-  void stopListening() async => await speechToText.stop();
+  void stopListening() async {
+    _speechToTextCheck = false;
+    await speechToText.stop();
+  }
+
+  bool isWatchingVideo = false;
 
   void onSpeechResult(SpeechRecognitionResult result, BuildContext context) {
-    dev.log('Start', name: 'Microphone Error');
     lastWords = result.recognizedWords;
-    dev.log(lastWords);
-    int index = gridSizedModel.listData
-            ?.indexWhere((gridModel) => gridModel.title == lastWords) ??
-        -1;
 
-    if (index != -1) {
+    // int index = gridSizedModel.listData
+    //         ?.indexWhere((gridModel) => gridModel.title == lastWords) ??
+    //     -1;
+
+    int index = findWordInGrid(lastWords);
+    lastWords = "";
+
+    if (index >= 0 && !isWatchingVideo) {
+// Setting this true so the other words will not make further instences of VideoPlayerView.
+      isWatchingVideo = true;
+
       dev.log("Match found at index: $index");
       GridModel matchedModel = gridSizedModel.listData?[index] ?? GridModel();
       var rand = Random().nextInt(matchedModel.videosPath?.length ?? 0 + 1);
 
-      Navigator.pushNamed(_contextForSpeechToText!, RouteStrings.videoPlayer,
-          arguments: matchedModel.videosPath?[rand]);
+      Navigator.pushNamed(
+        context,
+        RouteStrings.videoPlayer,
+        arguments: matchedModel.videosPath?[rand],
+      );
     } else {
       dev.log("No match found for: $lastWords");
     }
+  }
 
-    _speechToTextCheck = false;
+  int findWordInGrid(String w) {
+    List<String> words = w.split(' ');
+    int index = -1;
 
-    // ignore: use_build_context_synchronously
-    Future.delayed(Duration(milliseconds: 1000), () => startListening(context));
+    for (String i in words) {
+      if (gridSizedModel.listData != null) {
+        index = gridSizedModel.listData!.indexWhere((gridModel) {
+          if (gridModel.title == i &&
+              (gridModel.videosPath?.isNotEmpty ?? false)) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+      }
+    }
+
+    return index;
   }
 
   ///Text to speech

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
 import 'package:word_toob/src/common/utils/navigation_animation.dart';
 import 'package:word_toob/src/views/screens/main_dashboard/main_dashboard.dart';
-import 'package:word_toob/src/views/widgets/video_thumbnail_fleet.dart';
+import 'package:word_toob/src/views/screens/video/video_player.dart';
 // import 'package:responsive_framework/responsive_framework.dart';
 
 class RouteGenerator {

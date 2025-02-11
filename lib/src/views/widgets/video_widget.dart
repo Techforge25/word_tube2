@@ -45,17 +45,11 @@ class _VideoThumbnailState extends State<VideoThumbnail> {
     return SizedBox(
       width: 200,
       height: 100,
-      child: InkWell(
-        child: _controller.value.isInitialized
-            ? GestureDetector(
-                onTap: () {},
-                child: Chewie(controller: _chewieController),
-              )
-            : const Center(
-                child: CircularProgressIndicator(),
-              ),
-        onTap: () {},
-      ),
+      child: _controller.value.isInitialized
+          ? Chewie(controller: _chewieController)
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }
