@@ -146,35 +146,38 @@ class _MainDashboardState extends State<MainDashboard> {
 
     double sizeWidth = context.width * 0.02;
 
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: Scaffold(
-        body: Consumer2<MainDashboardController, ContentProvider>(
-          builder: (context, mainDashBoarState, contentState, child) =>
-              GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: Column(
-              children: [
-                !mainDashBoarState.editPressedYello
-                    ? NormalNavBar(
-                        addMap: addMap,
-                        sizeWidth: sizeWidth,
-                        value: mainDashBoarState,
-                        contentProvider: contentState,
-                        menuController: MenuController(),
-                      )
-                    : EditWidget(
-                        sizeWidth: sizeWidth,
-                        controler: _mainDashBoard.boradTitleController,
-                        value: mainDashBoarState,
-                        contentProvider: contentState,
-                      ),
-                GridViewWidget(
-                  value: mainDashBoarState,
-                  contentProvider: contentState,
-                ),
-              ],
+    return PopScope(
+      canPop: false,
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Scaffold(
+          body: Consumer2<MainDashboardController, ContentProvider>(
+            builder: (context, mainDashBoarState, contentState, child) =>
+                GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: Column(
+                children: [
+                  !mainDashBoarState.editPressedYello
+                      ? NormalNavBar(
+                          addMap: addMap,
+                          sizeWidth: sizeWidth,
+                          value: mainDashBoarState,
+                          contentProvider: contentState,
+                          menuController: MenuController(),
+                        )
+                      : EditWidget(
+                          sizeWidth: sizeWidth,
+                          controler: _mainDashBoard.boradTitleController,
+                          value: mainDashBoarState,
+                          contentProvider: contentState,
+                        ),
+                  GridViewWidget(
+                    value: mainDashBoarState,
+                    contentProvider: contentState,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

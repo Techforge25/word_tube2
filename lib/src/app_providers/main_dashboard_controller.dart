@@ -131,7 +131,7 @@ class MainDashboardController extends ChangeNotifier {
     try {
       await speechToText.listen(
         onResult: (result) => onSpeechResult(result, context),
-        listenFor: Duration(hours: 1),
+        listenFor: Duration(hours: 50),
         onSoundLevelChange: (level) {
           _soundLevel = level;
           notifyListeners();
@@ -210,7 +210,10 @@ class MainDashboardController extends ChangeNotifier {
   FlutterTts get flutterTts => _flutterTts;
 
   List<Map> _voices = [];
+  List<Map> get ttfVoices => _voices;
+
   Map? _currentVoice;
+  Map? get currentVoice => _currentVoice;
 
   int? _currentWordStart;
   int? get currentWordStart => _currentWordStart;
@@ -237,18 +240,21 @@ class MainDashboardController extends ChangeNotifier {
 
 // Setting the TTS voice so when ever the user click on a tile it will only say in a english accent.
         _voices = voices.where((v) {
-          if (v['locale'] == 'en-US' && v['gender'] == 'male') {
+          if (v['locale'] == 'en-US') {
+            // && v['gender'] == 'male'
             return true;
-          } else if (v['locale'] == 'en-US' && v['gender'] == 'female') {
-            return true;
-          } else {
+          }
+          //  else if (v['locale'] == 'en-US' && v['gender'] == 'female') {
+          //   return true;
+          // }
+          else {
             return false;
           }
         }).toList();
 
-        _currentVoice = _voices.first;
-
+        _currentVoice = _voices.where((v) => v['gender'] == 'female').first;
         setVoice(_currentVoice!);
+
         notifyListeners();
       } catch (e) {
         dev.log('$e', name: 'Voice TTS Error');
@@ -256,8 +262,16 @@ class MainDashboardController extends ChangeNotifier {
     });
   }
 
-  void setVoice(Map voice) {
-    _flutterTts.setVoice({"name": voice["name"], "locale": voice["locale"]});
+  onVoiceTap(Map v, BuildContext context) async {
+    _currentVoice = v;
+    dev.log(v.toString(), name: 'SelectedVoice');
+    Navigator.pop(context);
+    await setVoice(v);
+  }
+
+  Future<void> setVoice(Map voice) async {
+    await _flutterTts
+        .setVoice({"name": voice["name"], "locale": voice["locale"]});
   }
 
   setGridSizedModel(GridSizeModel grid, int index) {

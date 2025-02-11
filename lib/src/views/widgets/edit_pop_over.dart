@@ -59,7 +59,7 @@ class _EditPopOverState extends State<EditPopOver> {
     if (orientation == Orientation.landscape) {
       fontSize = context.width * 0.02;
     } else {
-      fontSize = context.height * 0.02;
+      fontSize = context.height * 0.01;
     }
 
     dev.log('${widget.hide}');
