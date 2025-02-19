@@ -29,6 +29,8 @@ Widget basicGrid({
           ),
           onTap: () {
             // value.setItemOnEditState(index,context,title: "Happy",picture: MyAssets.happy );
+            value.flutterTts.speak(grid.title ?? "");
+
             value.setItemOnEditState(
               hide: grid.hidetitle ?? false,
               index,
@@ -41,7 +43,6 @@ Widget basicGrid({
             );
 
             //  value.setLottie();
-            value.flutterTts.speak(grid.title ?? "");
 
             if (!value.editPressedYello) {
               if (grid.videosPath?.isNotEmpty ?? false) {
