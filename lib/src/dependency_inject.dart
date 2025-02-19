@@ -16,12 +16,14 @@ final GetIt sl = GetIt.instance;
 Future<void> setup() async {
   final dir = await getApplicationDocumentsDirectory();
 
-  final isar = await Isar.open([GridSizedLocalSchema, GridLocalSchema],
-      directory: dir.path);
+  final isar = await Isar.open(
+    [GridSizedLocalSchema, GridLocalSchema],
+    directory: dir.path,
+  );
 
   printLog("[setup] **** App Settings Applied ****");
 
-  ///providers
+// Providers
   sl.registerLazySingleton<AppSettingsProvider>(() => AppSettingsProvider());
   sl.registerLazySingleton<ContentProvider>(
       () => ContentProvider(iAppRepository: sl()));

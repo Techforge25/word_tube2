@@ -10,6 +10,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/common/utils/app_utility.dart';
+import 'package:word_toob/src/func/device_check.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/views/widgets/edit_pop_over.dart';
@@ -240,7 +241,7 @@ class MainDashboardController extends ChangeNotifier {
 
 // Setting the TTS voice so when ever the user click on a tile it will only say in a english accent.
         _voices = voices.where((v) {
-          if (v['locale'] == 'en-US') {
+          if (v['locale'].contains('en')) {
             // && v['gender'] == 'male'
             return true;
           }
@@ -252,7 +253,9 @@ class MainDashboardController extends ChangeNotifier {
           }
         }).toList();
 
-        _currentVoice = _voices.where((v) => v['gender'] == 'female').first;
+        _currentVoice = _voices
+            .where((v) => (v['gender'] == 'female' && v['locale'] == 'en-US'))
+            .first;
         setVoice(_currentVoice!);
 
         notifyListeners();
@@ -542,6 +545,11 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> speakForWrong() async {
+    await flutterTts.awaitSynthCompletion(true);
+    flutterTts.speak("Find $_targetFindWord");
+  }
+
   Future<void> setCurrentIndex() async {
     _targetFindWord = gridSizedModel.listData?[_randomListIndex].title ?? "";
     await flutterTts.awaitSynthCompletion(true);
@@ -590,6 +598,14 @@ class MainDashboardController extends ChangeNotifier {
     if (editTitleTextEditingController.text.isNotEmpty) {
       editTitleTextEditingController.clear();
     }
+    notifyListeners();
+  }
+
+  bool _isMobile = true;
+  bool get isMobile => _isMobile;
+
+  setIsMobile() async {
+    _isMobile = await DeviceCheck.isMobile();
     notifyListeners();
   }
 }

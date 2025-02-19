@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/board/board.dart';
+import 'package:word_toob/src/views/widgets/main_dashboard_widgets/list.dart';
 import '../../../app_providers/content_provider.dart';
 import '../../../app_providers/main_dashboard_controller.dart';
 import '../../../common/app_constants/assets.dart';
@@ -55,13 +56,15 @@ class _GridViewWidgetState extends State<GridViewWidget>
     widget.value.setFindWordImagePath(image);
     _controller.reset();
     _controller.forward();
-    Future.delayed(const Duration(seconds: 7), () async {
+    Future.delayed(const Duration(seconds: 5), () async {
       widget.value.setFindWordImage(false);
 
       if (widget.value.foundSuccess) {
         widget.value.clearFindTheWrongList();
         widget.value.setFoundSuccess(false);
         widget.value.setRandomIndex();
+      } else {
+        widget.value.speakForWrong();
       }
     });
   }
@@ -71,6 +74,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
     late double fontSize;
     // late double iconSize;
     Orientation orientation = MediaQuery.orientationOf(context);
+
     if (orientation == Orientation.landscape) {
       if (context.height > 500) {
         fontSize = context.height * 0.025;
@@ -105,59 +109,60 @@ class _GridViewWidgetState extends State<GridViewWidget>
               ),
               const Gap(5),
               Expanded(
-                // child: mainBoardList(
-                //   context: context,
-                //   value: widget.value,
-                //   contentProvider: widget.contentProvider,
-                //   fontSize: fontSize,
-                //   onTap: (title, index) {
-                //     if (widget.value.targetFindWord == title) {
-                //       widget.value.setFindWordImage(true);
-                //       widget.value.setFoundSuccess(true);
-                //       _onImageTap(MyAssets.correct);
-                //     } else {
-                //       widget.value.setFindTheWordWrongList(index);
-                //       widget.value.setFindWordImage(true);
-                //       _onImageTap(MyAssets.wrong);
-                //     }
-                //   },
-                // ),
-                child: gridBoard(
-                  value: widget.value,
-                  contentProvider: widget.contentProvider,
-                  fontSize: fontSize,
-                  onTap: (title, index, grid) {
-                    if (widget.value.targetFindWord == title) {
-                      widget.value.setFindWordImage(true);
-                      widget.value.setFoundSuccess(true);
-                      _onImageTap(MyAssets.correct);
+                child: widget.value.isMobile
+                    ? gridBoard(
+                        value: widget.value,
+                        contentProvider: widget.contentProvider,
+                        fontSize: fontSize,
+                        onTap: (title, index, grid) {
+                          if (widget.value.targetFindWord == title) {
+                            widget.value.setFindWordImage(true);
+                            widget.value.setFoundSuccess(true);
+                            _onImageTap(MyAssets.correct);
 
-                      Future.delayed(Duration(milliseconds: 3500), () {
-                        // Show video in playing mode correct guessing
-                        if (!widget.value.editPressedYello) {
-                          if (grid.videosPath?.isNotEmpty ?? false) {
-                            var rand = Random()
-                                .nextInt(grid.videosPath?.length ?? 0 + 1);
+                            Future.delayed(Duration(milliseconds: 3500), () {
+                              // Show video in playing mode correct guessing
+                              if (!widget.value.editPressedYello) {
+                                if (grid.videosPath?.isNotEmpty ?? false) {
+                                  var rand = Random().nextInt(
+                                      grid.videosPath?.length ?? 0 + 1);
 
-                            dev.log(grid.videosPath!.length.toString());
-                            Navigator.pushNamed(
-                              // ignore: use_build_context_synchronously
-                              context,
-                              RouteStrings.videoPlayer,
-                              arguments: grid.videosPath?[rand],
-                            );
+                                  dev.log(grid.videosPath!.length.toString());
+                                  Navigator.pushNamed(
+                                    // ignore: use_build_context_synchronously
+                                    context,
+                                    RouteStrings.videoPlayer,
+                                    arguments: grid.videosPath?[rand],
+                                  );
+                                } else {
+                                  dev.log("Error occured no item  ");
+                                }
+                              }
+                            });
                           } else {
-                            dev.log("Error occured no item  ");
+                            widget.value.setFindTheWordWrongList(index);
+                            widget.value.setFindWordImage(true);
+                            _onImageTap(MyAssets.wrong);
                           }
-                        }
-                      });
-                    } else {
-                      widget.value.setFindTheWordWrongList(index);
-                      widget.value.setFindWordImage(true);
-                      _onImageTap(MyAssets.wrong);
-                    }
-                  },
-                ),
+                        },
+                      )
+                    : mainBoardList(
+                        context: context,
+                        value: widget.value,
+                        contentProvider: widget.contentProvider,
+                        fontSize: fontSize,
+                        onTap: (title, index) {
+                          if (widget.value.targetFindWord == title) {
+                            widget.value.setFindWordImage(true);
+                            widget.value.setFoundSuccess(true);
+                            _onImageTap(MyAssets.correct);
+                          } else {
+                            widget.value.setFindTheWordWrongList(index);
+                            widget.value.setFindWordImage(true);
+                            _onImageTap(MyAssets.wrong);
+                          }
+                        },
+                      ),
               ),
             ],
           ),

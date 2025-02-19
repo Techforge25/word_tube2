@@ -77,7 +77,7 @@ Future<dynamic> voicesPopup(
                 //   ),
                 // ),
                 title: Text(
-                  '${voices[index]['name']}',
+                  '${voices[index]['name']} - ${voices[index]['locale']}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: currentVoice != null &&
                                 voices[index]['name'] == currentVoice['name']

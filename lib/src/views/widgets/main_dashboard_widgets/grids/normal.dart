@@ -48,8 +48,12 @@ Widget basicGrid({
                 var rand = Random().nextInt(grid.videosPath?.length ?? 0 + 1);
 
                 dev.log(grid.videosPath!.length.toString());
-                Navigator.pushNamed(context, RouteStrings.videoPlayer,
-                    arguments: grid.videosPath?[rand]);
+
+                Navigator.pushNamed(
+                  context,
+                  RouteStrings.videoPlayer,
+                  arguments: grid.videosPath?[rand],
+                );
               } else {
                 dev.log("Error occured no item  ");
               }
@@ -79,6 +83,7 @@ Widget basicGrid({
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Flexible(
+                        flex: 2,
                         child: Text(
                           grid.title ?? '?',
                           maxLines: 2,
@@ -92,9 +97,7 @@ Widget basicGrid({
                         ),
                       ),
                       // Add spacing between text and image
-                      SizedBox(
-                        height: context.height * 0.02,
-                      ),
+                      SizedBox(height: context.height * 0.02),
                       if (value.settingsWordOnlyShow == 1)
                         Flexible(
                           flex: 3,

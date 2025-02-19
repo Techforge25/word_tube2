@@ -42,6 +42,7 @@ class _MainDashboardState extends State<MainDashboard> {
     Future.microtask(() =>
         _mainDashBoard.getCurrentSelectedGridSizedModel(_contentProvider));
     _mainDashBoard.initTextToSpeech();
+    _mainDashBoard.setIsMobile();
   }
 
   @override

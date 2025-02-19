@@ -1,21 +1,19 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:developer' as dev;
-
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/dependency_inject.dart';
 
 class VideoPlayerView extends StatefulWidget {
-  const VideoPlayerView({super.key, required this.url});
   final String url;
+  const VideoPlayerView({super.key, required this.url});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _VideoPlayerViewState createState() => _VideoPlayerViewState();
+  VideoPlayerViewState createState() => VideoPlayerViewState();
 }
 
-class _VideoPlayerViewState extends State<VideoPlayerView> {
+class VideoPlayerViewState extends State<VideoPlayerView>
+    with WidgetsBindingObserver {
   late VideoPlayerController _controller;
   bool _hasNavigated = false;
   final _mainDashBoard = sl<MainDashboardController>();
@@ -46,17 +44,25 @@ class _VideoPlayerViewState extends State<VideoPlayerView> {
     _controller.addListener(() async {
       if (!_hasNavigated &&
           _controller.value.position >= _controller.value.duration) {
-        await Future.delayed(Duration(milliseconds: 1250), () {
-          _hasNavigated = true;
-          _mainDashBoard.isWatchingVideo = false;
-          // Ensure this only happens once
-// ignore: use_build_context_synchronously
-          Navigator.of(context).pop();
+        _hasNavigated = true;
+        _mainDashBoard.isWatchingVideo = false;
+        Navigator.of(context).pop();
 
-          dev.log("going back----------->");
-        });
+        if (_mainDashBoard.speechToTextCheck) {
+// It will start the listening what the user says
+          _mainDashBoard.startListening(context);
+        }
       }
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        _mainDashBoard.speechToTextCheck) {
+// It will start the listening what the user says
+      _mainDashBoard.startListening(context);
+    }
   }
 
   @override
@@ -67,66 +73,69 @@ class _VideoPlayerViewState extends State<VideoPlayerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Center(
-              child: _controller.value.isInitialized
-                  ? AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    )
-                  : const CircularProgressIndicator(),
-            ),
-            // IconButton(
-            //   onPressed: (){
-            //     Navigator.of(context).pop();
-            //   },
-            //   icon: Container(
-            //
-            //     padding: const EdgeInsets.all(5),
-            //     decoration: BoxDecoration(
-            //         color: Colors.grey[300]!.withOpacity(0.4),
-            //         borderRadius: BorderRadius.circular(200)
-            //     ),
-            //     child: Icon(Icons.arrow_back,
-            //         size: 10,
-            //         color: Theme.of(context).inputDecorationTheme.iconColor),
-            //   ),
-            // ),
-            // Center(
-            //   child: IconButton(
-            //     onPressed: (){
-            //       Navigator.of(context).pop();
-            //     },
-            //     icon: Container(
-            //
-            //       padding: const EdgeInsets.all(5),
-            //       decoration: BoxDecoration(
-            //           color: Colors.grey[300]!,
-            //           borderRadius: BorderRadius.circular(200)
-            //       ),
-            //       child: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-            //           size: 20,
-            //           color: Theme.of(context).inputDecorationTheme.iconColor),
-            //     ),
-            //   ),
-            // ),
-          ],
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                child: _controller.value.isInitialized
+                    ? AspectRatio(
+                        aspectRatio: _controller.value.aspectRatio,
+                        child: VideoPlayer(_controller),
+                      )
+                    : const CircularProgressIndicator(),
+              ),
+              // IconButton(
+              //   onPressed: (){
+              //     Navigator.of(context).pop();
+              //   },
+              //   icon: Container(
+              //
+              //     padding: const EdgeInsets.all(5),
+              //     decoration: BoxDecoration(
+              //         color: Colors.grey[300]!.withOpacity(0.4),
+              //         borderRadius: BorderRadius.circular(200)
+              //     ),
+              //     child: Icon(Icons.arrow_back,
+              //         size: 10,
+              //         color: Theme.of(context).inputDecorationTheme.iconColor),
+              //   ),
+              // ),
+              // Center(
+              //   child: IconButton(
+              //     onPressed: (){
+              //       Navigator.of(context).pop();
+              //     },
+              //     icon: Container(
+              //
+              //       padding: const EdgeInsets.all(5),
+              //       decoration: BoxDecoration(
+              //           color: Colors.grey[300]!,
+              //           borderRadius: BorderRadius.circular(200)
+              //       ),
+              //       child: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+              //           size: 20,
+              //           color: Theme.of(context).inputDecorationTheme.iconColor),
+              //     ),
+              //   ),
+              // ),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _controller.value.isPlaying
-                ? _controller.pause()
-                : _controller.play();
-          });
-        },
-        child: Icon(
-          _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              _controller.value.isPlaying
+                  ? _controller.pause()
+                  : _controller.play();
+            });
+          },
+          child: Icon(
+            _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+          ),
         ),
       ),
     );
