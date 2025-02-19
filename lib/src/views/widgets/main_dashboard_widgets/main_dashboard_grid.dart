@@ -114,8 +114,9 @@ class _GridViewWidgetState extends State<GridViewWidget>
                         value: widget.value,
                         contentProvider: widget.contentProvider,
                         fontSize: fontSize,
-                        onTap: (title, index, grid) {
+                        onTap: (title, index, grid) async {
                           if (widget.value.targetFindWord == title) {
+                            await widget.value.flutterTts.speak(title);
                             widget.value.setFindWordImage(true);
                             widget.value.setFoundSuccess(true);
                             _onImageTap(MyAssets.correct);
@@ -151,8 +152,9 @@ class _GridViewWidgetState extends State<GridViewWidget>
                         value: widget.value,
                         contentProvider: widget.contentProvider,
                         fontSize: fontSize,
-                        onTap: (title, index) {
+                        onTap: (title, index) async {
                           if (widget.value.targetFindWord == title) {
+                            await widget.value.flutterTts.speak(title);
                             widget.value.setFindWordImage(true);
                             widget.value.setFoundSuccess(true);
                             _onImageTap(MyAssets.correct);
