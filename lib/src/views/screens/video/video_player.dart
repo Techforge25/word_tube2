@@ -27,17 +27,15 @@ class VideoPlayerViewState extends State<VideoPlayerView>
       _controller = VideoPlayerController.asset(widget.url,
           videoPlayerOptions: VideoPlayerOptions())
         ..initialize().then((_) {
-          setState(() {
-            _controller.play();
-          });
+          setState(() {});
+          _controller.play();
         });
     } else {
       _controller = VideoPlayerController.file(File(widget.url),
           videoPlayerOptions: VideoPlayerOptions())
         ..initialize().then((_) {
-          setState(() {
-            _controller.play();
-          });
+          setState(() {});
+          _controller.play();
         });
     }
 
@@ -67,6 +65,10 @@ class VideoPlayerViewState extends State<VideoPlayerView>
 
   @override
   void dispose() {
+    if (_mainDashBoard.speechToTextCheck) {
+// It will start the listening what the user says
+      _mainDashBoard.startListening(context);
+    }
     _controller.dispose();
     super.dispose();
   }
