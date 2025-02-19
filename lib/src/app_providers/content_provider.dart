@@ -68,6 +68,20 @@ class ContentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future getFirstGridSizeModel() async {
+    getAllGridSizeModelStatus = Status.loading;
+    notifyListeners();
+    try {
+      _allGridSizedModel = await iAppRepository.getFirstGridSizedModel();
+
+      getAllGridSizeModelStatus = Status.loaded;
+    } on Exception catch (e) {
+      getAllGridSizeModelStatus = Status.error;
+      dev.log(e.toString());
+    }
+    notifyListeners();
+  }
+
   Future<void> updateGridSizeModelData({
     required int id,
     String? title,
@@ -83,14 +97,15 @@ class ContentProvider extends ChangeNotifier {
     try {
       await iAppRepository
           .updateGridSizedModel(
-              id: id,
-              listData: listData,
-              title: title,
-              duplicateCount: duplicateCount,
-              currentSelected: currentSelected,
-              hideModel: hideModel,
-              gridSizeY: gridSizeY,
-              gridSizeX: gridSizeX)
+        id: id,
+        listData: listData,
+        title: title,
+        duplicateCount: duplicateCount,
+        currentSelected: currentSelected,
+        hideModel: hideModel,
+        gridSizeY: gridSizeY,
+        gridSizeX: gridSizeX,
+      )
           .then(
         (value) async {
           await getAllGridSizeModel();
@@ -141,6 +156,26 @@ class ContentProvider extends ChangeNotifier {
       updateGridListDataStatus = Status.error;
       dev.log(e.toString());
     }
+    notifyListeners();
+  }
+
+  Future<void> deleteGrid({required int id}) async {
+    updateGridListDataStatus = Status.loading;
+    notifyListeners();
+    try {
+      await iAppRepository.deleteRecord(id: id).then(
+        (value) async {
+          int i = _allGridSizedModel.indexWhere((a) => a.id! == id);
+          _allGridSizedModel.removeAt(i);
+        },
+      );
+
+      updateGridListDataStatus = Status.loaded;
+    } on Exception catch (e) {
+      updateGridListDataStatus = Status.error;
+      dev.log(e.toString(), name: 'First Grid Error');
+    }
+
     notifyListeners();
   }
 

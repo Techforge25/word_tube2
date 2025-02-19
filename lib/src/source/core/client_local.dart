@@ -25,6 +25,30 @@ class LocalClient {
     return response;
   }
 
+  Future<List<GridSizeModel>> getFirstGridSizedModel() async {
+    try {
+      final List<GridSizeModel> response = await isar.txn(() async {
+        List<GridSizedLocal> gridSizedLocalList =
+            await isar.gridSizedLocals.where().findAll();
+
+        List<GridSizeModel> gridSizedModalList = [];
+        for (var item in gridSizedLocalList) {
+          gridSizedModalList.add(GridSizeModel.fromLocal(item));
+        }
+
+        dev.log(gridSizedModalList.toString());
+        return [gridSizedModalList.first];
+      });
+
+      dev.log("Fetched local gridSizedModels");
+      return response;
+    } catch (e) {
+      dev.log(e.toString(), name: 'Response adding');
+    }
+    
+    return [];
+  }
+
   Future<void> saveAllGridSizedModel(
       {required List<GridSizeModel> gridSizedModelList}) async {
     List<GridSizedLocal> gridSizedLocalAll = [];
@@ -142,4 +166,8 @@ class LocalClient {
       }
     });
   }
+
+  deleteRecord(int id) async => await isar.writeTxn(() async {
+        await isar.gridSizedLocals.delete(id);
+      });
 }

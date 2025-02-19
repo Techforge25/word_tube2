@@ -50,8 +50,8 @@ class _MainDashboardState extends State<MainDashboard> {
     List<Map<String, dynamic>> customDialogList = [
       {
         "name": "Emotions",
-        "gridSizeX": 4,
-        "gridSizeY": 2,
+        "gridSizeX": 2,
+        "gridSizeY": 4,
       },
       {
         "name": "First 25 Words",

@@ -82,7 +82,20 @@ class _EditWidgetState extends State<EditWidget> {
               controller: widget.controler,
             ),
           ),
-          Gap(widget.sizeWidth + 60),
+          Gap(widget.sizeWidth + 30),
+          // TextButton(
+          //   onPressed: () async =>
+          //       await widget.value.deleteBoardButton(widget.contentProvider),
+          //   child: Text(
+          //     "Delete Board",
+          //     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          //           fontWeight: FontWeight.w600,
+          //           fontSize: fontSize + 2,
+          //           color: AppColor.red,
+          //         ),
+          //   ),
+          // ),
+          // Gap(10),
           TextButton(
             onPressed: () async => widget.value.setDone(widget.contentProvider),
             child: Text(

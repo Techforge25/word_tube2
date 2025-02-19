@@ -302,7 +302,7 @@ class MainDashboardController extends ChangeNotifier {
     await contentProvider.getAllGridSizeModel();
     _gridSizedModel = contentProvider.allGridSizedModel.firstWhere(
         (grid) => grid.currentSelected == true,
-        orElse: () => contentProvider.allGridSizedModel[0]);
+        orElse: () => contentProvider.allGridSizedModel.first);
 
     notifyListeners();
   }
@@ -368,6 +368,18 @@ class MainDashboardController extends ChangeNotifier {
       // dev.log(gridModel.toJson());
 
       _gridSizedModel = contentProvider.allGridSizedModel[_gridIndex];
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> deleteBoardButton(ContentProvider contentProvider) async {
+    dev.log("grid index $_gridIndex");
+
+    if (_gridSizedModel.id != null) {
+      await contentProvider.deleteGrid(id: _gridSizedModel.id!);
+      _gridSizedModel = contentProvider.allGridSizedModel[_gridIndex];
+      dev.log(_gridSizedModel.toString());
     }
 
     notifyListeners();
