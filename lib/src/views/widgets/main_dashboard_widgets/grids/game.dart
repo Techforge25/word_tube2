@@ -34,10 +34,7 @@ Widget gameGridCard({
       child: Container(
         height: size,
         width: size,
-        padding: EdgeInsets.symmetric(
-          horizontal: 5,
-          vertical: 1,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
         decoration: BoxDecoration(
           color: findTheWrongWord ? AppColor.cardColor : AppColor.transparent,
           borderRadius: BorderRadius.circular(10),
