@@ -54,22 +54,21 @@ class VideoPlayerViewState extends State<VideoPlayerView>
     });
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed &&
-        _mainDashBoard.speechToTextCheck) {
-// It will start the listening what the user says
-      _mainDashBoard.startListening(context);
-    }
-  }
+//   @override
+//   void didChangeAppLifecycleState(AppLifecycleState state) {
+//     if (state == AppLifecycleState.resumed &&
+//         _mainDashBoard.speechToTextCheck) {
+// // It will start the listening what the user says
+//       _mainDashBoard.startListening(context);
+//     }
+//   }
 
   @override
   void dispose() {
-    if (_mainDashBoard.speechToTextCheck) {
 // It will start the listening what the user says
-      _mainDashBoard.startListening(context);
-    }
+    _mainDashBoard.startListening(context);
     _controller.dispose();
+
     super.dispose();
   }
 

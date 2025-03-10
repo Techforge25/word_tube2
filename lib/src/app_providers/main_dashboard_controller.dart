@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
@@ -121,7 +122,25 @@ class MainDashboardController extends ChangeNotifier {
   String lastWords = '';
 
   Future<void> initSpeechToText() async {
-    speechEnabled = await speechToText.initialize();
+    speechEnabled = await speechToText.initialize(
+      onStatus: onStatus,
+      onError: onError,
+    );
+    notifyListeners();
+  }
+
+  void onStatus(String s) {
+    dev.log(s, name: 'Listening Status');
+    if (!speechToText.isListening) {
+      _speechToTextCheck = false;
+      notifyListeners();
+    }
+  }
+
+  void onError(SpeechRecognitionError e) {
+    dev.log(e.errorMsg, name: 'Listening Error');
+    _speechToTextCheck = false;
+    speechEnabled = false;
     notifyListeners();
   }
 
@@ -129,6 +148,8 @@ class MainDashboardController extends ChangeNotifier {
   double get soundLevel => _soundLevel;
 
   void startListening(BuildContext context) async {
+    if (!speechEnabled) initSpeechToText();
+
     try {
       await speechToText.listen(
         onResult: (result) => onSpeechResult(result, context),
