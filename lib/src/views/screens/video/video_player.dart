@@ -42,7 +42,7 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
 
     _controller.addListener(() async {
       if (!_hasNavigated &&
-          _controller.value.position > _controller.value.duration) {
+          _controller.value.position >= _controller.value.duration) {
         _hasNavigated = true;
         _mainDashBoard.isWatchingVideo = false;
 
