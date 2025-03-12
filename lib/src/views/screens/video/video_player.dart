@@ -12,8 +12,7 @@ class VideoPlayerView extends StatefulWidget {
   VideoPlayerViewState createState() => VideoPlayerViewState();
 }
 
-class VideoPlayerViewState extends State<VideoPlayerView>
-    with WidgetsBindingObserver {
+class VideoPlayerViewState extends State<VideoPlayerView> {
   late VideoPlayerController _controller;
   bool _hasNavigated = false;
   final _mainDashBoard = sl<MainDashboardController>();
@@ -27,29 +26,32 @@ class VideoPlayerViewState extends State<VideoPlayerView>
       _controller = VideoPlayerController.asset(widget.url,
           videoPlayerOptions: VideoPlayerOptions())
         ..initialize().then((_) {
-          setState(() {});
-          _controller.play();
+          setState(() {
+            _controller.play();
+          });
         });
     } else {
       _controller = VideoPlayerController.file(File(widget.url),
           videoPlayerOptions: VideoPlayerOptions())
         ..initialize().then((_) {
-          setState(() {});
-          _controller.play();
+          setState(() {
+            _controller.play();
+          });
         });
     }
 
     _controller.addListener(() async {
       if (!_hasNavigated &&
-          _controller.value.position >= _controller.value.duration) {
+          _controller.value.position > _controller.value.duration) {
         _hasNavigated = true;
         _mainDashBoard.isWatchingVideo = false;
-        Navigator.of(context).pop();
 
         if (_mainDashBoard.speechToTextCheck) {
 // It will start the listening what the user says
           _mainDashBoard.startListening(context);
         }
+
+        Navigator.of(context).pop();
       }
     });
   }
@@ -65,8 +67,10 @@ class VideoPlayerViewState extends State<VideoPlayerView>
 
   @override
   void dispose() {
+    if (_mainDashBoard.speechToTextCheck) {
 // It will start the listening what the user says
-    _mainDashBoard.startListening(context);
+      _mainDashBoard.startListening(context);
+    }
     _controller.dispose();
 
     super.dispose();

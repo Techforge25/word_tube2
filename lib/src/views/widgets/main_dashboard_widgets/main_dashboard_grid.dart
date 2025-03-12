@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
+import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/board/board.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/list.dart';
 import '../../../app_providers/content_provider.dart';
@@ -69,6 +70,38 @@ class _GridViewWidgetState extends State<GridViewWidget>
     });
   }
 
+  Future<void> _onGridTap(String title, int index, GridModel grid) async {
+    if (widget.value.targetFindWord == title) {
+      await widget.value.flutterTts.speak(title);
+      widget.value.setFindWordImage(true);
+      widget.value.setFoundSuccess(true);
+      _onImageTap(MyAssets.correct);
+
+      Future.delayed(Duration(milliseconds: 3500), () {
+        // Show video in playing mode correct guessing
+        if (!widget.value.editPressedYello) {
+          if (grid.videosPath?.isNotEmpty ?? false) {
+            var rand = Random().nextInt(grid.videosPath?.length ?? 0 + 1);
+
+            dev.log(grid.videosPath!.length.toString());
+            Navigator.pushNamed(
+              // ignore: use_build_context_synchronously
+              context,
+              RouteStrings.videoPlayer,
+              arguments: grid.videosPath?[rand],
+            );
+          } else {
+            dev.log("Error occured no item  ");
+          }
+        }
+      });
+    } else {
+      widget.value.setFindTheWordWrongList(index);
+      widget.value.setFindWordImage(true);
+      _onImageTap(MyAssets.wrong);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     late double fontSize;
@@ -114,56 +147,14 @@ class _GridViewWidgetState extends State<GridViewWidget>
                         value: widget.value,
                         contentProvider: widget.contentProvider,
                         fontSize: fontSize,
-                        onTap: (title, index, grid) async {
-                          if (widget.value.targetFindWord == title) {
-                            await widget.value.flutterTts.speak(title);
-                            widget.value.setFindWordImage(true);
-                            widget.value.setFoundSuccess(true);
-                            _onImageTap(MyAssets.correct);
-
-                            Future.delayed(Duration(milliseconds: 3500), () {
-                              // Show video in playing mode correct guessing
-                              if (!widget.value.editPressedYello) {
-                                if (grid.videosPath?.isNotEmpty ?? false) {
-                                  var rand = Random().nextInt(
-                                      grid.videosPath?.length ?? 0 + 1);
-
-                                  dev.log(grid.videosPath!.length.toString());
-                                  Navigator.pushNamed(
-                                    // ignore: use_build_context_synchronously
-                                    context,
-                                    RouteStrings.videoPlayer,
-                                    arguments: grid.videosPath?[rand],
-                                  );
-                                } else {
-                                  dev.log("Error occured no item  ");
-                                }
-                              }
-                            });
-                          } else {
-                            widget.value.setFindTheWordWrongList(index);
-                            widget.value.setFindWordImage(true);
-                            _onImageTap(MyAssets.wrong);
-                          }
-                        },
+                        onTap: _onGridTap,
                       )
                     : mainBoardList(
                         context: context,
                         value: widget.value,
                         contentProvider: widget.contentProvider,
                         fontSize: fontSize,
-                        onTap: (title, index) async {
-                          if (widget.value.targetFindWord == title) {
-                            await widget.value.flutterTts.speak(title);
-                            widget.value.setFindWordImage(true);
-                            widget.value.setFoundSuccess(true);
-                            _onImageTap(MyAssets.correct);
-                          } else {
-                            widget.value.setFindTheWordWrongList(index);
-                            widget.value.setFindWordImage(true);
-                            _onImageTap(MyAssets.wrong);
-                          }
-                        },
+                        onTap: _onGridTap,
                       ),
               ),
             ],
@@ -172,7 +163,8 @@ class _GridViewWidgetState extends State<GridViewWidget>
             Align(
               alignment: Alignment.center,
               child: ScaleTransition(
-                scale: _animation, // Scale value for zoom
+// Scale value for zoom
+                scale: _animation,
                 child: Image.asset(
                   widget.value.findWordImagePath,
                   width: 200,
