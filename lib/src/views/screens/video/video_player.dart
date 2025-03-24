@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/dependency_inject.dart';
+import 'dart:developer' as dev;
 
 class VideoPlayerView extends StatefulWidget {
   final String url;
@@ -21,39 +22,58 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
   void initState() {
     super.initState();
 
-    // Check if the video is an asset or a file
-    if (widget.url.contains("asset")) {
-      _controller = VideoPlayerController.asset(widget.url,
-          videoPlayerOptions: VideoPlayerOptions())
-        ..initialize().then((_) {
-          setState(() {
-            _controller.play();
-          });
+    _initController().then((v) {
+      if (v) {
+        _controller.addListener(() {
+          if (!_hasNavigated &&
+              _controller.value.position >= _controller.value.duration) {
+            _hasNavigated = true;
+            _mainDashBoard.isWatchingVideo = false;
+
+            _onVideoEnd();
+          }
         });
-    } else {
-      _controller = VideoPlayerController.file(File(widget.url),
-          videoPlayerOptions: VideoPlayerOptions())
-        ..initialize().then((_) {
-          setState(() {
-            _controller.play();
-          });
-        });
-    }
-
-    _controller.addListener(() async {
-      if (!_hasNavigated &&
-          _controller.value.position >= _controller.value.duration) {
-        _hasNavigated = true;
-        _mainDashBoard.isWatchingVideo = false;
-
-        if (_mainDashBoard.speechToTextCheck) {
-// It will start the listening what the user says
-          _mainDashBoard.startListening(context);
-        }
-
-        Navigator.of(context).pop();
+      } else {
+        _onVideoEnd();
       }
     });
+  }
+
+  Future<bool> _initController() async {
+    try {
+      // Check if the video is an asset or a file
+      if (widget.url.contains("asset")) {
+        _controller = VideoPlayerController.asset(
+          widget.url,
+          videoPlayerOptions: VideoPlayerOptions(),
+        )..initialize().then((_) {
+            setState(() {
+              _controller.play();
+            });
+          });
+      } else {
+        _controller = VideoPlayerController.file(File(widget.url),
+            videoPlayerOptions: VideoPlayerOptions())
+          ..initialize().then((_) {
+            setState(() {
+              _controller.play();
+            });
+          });
+      }
+
+      return true;
+    } catch (e) {
+      dev.log('$e', name: 'Video Error');
+      return false;
+    }
+  }
+
+  void _onVideoEnd() {
+    if (_mainDashBoard.speechToTextCheck) {
+// It will start the listening what the user says
+      _mainDashBoard.startListening(context);
+    }
+    Navigator.of(context).pop();
   }
 
 //   @override
