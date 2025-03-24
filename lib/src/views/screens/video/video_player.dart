@@ -46,20 +46,19 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
         _controller = VideoPlayerController.asset(
           widget.url,
           videoPlayerOptions: VideoPlayerOptions(),
-        )..initialize().then((_) {
-            setState(() {
-              _controller.play();
-            });
-          });
+        );
       } else {
-        _controller = VideoPlayerController.file(File(widget.url),
-            videoPlayerOptions: VideoPlayerOptions())
-          ..initialize().then((_) {
-            setState(() {
-              _controller.play();
-            });
-          });
+        _controller = VideoPlayerController.file(
+          File(widget.url),
+          videoPlayerOptions: VideoPlayerOptions(),
+        );
       }
+
+      await _controller.initialize().then((v) {
+        setState(() {
+          _controller.play();
+        });
+      });
 
       return true;
     } catch (e) {
@@ -73,7 +72,11 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
 // It will start the listening what the user says
       _mainDashBoard.startListening(context);
     }
-    Navigator.of(context).pop();
+
+    if (mounted) {
+      dev.log('i Poped');
+      Navigator.of(context).pop();
+    }
   }
 
 //   @override
