@@ -394,10 +394,14 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteBoardButton(ContentProvider contentProvider) async {
-    dev.log("grid index $_gridIndex");
+  Future<void> deleteBoardButton(
+      ContentProvider contentProvider, int index) async {
+    dev.log("grid index: $index");
 
-    if (_gridSizedModel.id != null) {
+    int? id = contentProvider.allGridSizedModel[index].id;
+    dev.log("grid id: $id");
+
+    if (id != null) {
       await contentProvider.deleteGrid(id: _gridSizedModel.id!);
       _gridSizedModel = contentProvider.allGridSizedModel[_gridIndex];
       dev.log(_gridSizedModel.toString());

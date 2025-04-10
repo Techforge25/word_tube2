@@ -158,9 +158,7 @@ class FindTheWordRow extends StatelessWidget {
         //       fontSize: fontSize
         //   )),
         // ),
-        SizedBox(
-          width: sizeWidth,
-        ),
+        SizedBox(width: sizeWidth),
         GestureDetector(
           onTap: () {
             mainDashboardController.setFindTheWord(false);

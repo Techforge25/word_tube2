@@ -6,6 +6,7 @@ import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/common/app_constants/app_keys.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import 'package:word_toob/src/views/widgets/custom_menu_widget.dart';
+import 'package:word_toob/src/views/widgets/voices.dart';
 
 class SettingButton extends StatefulWidget {
   final double fontSize;
@@ -256,31 +257,31 @@ class _SettingButtonState extends State<SettingButton> {
                       //               color: AppColor.appPrimaryColor
                       //                   .withOpacity(0.5))),
                       // ),
-                      // TextButton(
-                      //   onPressed: () async {
-                      //     menuController.close();
-                      //     await voicesPopup(
-                      //       context,
-                      //       voices: widget.value.ttfVoices,
-                      //       currentVoice: widget.value.currentVoice,
-                      //       onVoicesTap: (v) =>
-                      //           widget.value.onVoiceTap(v, context),
-                      //     );
-                      //   },
-                      //   child: Text(
-                      //     "Change Voice",
-                      //     style: Theme.of(context)
-                      //         .textTheme
-                      //         .bodyMedium
-                      //         ?.copyWith(
-                      //           fontSize: widget.fontSize + 4,
-                      //           color:
-                      //               AppColor.appPrimaryColor.withOpacity(0.5),
-                      //         ),
-                      //   ),
-                      // ),
+                      TextButton(
+                        onPressed: () async {
+                          menuController.close();
+                          await voicesPopup(
+                            context,
+                            voices: widget.value.ttfVoices,
+                            currentVoice: widget.value.currentVoice,
+                            onVoicesTap: (v) =>
+                                widget.value.onVoiceTap(v, context),
+                          );
+                        },
+                        child: Text(
+                          "Change Voice",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                fontSize: widget.fontSize + 4,
+                                color:
+                                    AppColor.appPrimaryColor.withOpacity(0.5),
+                              ),
+                        ),
+                      ),
 
-                      // Gap(widget.gap),
+                      Gap(widget.gap),
 
                       TextButton(
                         onPressed: () async {
