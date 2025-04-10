@@ -120,6 +120,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
       fontSize = context.height * 0.025;
       // iconSize = context.height * 0.04;
     }
+
     return Expanded(
       child: Stack(
         children: [

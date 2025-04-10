@@ -11,15 +11,20 @@ Future<dynamic> voicesPopup(
 }) async {
   double height = MediaQuery.sizeOf(context).height;
   double width = MediaQuery.sizeOf(context).width;
-  double fontSize = 20;
+  late double fontSize;
+  if (height > 500) {
+    fontSize = 20;
+  } else {
+    fontSize = 14;
+  }
 
   dev.log(currentVoice.toString());
 
   await AppUtility.appDialog(
     context,
     child: Container(
-      height: height * 0.5,
-      width: width * 0.5,
+      height: height > 500 ? height * 0.5 : height * 0.75,
+      width: height > 500 ? width * 0.5 : width * 0.75,
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
         color: AppColor.white,
@@ -37,6 +42,8 @@ Future<dynamic> voicesPopup(
           ),
           Divider(),
           ListTile(
+            minVerticalPadding: height > 500 ? null : 2,
+            minTileHeight: height > 500 ? null : 30,
             title: Text(
               'Names',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -61,6 +68,8 @@ Future<dynamic> voicesPopup(
               shrinkWrap: true,
               padding: EdgeInsets.symmetric(vertical: 10),
               itemBuilder: (context, index) => ListTile(
+                minVerticalPadding: height > 500 ? null : 2,
+                minTileHeight: height > 500 ? null : 20,
                 onTap: onVoicesTap == null
                     ? () => dev.log(
                           'Selected Voice: ${voices[index]['name']}',

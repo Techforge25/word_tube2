@@ -29,7 +29,7 @@ class MyBoardsButton extends StatelessWidget {
         return Slidable(
             key: Key(index.toString()),
             // Use a unique key for each item, such as a video ID or index
-            // direction: DismissDirection .startToEnd, // Swipe direction
+            // direction: DismissDirection.startToEnd, // Swipe direction
             // background: Container(
             //   color: Colors.red, // Background color for the dismiss action
             //   alignment: Alignment.centerRight,
@@ -38,10 +38,11 @@ class MyBoardsButton extends StatelessWidget {
             //       color: Colors.white),
             // ),
             // onDismissed: (direction) {},
+
             endActionPane: ActionPane(
               motion: const ScrollMotion(),
-              dismissible: DismissiblePane(onDismissed: () {}),
-              extentRatio: 0.25,
+              // dismissible: DismissiblePane(onDismissed: () {}),
+              extentRatio: 0.5,
               children: [
                 SlidableAction(
                   onPressed: (context) async =>
@@ -49,8 +50,8 @@ class MyBoardsButton extends StatelessWidget {
                   backgroundColor: Color(0xFFFE4A49),
                   foregroundColor: Colors.white,
                   icon: Icons.delete,
-                  flex: 1,
-                  label: 'Delete',
+                  padding: EdgeInsets.all(5),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ],
             ),

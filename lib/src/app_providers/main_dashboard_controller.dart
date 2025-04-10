@@ -575,10 +575,24 @@ class MainDashboardController extends ChangeNotifier {
   }
 
   Future<void> setRandomIndex() async {
-    _randomListIndex = Random().nextInt(gridSizedModel.listData!.length - 1);
-    _targetFindWord = gridSizedModel.listData?[_randomListIndex].title ?? "";
-    await flutterTts.awaitSynthCompletion(true);
-    flutterTts.speak("Find $_targetFindWord");
+    if (gridSizedModel.listData != null) {
+      List<GridModel> l = gridSizedModel.listData!
+          .where((a) => a.hideImage == false && a.hidetitle == false)
+          .toList();
+
+      int i = Random().nextInt(l.length - 1);
+      _randomListIndex = gridSizedModel.listData!.indexWhere((a) {
+        if (a.title == l[i].title) return true;
+        return false;
+      });
+
+      dev.log(_randomListIndex.toString());
+
+      _targetFindWord = l[i].title ?? "";
+
+      await flutterTts.awaitSynthCompletion(true);
+      flutterTts.speak("Find $_targetFindWord");
+    }
 
     notifyListeners();
   }
@@ -589,7 +603,7 @@ class MainDashboardController extends ChangeNotifier {
   }
 
   Future<void> setCurrentIndex() async {
-    _targetFindWord = gridSizedModel.listData?[_randomListIndex].title ?? "";
+    _targetFindWord = gridSizedModel.listData![_randomListIndex].title ?? "";
     await flutterTts.awaitSynthCompletion(true);
     flutterTts.speak("Find $_targetFindWord");
 
