@@ -402,9 +402,8 @@ class MainDashboardController extends ChangeNotifier {
     dev.log("grid id: $id");
 
     if (id != null) {
-      await contentProvider.deleteGrid(id: _gridSizedModel.id!);
+      await contentProvider.deleteGrid(id: id);
       _gridSizedModel = contentProvider.allGridSizedModel[_gridIndex];
-      dev.log(_gridSizedModel.toString());
     }
 
     notifyListeners();
