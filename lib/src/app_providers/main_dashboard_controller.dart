@@ -261,18 +261,20 @@ class MainDashboardController extends ChangeNotifier {
         // _voices = voices.where((voice) => voice["name"].contains("en")).toList();
 
 // Setting the TTS voice so when ever the user click on a tile it will only say in a english accent.
-        _voices = voices.where((v) {
-          if (v['locale'].contains('en')) {
-            // && v['gender'] == 'male'
-            return true;
-          }
-          //  else if (v['locale'] == 'en-US' && v['gender'] == 'female') {
-          //   return true;
-          // }
-          else {
-            return false;
-          }
-        }).toList();
+        _voices = voices;
+// Uncomment the code below if you need to allow only en-Local
+        // .where((v) {
+        //   if (v['locale'].contains('en')) {
+        //     // && v['gender'] == 'male'
+        //     return true;
+        //   }
+        //   //  else if (v['locale'] == 'en-US' && v['gender'] == 'female') {
+        //   //   return true;
+        //   // }
+        //   else {
+        //     return false;
+        //   }
+        // }).toList();
 
         _currentVoice = _voices
             .where((v) => (v['gender'] == 'female' && v['locale'] == 'en-US'))
