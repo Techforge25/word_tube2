@@ -63,7 +63,6 @@ class _GridViewWidgetState extends State<GridViewWidget>
       if (widget.value.foundSuccess) {
         widget.value.clearFindTheWrongList();
         widget.value.setFoundSuccess(false);
-        widget.value.setRandomIndex();
       } else {
         widget.value.speakForWrong();
       }
@@ -92,6 +91,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
             );
           } else {
             dev.log("Error occured no item  ");
+            widget.value.setRandomIndex();
           }
         }
       });

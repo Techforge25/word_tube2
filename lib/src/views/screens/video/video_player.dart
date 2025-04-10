@@ -67,7 +67,7 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
     }
   }
 
-  void _onVideoEnd() {
+  Future<void> _onVideoEnd() async {
     if (_mainDashBoard.speechToTextCheck) {
 // It will start the listening what the user says
       _mainDashBoard.startListening(context);
@@ -75,6 +75,9 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
 
     if (mounted) {
       dev.log('i Poped');
+      await _mainDashBoard.setRandomIndex();
+
+// ignore: use_build_context_synchronously
       Navigator.of(context).pop();
     }
   }
