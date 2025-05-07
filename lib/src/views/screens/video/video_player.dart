@@ -74,8 +74,8 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
     }
 
     if (mounted) {
-      dev.log('i Poped');
-      await _mainDashBoard.setRandomIndex();
+      // dev.log('i Poped');
+      // await _mainDashBoard.setRandomIndex();
 
 // ignore: use_build_context_synchronously
       Navigator.of(context).pop();
