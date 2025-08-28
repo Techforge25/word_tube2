@@ -224,7 +224,7 @@ ThemeData _buildShrineTheme() {
       listTileTheme: const ListTileThemeData(
           shape: RoundedRectangleBorder(side: BorderSide.none),
           textColor: AppColor.black),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0.0,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -336,7 +336,7 @@ ThemeData _buildShrineTheme() {
               fontWeight: FontWeight.w700,
               color: AppColor.white)),
       iconTheme: const IconThemeData(color: AppColor.fontColor),
-      bottomAppBarTheme: const BottomAppBarTheme(
+      bottomAppBarTheme: const BottomAppBarThemeData(
           color: AppColor.lightBottomAppbarColor,
           surfaceTintColor: AppColor.lightBottomIconColor,
           shadowColor: AppColor.lightBottomIndicatorColor),

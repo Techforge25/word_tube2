@@ -38,19 +38,25 @@ class CustomBottomSheetVideo extends StatelessWidget {
                   InkWell(
                     onTap: () async {
                       var video = await AppUtility.videoFromCamera();
-                      printLog("index of each grid model$index");
-                      printLog("index of each grid model: $index");
 
-                      controller.addVideoToList(video!.path);
-                      await contentProvider.updateListDataItem(
-                          id: controller.gridSizedModel.id ?? -1,
-                          itemIndex: index,
-                          videosPath: controller.videos);
-                      await controller.setGridSizedModel(
-                          contentProvider
-                              .allGridSizedModel[controller.gridIndex],
-                          controller.gridIndex);
-                      controller.toggleBottomSheetOffVideo();
+                      if (video != null) {
+                        printLog("index of each grid model$index");
+                        printLog("index of each grid model: $index");
+
+                        controller.addVideoToList(video!.path);
+                        await contentProvider.updateListDataItem(
+                            id: controller.gridSizedModel.id ?? -1,
+                            itemIndex: index,
+                            videosPath: controller.videos);
+                        await controller.setGridSizedModel(
+                            contentProvider
+                                .allGridSizedModel[controller.gridIndex],
+                            controller.gridIndex);
+                        controller.toggleBottomSheetOffVideo();
+                      } else {
+                        printLog(
+                            "Video picking cancelled or permission denied.");
+                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(

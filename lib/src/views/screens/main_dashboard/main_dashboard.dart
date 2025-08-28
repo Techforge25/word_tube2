@@ -157,27 +157,30 @@ class _MainDashboardState extends State<MainDashboard> {
             builder: (context, mainDashBoarState, contentState, child) =>
                 GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
-              child: Column(
-                children: [
-                  !mainDashBoarState.editPressedYello
-                      ? NormalNavBar(
-                          addMap: addMap,
-                          sizeWidth: sizeWidth,
-                          value: mainDashBoarState,
-                          contentProvider: contentState,
-                          menuController: MenuController(),
-                        )
-                      : EditWidget(
-                          sizeWidth: sizeWidth,
-                          controler: _mainDashBoard.boradTitleController,
-                          value: mainDashBoarState,
-                          contentProvider: contentState,
-                        ),
-                  GridViewWidget(
-                    value: mainDashBoarState,
-                    contentProvider: contentState,
-                  ),
-                ],
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: Column(
+                  children: [
+                    !mainDashBoarState.editPressedYello
+                        ? NormalNavBar(
+                            addMap: addMap,
+                            sizeWidth: sizeWidth,
+                            value: mainDashBoarState,
+                            contentProvider: contentState,
+                            menuController: MenuController(),
+                          )
+                        : EditWidget(
+                            sizeWidth: sizeWidth,
+                            controler: _mainDashBoard.boradTitleController,
+                            value: mainDashBoarState,
+                            contentProvider: contentState,
+                          ),
+                    GridViewWidget(
+                      value: mainDashBoarState,
+                      contentProvider: contentState,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

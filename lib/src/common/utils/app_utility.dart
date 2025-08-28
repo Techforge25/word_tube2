@@ -14,11 +14,13 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/common/app_constants/app_strings.dart';
+import 'package:word_toob/src/common/app_constants/general.dart' show printLog;
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import '../../source/models/grid_model.dart';
@@ -245,9 +247,48 @@ abstract class AppUtility {
     return image;
   }
 
+  // static Future<XFile?> videoFromCamera() async {
+  //   var video = await ImagePicker().pickVideo(source: ImageSource.camera);
+  //   return video;
+  // }
+
   static Future<XFile?> videoFromCamera() async {
-    var video = await ImagePicker().pickVideo(source: ImageSource.camera);
-    return video;
+    try {
+      final video = await ImagePicker().pickVideo(source: ImageSource.camera);
+      return video;
+    } on PlatformException catch (e) {
+      if (e.code == 'camera_access_denied' || e.code == 'photo_access_denied') {
+        printLog("Camera access denied via ImagePicker: ${e.code}");
+
+        PermissionStatus status = await Permission.camera.status;
+
+        if (status.isDenied || status.isRestricted) {
+          status = await Permission.camera.request();
+        }
+
+        if (status.isPermanentlyDenied) {
+          await openAppSettings();
+          return null;
+        }
+
+        if (status.isGranted) {
+          try {
+            final video =
+                await ImagePicker().pickVideo(source: ImageSource.camera);
+            return video;
+          } catch (e) {
+            printLog("Error on retry: $e");
+            return null;
+          }
+        }
+      } else {
+        printLog("Unhandled PlatformException: ${e.code}");
+      }
+    } catch (e) {
+      printLog("Unexpected error in videoFromCamera: $e");
+    }
+
+    return null;
   }
 
   static Future<XFile?> videoFromGallery() async {

@@ -148,11 +148,15 @@ class MainDashboardController extends ChangeNotifier {
   double get soundLevel => _soundLevel;
 
   void startListening(BuildContext context) async {
-    if (!speechEnabled) initSpeechToText();
+    if (!speechEnabled) await initSpeechToText();
 
     try {
       await speechToText.listen(
-        onResult: (result) => onSpeechResult(result, context),
+        onResult: (result) {
+          dev.log(result.recognizedWords);
+
+          onSpeechResult(result, context);
+        },
         listenFor: Duration(hours: 50),
         onSoundLevelChange: (level) {
           _soundLevel = level;
@@ -178,10 +182,11 @@ class MainDashboardController extends ChangeNotifier {
   }
 
   bool isWatchingVideo = false;
+  int i = 0;
 
-  void onSpeechResult(SpeechRecognitionResult result, BuildContext context) {
-    lastWords = result.recognizedWords;
-
+  void onSpeechResult(
+      SpeechRecognitionResult result, BuildContext context) async {
+    lastWords = result.recognizedWords.split(" ").last;
     // int index = gridSizedModel.listData
     //         ?.indexWhere((gridModel) => gridModel.title == lastWords) ??
     //     -1;
@@ -193,36 +198,47 @@ class MainDashboardController extends ChangeNotifier {
 // Setting this true so the other words will not make further instences of VideoPlayerView.
       isWatchingVideo = true;
 
-      dev.log("Match found at index: $index");
+      dev.log("Match found at index: $index ${i++}");
       GridModel matchedModel = gridSizedModel.listData?[index] ?? GridModel();
-      var rand = Random().nextInt(matchedModel.videosPath?.length ?? 0 + 1);
+      // Log the matched path
+      dev.log("Matched video paths: ${matchedModel.videosPath}");
 
-      Navigator.pushNamed(
-        context,
-        RouteStrings.videoPlayer,
-        arguments: matchedModel.videosPath?[rand],
-      );
+      if (matchedModel.videosPath != null &&
+          matchedModel.videosPath!.isNotEmpty) {
+        var rand = Random().nextInt(matchedModel.videosPath?.length ?? 0 + 1);
+        dev.log("Navigating to: ${matchedModel.videosPath?[rand]}");
+        AppUtility.navigatorKey.currentState
+            ?.pushNamed(
+          RouteStrings.videoPlayer,
+          arguments: matchedModel.videosPath![rand],
+        )
+            .then((_) {
+          isWatchingVideo = false;
+        });
+      } else {
+        dev.log("No valid video path found.");
+      }
     } else {
       dev.log("No match found for: $lastWords");
     }
   }
 
   int findWordInGrid(String w) {
-    List<String> words = w.split(' ');
+    //List<String> words = w.split(' ');
     int index = -1;
 
-    for (String i in words) {
-      if (gridSizedModel.listData != null) {
-        index = gridSizedModel.listData!.indexWhere((gridModel) {
-          if (gridModel.title == i &&
-              (gridModel.videosPath?.isNotEmpty ?? false)) {
-            return true;
-          } else {
-            return false;
-          }
-        });
-      }
+    // for (String i in words) {
+    if (gridSizedModel.listData != null) {
+      index = gridSizedModel.listData!.indexWhere((gridModel) {
+        if (gridModel.title?.toLowerCase() == w.toLowerCase() &&
+            (gridModel.videosPath?.isNotEmpty ?? false)) {
+          return true;
+        } else {
+          return false;
+        }
+      });
     }
+    // }
 
     return index;
   }

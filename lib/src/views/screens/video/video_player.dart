@@ -71,6 +71,7 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
     if (_mainDashBoard.speechToTextCheck) {
 // It will start the listening what the user says
       _mainDashBoard.startListening(context);
+      _mainDashBoard.isWatchingVideo = false;
     }
 
     if (mounted) {
@@ -97,6 +98,8 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
 // It will start the listening what the user says
       _mainDashBoard.startListening(context);
     }
+    _mainDashBoard.isWatchingVideo = false;
+
     _controller.dispose();
 
     super.dispose();
