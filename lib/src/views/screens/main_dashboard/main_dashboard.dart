@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/common/app_constants/app_strings.dart';
+import 'package:word_toob/src/common/app_constants/assets.dart';
 import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/dependency_inject.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/main_dashboard_grid.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/nav_bar.dart';
-import '../../../common/app_constants/general.dart';
-import '../../../source/models/grid_size_model.dart';
-import 'widget/button/edit.dart';
+import 'package:word_toob/src/common/app_constants/general.dart';
+import 'package:word_toob/src/source/models/grid_size_model.dart';
+import 'package:word_toob/src/views/screens/main_dashboard/widget/button/edit.dart';
 
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});

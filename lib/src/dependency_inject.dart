@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'package:word_toob/src/app_providers/app_setting_provider.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
@@ -14,8 +15,10 @@ import 'package:word_toob/src/source/repository/app_repository.dart';
 final GetIt sl = GetIt.instance;
 
 Future<void> setup() async {
+  // Get application documents directory for Isar database
   final dir = await getApplicationDocumentsDirectory();
 
+  // Initialize Isar database with required schemas
   final isar = await Isar.open(
     [GridSizedLocalSchema, GridLocalSchema],
     directory: dir.path,
@@ -23,30 +26,21 @@ Future<void> setup() async {
 
   printLog("[setup] **** App Settings Applied ****");
 
-// Providers
+  // Register providers
   sl.registerLazySingleton<AppSettingsProvider>(() => AppSettingsProvider());
   sl.registerLazySingleton<ContentProvider>(
-      () => ContentProvider(iAppRepository: sl()));
+    () => ContentProvider(iAppRepository: sl()),
+  );
   sl.registerLazySingleton<MainDashboardController>(
-      () => MainDashboardController());
+    () => MainDashboardController(),
+  );
 
+  // Register data layer
   sl.registerLazySingleton<LocalClient>(() => LocalClient(isar: isar));
-
   sl.registerLazySingleton<ILocalDataSource>(
-      () => LocalDataSource(localClient: sl()));
-
+    () => LocalDataSource(localClient: sl()),
+  );
   sl.registerLazySingleton<IAppRepository>(
-      () => AppRepository(localDataSource: sl()));
-
-  //         iAuthenticationLocalDataSource: sl()));
-  // sl.registerLazySingleton<AuthenticationProvider>(
-  //         () => AuthenticationProvider(iAuthenticationRepository: sl()));
-  // sl.registerLazySingleton<ContentProvider>(
-  //         () => ContentProvider(iAppRepository: sl()));
-
-  // dio.interceptors.addAll([
-  //   if(kDebugMode)
-  //     prettyLogger(),
-  //   AuthInterceptor(dio,sl(), sl()),
-  // ]);
+    () => AppRepository(localDataSource: sl()),
+  );
 }

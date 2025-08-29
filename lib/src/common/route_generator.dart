@@ -1,65 +1,43 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
+
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
 import 'package:word_toob/src/common/utils/navigation_animation.dart';
 import 'package:word_toob/src/views/screens/main_dashboard/main_dashboard.dart';
 import 'package:word_toob/src/views/screens/video/video_player.dart';
-// import 'package:responsive_framework/responsive_framework.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     log("Route -> ${settings.name}");
     final args = settings.arguments;
+
     switch (settings.name) {
       case RouteStrings.mainDashboardView:
         return MaterialPageRoute(
-            // builder: (_) => const ResponsiveWrap(child: MainDashboard()));
-            builder: (_) => const MainDashboard());
+          builder: (_) => const MainDashboard(),
+        );
+
       case RouteStrings.videoPlayer:
         return SwipeLeftAnimationRoute(
-            widget:
-                // ResponsiveWrap(child: VideoPlayerView(url: args as String)));
-                VideoPlayerView(url: args as String));
+          widget: VideoPlayerView(url: args as String),
+        );
+
       default:
         return _errorRoute();
     }
   }
 
   static Route<dynamic> _errorRoute() {
-    return MaterialPageRoute(builder: (_) {
-      return Scaffold(
+    return MaterialPageRoute(
+      builder: (_) => Scaffold(
         appBar: AppBar(
           title: const Text('Error'),
         ),
         body: const Center(
           child: Text('ERROR'),
         ),
-      );
-    });
+      ),
+    );
   }
 }
-
-// class ResponsiveWrap extends StatelessWidget {
-//   final Widget child;
-//   const ResponsiveWrap({super.key, required this.child});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaxWidthBox(
-//       maxWidth: 2000,
-//       // background: Container(color: Colors.red),
-
-//       child: ResponsiveScaledBox(
-//         width: ResponsiveValue<double>(context,
-//             defaultValue: 500,
-//             conditionalValues: [
-//               // const Condition.equals(name: MOBILE, value: 1000),
-//               const Condition.between(start: 400, end: 700, value: 700),
-//               const Condition.between(start: 700, end: 2000, value: 2000),
-//             ]).value,
-//         child:
-//             BouncingScrollWrapper.builder(context, child, dragWithMouse: true),
-//       ),
-//     );
-//   }
-// }

@@ -48,7 +48,7 @@ class CustomBottomSheetVideo extends StatelessWidget {
                             id: controller.gridSizedModel.id ?? -1,
                             itemIndex: index,
                             videosPath: controller.videos);
-                        await controller.setGridSizedModel(
+                        controller.setGridSizedModel(
                             contentProvider
                                 .allGridSizedModel[controller.gridIndex],
                             controller.gridIndex);

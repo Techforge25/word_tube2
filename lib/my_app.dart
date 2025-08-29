@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
 import 'package:word_toob/src/app_providers/app_setting_provider.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
@@ -9,7 +10,7 @@ import 'package:word_toob/src/common/app_constants/route_strings.dart';
 import 'package:word_toob/src/common/route_generator.dart';
 import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/dependency_inject.dart';
-import 'src/views/theme/app_theme.dart';
+import 'package:word_toob/src/views/theme/app_theme.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -19,20 +20,21 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // Dependency injection instances
+  final _appSettingsProvider = sl<AppSettingsProvider>();
+  final _mainDashboardController = sl<MainDashboardController>();
+  final _contentProvider = sl<ContentProvider>();
+
   @override
-  initState() {
+  void initState() {
+    super.initState();
+
+    // Set preferred orientations to landscape only
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-
-    super.initState();
   }
-
-  final _appSettingsProvider = sl<AppSettingsProvider>();
-  final _mainDashboardController = sl<MainDashboardController>();
-  final _contentProvider = sl<ContentProvider>();
-  // final _chatMessage = sl<ChatProvider>();
 
   @override
   Widget build(BuildContext context) {
@@ -45,26 +47,6 @@ class _MyAppState extends State<MyApp> {
       child: Consumer<AppSettingsProvider>(
         builder: (_, appSettings, child) => MaterialApp(
           debugShowCheckedModeBanner: false,
-          // builder: (context, child) => ResponsiveBreakpoints.builder(
-          //   child: child!,
-          //   breakpointsLandscape: [
-          //     const Breakpoint(start: 0, end: 450, name: MOBILE),
-          //     const Breakpoint(start: 451, end: 800, name: TABLET),
-          //     const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-          //     const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-          //   ],
-          //   landscapePlatforms: [
-          //     ResponsiveTargetPlatform.iOS,
-          //     ResponsiveTargetPlatform.android,
-          //   ],
-          //   breakpoints: [
-          //     const Breakpoint(start: 0, end: 750, name: MOBILE),
-          //     const Breakpoint(start: 451, end: 800, name: TABLET),
-          //     const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-          //     const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-          //   ],
-          // ),
-          // home: child,
           builder: (context, child) => child!,
           title: AppString.appName,
           theme: AppTheme.lightTheme,

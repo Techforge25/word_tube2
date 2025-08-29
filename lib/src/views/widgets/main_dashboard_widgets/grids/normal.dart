@@ -28,7 +28,6 @@ Widget basicGrid({
             hideImage: true,
           ),
           onTap: () {
-            // value.setItemOnEditState(index,context,title: "Happy",picture: MyAssets.happy );
             value.flutterTts.speak(grid.title ?? "");
 
             value.setItemOnEditState(
@@ -42,8 +41,6 @@ Widget basicGrid({
               gridIndex: value.gridIndex,
             );
 
-            //  value.setLottie();
-
             if (!value.editPressedYello) {
               if (grid.videosPath?.isNotEmpty ?? false) {
                 var rand = Random().nextInt(grid.videosPath?.length ?? 0 + 1);
@@ -56,12 +53,12 @@ Widget basicGrid({
                   arguments: grid.videosPath?[rand],
                 );
               } else {
-                dev.log("Error occured no item  ");
+                dev.log("Error occurred no item");
               }
             }
           },
           child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+              margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
               height: size,
               width: size,
               decoration: BoxDecoration(
@@ -91,7 +88,6 @@ Widget basicGrid({
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: AppColor.white,
-                                    // Adjust the font size if necessary
                                     fontWeight: FontWeight.bold,
                                     fontSize: fontSize,
                                   ),

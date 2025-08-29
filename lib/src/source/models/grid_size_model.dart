@@ -1,7 +1,9 @@
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/source/models/isar_collection/grid_sized_local.dart';
+
 import 'dart:developer' as dev;
 
+/// Model representing a grid with size dimensions, title, and list of grid items
 class GridSizeModel {
   int? id;
   late int duplicateCount;
@@ -23,14 +25,17 @@ class GridSizeModel {
     this.currentSelected = false,
   });
 
+  /// Hide the grid model
   void setHide() {
     hideModel = true;
   }
 
+  /// Show the grid model
   void showHide() {
     hideModel = false;
   }
 
+  /// Create a GridSizeModel from local storage data
   GridSizeModel.fromLocal(GridSizedLocal localDetails) {
     try {
       gridSizeX = localDetails.gridSizeX;
@@ -46,6 +51,7 @@ class GridSizeModel {
     }
   }
 
+  /// Convert GridSizeModel to JSON data
   Map<String, dynamic> toJson() {
     return {
       'id': id,
