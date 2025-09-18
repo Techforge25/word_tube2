@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_final_fields
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -11,6 +13,9 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/common/utils/app_utility.dart';
+import 'package:word_toob/src/common/utils/constant.dart';
+import 'package:word_toob/src/common/utils/hive_storage_helper.dart';
+import 'package:word_toob/src/dependency_inject.dart';
 import 'package:word_toob/src/func/device_check.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
@@ -24,6 +29,7 @@ class MainDashboardController extends ChangeNotifier {
 
   TextEditingController boradTitleController = TextEditingController();
 
+  final AudioPlayer _audioPlayer = AudioPlayer();
   int _gridSizeX = 1;
 
   int get gridSizeX => _gridSizeX;
@@ -291,10 +297,14 @@ class MainDashboardController extends ChangeNotifier {
         //     return false;
         //   }
         // }).toList();
+        var existingVoice = hiveStorage.getData(DBKey.voiceKey);
+        _currentVoice = existingVoice != null
+            ? jsonDecode(existingVoice)
+            : _voices
+                .where(
+                    (v) => (v['gender'] == 'female' && v['locale'] == 'en-US'))
+                .first;
 
-        _currentVoice = _voices
-            .where((v) => (v['gender'] == 'female' && v['locale'] == 'en-US'))
-            .first;
         setVoice(_currentVoice!);
 
         notifyListeners();
@@ -314,16 +324,18 @@ class MainDashboardController extends ChangeNotifier {
   Future<void> setVoice(Map voice) async {
     await _flutterTts
         .setVoice({"name": voice["name"], "locale": voice["locale"]});
+
+    hiveStorage.putData(DBKey.voiceKey, jsonEncode(voice));
   }
 
-  setGridSizedModel(GridSizeModel grid, int index) {
-    _gridSizedModel = grid;
-    _gridIndex = index;
+//   setGridSizedModel(GridSizeModel grid, int index) {
+//     _gridSizedModel = grid;
+//     _gridIndex = index;
 
-// setting the borad title so it can be change easily
-    boradTitleController.text = grid.title ?? '';
-    notifyListeners();
-  }
+// // setting the borad title so it can be change easily
+//     boradTitleController.text = grid.title ?? '';
+//     notifyListeners();
+//   }
 
   setLottie() {
     _lottie = true;
@@ -465,10 +477,25 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeVideosFromList(int index) {
+  void removeVideosFromList(int index, int gridIndex, int id, int itemIndex,
+      ContentProvider contentProvider) {
+    if (index < 0 || index >= _videos.length) return;
     dismissedVideos.add(_videos[index]);
     _videos.removeAt(index);
-    dev.log('$index');
+    if (_videos.isEmpty) {
+      dev.log("No videos left, will play only word sound.");
+    }
+
+    contentProvider.updateListDataItem(
+      id: id,
+      itemIndex: itemIndex,
+      videosPath: _videos,
+    );
+
+    setGridSizedModel(contentProvider.allGridSizedModel[gridIndex], gridIndex);
+
+    dev.log("Video removed at index $index, remaining: ${_videos.length}");
+
     notifyListeners();
   }
 
@@ -596,7 +623,10 @@ class MainDashboardController extends ChangeNotifier {
           .where((a) => a.hideImage == false && a.hidetitle == false)
           .toList();
 
-      int i = Random().nextInt(l.length - 1);
+      int i = 0;
+      if (l.length > 1) {
+        i = Random().nextInt(l.length);
+      }
       _randomListIndex = gridSizedModel.listData!.indexWhere((a) {
         if (a.title == l[i].title) return true;
         return false;
@@ -613,9 +643,19 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> playCorrectSound() async {
+    await _playSound("sounds/ding.flac");
+  }
+
   Future<void> speakForWrong() async {
-    await flutterTts.awaitSynthCompletion(true);
-    flutterTts.speak("Find $_targetFindWord");
+    // await flutterTts.awaitSynthCompletion(true);
+    // flutterTts.speak("Find $_targetFindWord");
+    await _playSound("sounds/error.wav");
+  }
+
+  Future<void> _playSound(String path) async {
+    await _audioPlayer.stop();
+    await _audioPlayer.play(AssetSource(path));
   }
 
   Future<void> setCurrentIndex() async {
@@ -638,6 +678,7 @@ class MainDashboardController extends ChangeNotifier {
 
   void setFindWordImage(bool value) {
     _findWordImage = value;
+
     notifyListeners();
   }
 
@@ -674,6 +715,145 @@ class MainDashboardController extends ChangeNotifier {
 
   setIsMobile() async {
     _isMobile = await DeviceCheck.isMobile();
+    notifyListeners();
+  }
+
+  //Ameer Code
+
+  // MainDashboardController class ke andar yeh method add karein ya existing logic ko update karein
+  Future<void> duplicateCurrentBoard(
+      ContentProvider contentProvider, BuildContext context) async {
+    if (_gridSizedModel.id == null) {
+      dev.log("No board selected to duplicate.", name: "Duplicate Board");
+      return;
+    }
+
+    GridSizeModel currentBoardToDuplicate = _gridSizedModel;
+    // Ensure `allGridSizedModel` is up-to-date from the database
+    await contentProvider.getAllGridSizeModel();
+
+    // Duplicate board ke liye ek unique title generate karein
+    String baseTitle = currentBoardToDuplicate.title?.split(' copy ').first ??
+        currentBoardToDuplicate.title ??
+        "New Board";
+    int highestCopyNumber = 0;
+
+    // Existing duplicates ko count karein taaki hum next copy number de sakein (e.g., "Board copy 1", "Board copy 2")
+    for (var board in contentProvider.allGridSizedModel) {
+      if (board.title?.startsWith(baseTitle) ?? false) {
+        final match = RegExp(r' copy (\d+)$').firstMatch(board.title ?? '');
+        if (match != null && match.group(1) != null) {
+          int? currentCopyNum = int.tryParse(match.group(1)!);
+          if (currentCopyNum != null && currentCopyNum > highestCopyNumber) {
+            highestCopyNumber = currentCopyNum;
+          }
+        } else if (board.title == baseTitle) {
+          // Original board jiska "copy" suffix nahi hai
+          highestCopyNumber = max(highestCopyNumber, 0);
+        }
+      }
+    }
+    int newCopyNumber = highestCopyNumber + 1;
+
+    String newBoardTitle = "$baseTitle copy $newCopyNumber";
+
+    // New duplicated board create karein
+    GridSizeModel newDuplicatedBoard = GridSizeModel(
+      currentSelected: true, // Naya board turant selected ho jaayega
+      duplicateCount: newCopyNumber,
+      // Deep copy `listData` taaki references share na hon
+      listData: currentBoardToDuplicate.listData
+          ?.map((item) => GridModel.fromJson(item.toJson()))
+          .toList(),
+      gridSizeY: currentBoardToDuplicate.gridSizeY,
+      gridSizeX: currentBoardToDuplicate.gridSizeX,
+      title: newBoardTitle,
+      hideModel: currentBoardToDuplicate.hideModel,
+      // Baaki saari properties ko bhi copy karein agar GridSizeModel ke constructor mein nahi hain
+    );
+
+    // 1. Naye board ko database mein save karein
+    await contentProvider.saveGridSizedModel(
+        gridSizedModel: newDuplicatedBoard);
+
+    // 2. Refresh the list of all boards from the database to get the ID of the newly saved board
+    await contentProvider.getAllGridSizeModel();
+
+    GridSizeModel? savedNewBoard;
+    int? savedNewBoardIndex;
+
+    // Naye save kiye gaye board ko `allGridSizedModel` mein find karein
+    // Iske liye hum title ka use kar rahe hain, assumption hai ki save hone ke baad title unique hoga
+    for (int i = 0; i < contentProvider.allGridSizedModel.length; i++) {
+      if (contentProvider.allGridSizedModel[i].title == newBoardTitle &&
+          contentProvider.allGridSizedModel[i].id !=
+              currentBoardToDuplicate.id) {
+        savedNewBoard = contentProvider.allGridSizedModel[i];
+        savedNewBoardIndex = i;
+        break;
+      }
+    }
+
+    if (savedNewBoard != null && savedNewBoardIndex != null) {
+      // 3. Database mein sabhi boards ki `currentSelected` status ko update karein.
+      // Sirf naya duplicated board selected hoga, baaki sab unselected.
+      for (int i = 0; i < contentProvider.allGridSizedModel.length; i++) {
+        bool shouldBeSelected =
+            (contentProvider.allGridSizedModel[i].id == savedNewBoard.id);
+        if (contentProvider.allGridSizedModel[i].currentSelected !=
+            shouldBeSelected) {
+          await contentProvider.updateGridSizeModelData(
+            id: contentProvider.allGridSizedModel[i].id!,
+            currentSelected: shouldBeSelected,
+          );
+        }
+      }
+
+      // 4. Update kiye gaye `currentSelected` flags ke baad `allGridSizedModel` ko phir se database se refresh karein.
+      await contentProvider.getAllGridSizeModel();
+
+      // 5. `MainDashboardController` ki internal state ko naye duplicated board par update karein
+      _gridSizedModel = savedNewBoard;
+      _gridIndex = savedNewBoardIndex;
+      boradTitleController.text = _gridSizedModel.title ??
+          ''; // Rename field mein naya title pre-fill karein
+      setEdit(true); // Edit mode ko activate karein taaki user rename kar sake
+      notifyListeners(); // UI ko update karne ke liye notify karein
+    } else {
+      dev.log(
+          "Failed to locate the newly duplicated board after saving and refreshing.",
+          name: "Duplicate Board Error");
+      // User ko error message dikhane ka option
+    }
+  }
+
+  setGridSizedModel(GridSizeModel grid, int index) async {
+    final _contentProvider =
+        sl<ContentProvider>(); // Make sure ContentProvider is accessible
+
+    // Purane selected board ko unselect karein agar woh naye selected board se alag hai
+    if (_gridSizedModel.id != null && _gridSizedModel.id != grid.id) {
+      if (_gridSizedModel.currentSelected == true) {
+        await _contentProvider.updateGridSizeModelData(
+          id: _gridSizedModel.id!,
+          currentSelected: false,
+        );
+      }
+    }
+
+    // Naye selected board ko select karein agar woh already selected nahi hai
+    if (grid.currentSelected == false) {
+      await _contentProvider.updateGridSizeModelData(
+        id: grid.id!,
+        currentSelected: true,
+      );
+    }
+
+    // Local state update karein
+    _gridSizedModel = grid;
+    _gridIndex = index;
+    boradTitleController.text =
+        grid.title ?? ''; // Edit controller ko update karein
     notifyListeners();
   }
 }

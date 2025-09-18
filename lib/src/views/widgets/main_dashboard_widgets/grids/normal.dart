@@ -27,10 +27,10 @@ Widget basicGrid({
             hideTitle: true,
             hideImage: true,
           ),
-          onTap: () {
+          onTap: () async {
             // value.setItemOnEditState(index,context,title: "Happy",picture: MyAssets.happy );
-            value.flutterTts.speak(grid.title ?? "");
-
+            await value.flutterTts.speak(grid.title ?? "");
+            await Future.delayed(Duration(milliseconds: 300));
             value.setItemOnEditState(
               hide: grid.hidetitle ?? false,
               index,

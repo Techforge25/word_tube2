@@ -2,6 +2,7 @@
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/app_setting_provider.dart';
 import 'package:word_toob/src/common/app_constants/assets.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
@@ -52,6 +53,41 @@ class ContentProvider extends ChangeNotifier {
     {"name": "Surprised", "image": MyAssets.surprised},
   ];
   List<Map<String, dynamic>> get imagePathsPreLoad => _imagePathsPreLoad;
+  Future<void> addVideoToGridItem({
+    required int gridSizeModelId,
+    required int itemIndex,
+    required String videoPath,
+  }) async {
+    GridSizeModel? parentGrid = allGridSizedModel
+        .firstWhereOrNull((element) => element.id == gridSizeModelId);
+
+    if (parentGrid != null &&
+        parentGrid.listData != null &&
+        itemIndex < parentGrid.listData!.length) {
+      GridModel gridItemToUpdate = parentGrid.listData![itemIndex];
+
+      gridItemToUpdate.videosPath ??= [];
+      gridItemToUpdate.videosPath!.add(videoPath);
+
+      dev.log(
+          "Adding video: $videoPath to GridItem at index $itemIndex on board $gridSizeModelId",
+          name: 'ContentProvider');
+
+      await updateGridSizeModelData(
+        id: gridSizeModelId,
+        listData: parentGrid.listData, // Pass the updated listData
+      );
+
+      // updateGridSizeModelData already calls getAllGridSizeModel(),
+      // so `allGridSizedModel` will be refreshed automatically.
+      // And `notifyListeners()` is also called within updateGridSizeModelData.
+    } else {
+      dev.log(
+          "Error: Parent GridSizeModel (ID: $gridSizeModelId) or GridItem (Index: $itemIndex) not found for adding video.",
+          name: 'ContentProvider');
+      // Optionally, throw an exception or return a specific error code
+    }
+  }
 
   Future getAllGridSizeModel() async {
     getAllGridSizeModelStatus = Status.loading;

@@ -249,11 +249,13 @@ class _EditPopOverState extends State<EditPopOver> {
                                 children: List.generate(
                                     mainDashboardController
                                         .visibleVideos.length, (index) {
+                                  dev.log(
+                                      "method called video length: ${mainDashboardController.visibleVideos.length}");
                                   final video = mainDashboardController
                                       .visibleVideos[index];
                                   if (mainDashboardController.isEditPressed) {
                                     return Slidable(
-                                      key: Key(index.toString()),
+                                      key: ValueKey(video),
                                       // Use a unique key for each item, such as a video ID or index
                                       // direction: DismissDirection
                                       //     .startToEnd, // Swipe direction
@@ -271,14 +273,29 @@ class _EditPopOverState extends State<EditPopOver> {
                                       endActionPane: ActionPane(
                                         motion: const ScrollMotion(),
                                         dismissible:
-                                            DismissiblePane(onDismissed: () {}),
+                                            DismissiblePane(onDismissed: () {
+                                          mainDashboardController
+                                              .removeVideosFromList(
+                                            index,
+                                            widget.gridIndex,
+                                            widget.id,
+                                            widget.index,
+                                            contentProvider,
+                                          );
+                                        }),
                                         extentRatio: 0.25,
                                         children: [
                                           SlidableAction(
                                             onPressed: (context) {
                                               // Handle the removal of the video
                                               mainDashboardController
-                                                  .removeVideosFromList(index);
+                                                  .removeVideosFromList(
+                                                index,
+                                                widget.gridIndex,
+                                                widget.id,
+                                                widget.index,
+                                                contentProvider,
+                                              );
                                             },
                                             backgroundColor: Color(0xFFFE4A49),
                                             foregroundColor: Colors.white,
@@ -293,7 +310,13 @@ class _EditPopOverState extends State<EditPopOver> {
                                             .isEditPressed,
                                         onTapRemove: () =>
                                             mainDashboardController
-                                                .removeVideosFromList(index),
+                                                .removeVideosFromList(
+                                          index,
+                                          widget.gridIndex,
+                                          widget.id,
+                                          widget.index,
+                                          contentProvider,
+                                        ),
                                         video: video,
                                         onTap: () => Navigator.pushNamed(
                                           context,
@@ -307,7 +330,13 @@ class _EditPopOverState extends State<EditPopOver> {
                                       isEditPressed:
                                           mainDashboardController.isEditPressed,
                                       onTapRemove: () => mainDashboardController
-                                          .removeVideosFromList(index),
+                                          .removeVideosFromList(
+                                        index,
+                                        widget.gridIndex,
+                                        widget.id,
+                                        widget.index,
+                                        contentProvider,
+                                      ),
                                       video: video,
                                       onTap: () => Navigator.pushNamed(
                                         context,

@@ -12,7 +12,11 @@ Widget mainBoardList({
   required MainDashboardController value,
   required ContentProvider contentProvider,
   required double fontSize,
-  required void Function(String title, int index, GridModel grid) onTap,
+  required void Function(
+    String title,
+    int index,
+    GridModel grid,
+  ) onTap,
 }) {
   int gridSizeX = value.gridSizedModel.gridSizeX ?? 1;
   int gridSizeY = value.gridSizedModel.gridSizeY ?? 1;

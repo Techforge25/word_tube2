@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -148,12 +149,17 @@ abstract class AppUtility {
   static Future<XFile?> imageFromCamera() async {
     var image = await ImagePicker()
         .pickImage(source: ImageSource.camera, imageQuality: 40);
+    if (image != null) {
+      await GallerySaver.saveImage(image.path);
+      dev.log("image saved to gallery: ${image.path}");
+    }
     return image;
   }
 
   static Future<XFile?> imageFromGallery() async {
     var image = await ImagePicker()
         .pickImage(source: ImageSource.gallery, imageQuality: 30);
+
     return image;
   }
 
@@ -255,6 +261,10 @@ abstract class AppUtility {
   static Future<XFile?> videoFromCamera() async {
     try {
       final video = await ImagePicker().pickVideo(source: ImageSource.camera);
+      if (video != null) {
+        await GallerySaver.saveVideo(video.path);
+        dev.log("Video saved to gallery: ${video.path}");
+      }
       return video;
     } on PlatformException catch (e) {
       if (e.code == 'camera_access_denied' || e.code == 'photo_access_denied') {
@@ -275,6 +285,10 @@ abstract class AppUtility {
           try {
             final video =
                 await ImagePicker().pickVideo(source: ImageSource.camera);
+            if (video != null) {
+              await GallerySaver.saveVideo(video.path);
+              dev.log("Video saved to gallery: ${video.path}");
+            }
             return video;
           } catch (e) {
             printLog("Error on retry: $e");
@@ -293,7 +307,7 @@ abstract class AppUtility {
 
   static Future<XFile?> videoFromGallery() async {
     var video = await ImagePicker().pickVideo(source: ImageSource.gallery);
-    dev.log(video!.path);
+
     return video;
   }
 
@@ -898,8 +912,8 @@ abstract class AppUtility {
                   Expanded(
                     child: ListView(
                       children: list.asMap().entries.map((entry) {
-                        int index = entry.key; // The index
-                        var item = entry.value; // The item
+                        int index = entry.key;
+                        var item = entry.value;
 
                         return TextButton(
                           onPressed: () async {

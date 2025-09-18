@@ -139,9 +139,14 @@ class _MainDashboardState extends State<MainDashboard> {
       },
       {
         "name": "Duplicate Board",
-        "onTap": () => _contentProvider.saveGridSizedModel(
-              gridSizedModel: _mainDashBoard.duplicateGridSizedModel,
-            )
+        "onTap": () async {
+          // _contentProvider.saveGridSizedModel(
+          //   gridSizedModel: _mainDashBoard.duplicateGridSizedModel,
+          // );
+          // _mainDashBoard.setEdit(true);
+
+          await _mainDashBoard.duplicateCurrentBoard(_contentProvider, context);
+        }
       }
     ];
 

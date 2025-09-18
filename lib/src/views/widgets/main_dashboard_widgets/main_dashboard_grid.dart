@@ -37,12 +37,13 @@ class _GridViewWidgetState extends State<GridViewWidget>
 
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: Duration(milliseconds: 600),
     );
 
-    _animation = Tween<double>(begin: 0.1, end: 0.5).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.1,
+      end: 0.5,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -52,53 +53,94 @@ class _GridViewWidgetState extends State<GridViewWidget>
     super.dispose();
   }
 
-  // Define the function that triggers the animation
+  // // Define the function that triggers the animation
+  // void _onImageTap(String image) {
+  //   widget.value.setFindWordImagePath(image);
+  //   _controller.reset();
+  //   _controller.forward();
+  //   Future.delayed(const Duration(milliseconds: 1500), () async {
+  //     widget.value.setFindWordImage(false);
+
+  //     if (widget.value.foundSuccess) {
+  //       widget.value.clearFindTheWrongList();
+  //       widget.value.setFoundSuccess(false);
+  //     } else {
+  //       widget.value.speakForWrong();
+  //     }
+  //   });
+  // }
+
   void _onImageTap(String image) {
     widget.value.setFindWordImagePath(image);
     _controller.reset();
     _controller.forward();
-    Future.delayed(const Duration(seconds: 5), () async {
+
+    if (widget.value.foundSuccess) {
+      widget.value.playCorrectSound();
+    } else {
+      widget.value.speakForWrong();
+    }
+
+    // Thodi der baad image ko hide kar do
+    Future.delayed(const Duration(milliseconds: 1500), () async {
       widget.value.setFindWordImage(false);
 
       if (widget.value.foundSuccess) {
         widget.value.clearFindTheWrongList();
         widget.value.setFoundSuccess(false);
-      } else {
-        widget.value.speakForWrong();
       }
     });
   }
 
+  bool isGridTapped = false;
   Future<void> _onGridTap(String title, int index, GridModel grid) async {
+    if (isGridTapped) return; // Prevent multiple taps
+    isGridTapped = true;
+
+    if (widget.value.findTheWordWrongList.contains(index)) {
+      isGridTapped = false;
+      return;
+    }
+    if (title == "null" || title.isEmpty) {
+      isGridTapped = false;
+      return;
+    }
+
     if (widget.value.targetFindWord == title) {
-      await widget.value.flutterTts.speak(title);
       widget.value.setFindWordImage(true);
       widget.value.setFoundSuccess(true);
       _onImageTap(MyAssets.correct);
-
-      Future.delayed(Duration(milliseconds: 3500), () {
-        // Show video in playing mode correct guessing
+      Future.delayed(const Duration(milliseconds: 1700), () async {
         if (!widget.value.editPressedYello) {
           if (grid.videosPath?.isNotEmpty ?? false) {
-            var rand = Random().nextInt(grid.videosPath?.length ?? 0 + 1);
+            var rand = Random().nextInt(grid.videosPath!.length);
 
-            dev.log(grid.videosPath!.length.toString());
+            await widget.value.flutterTts.speak(title);
+
             Navigator.pushNamed(
-              // ignore: use_build_context_synchronously
               context,
               RouteStrings.videoPlayer,
               arguments: grid.videosPath?[rand],
-            );
+            ).then((_) {
+              if (widget.value.findTheWord) {
+                widget.value.setRandomIndex();
+              }
+            });
           } else {
-            dev.log("Error occured no item  ");
+            dev.log("Error: No video found");
+            // Sirf word bolo agar video hi nahi hai
+            await widget.value.flutterTts.speak(title);
             widget.value.setRandomIndex();
           }
         }
+        isGridTapped = false;
       });
     } else {
+      // ❌ Wrong case
       widget.value.setFindTheWordWrongList(index);
       widget.value.setFindWordImage(true);
       _onImageTap(MyAssets.wrong);
+      isGridTapped = false;
     }
   }
 
@@ -164,12 +206,12 @@ class _GridViewWidgetState extends State<GridViewWidget>
             Align(
               alignment: Alignment.center,
               child: ScaleTransition(
-// Scale value for zoom
+                // Scale value for zoom
                 scale: _animation,
                 child: Image.asset(
                   widget.value.findWordImagePath,
-                  width: 200,
-                  height: 200,
+                  width: 400,
+                  height: 400,
                 ),
               ),
             ),

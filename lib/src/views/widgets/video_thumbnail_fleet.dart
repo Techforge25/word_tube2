@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_returning_null_for_void
 
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_utils/get_utils.dart';
@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import 'dart:developer' as dev;
+import 'package:path/path.dart' as p;
 
 class ImageUploadWidget extends StatefulWidget {
   final File image;
@@ -114,42 +115,146 @@ class VideoUploadWidget extends StatefulWidget {
 }
 
 class _VideoUploadWidgetState extends State<VideoUploadWidget> {
-  Uint8List? generatedFile;
+  Uint8List? generatedThumbnailData;
   bool isLoading = true;
-  setLoading(bool loading) {
-    setState(() {
-      isLoading = loading;
-    });
+  void setLoading(bool loading) {
+    if (mounted) {
+      setState(() {
+        isLoading = loading;
+      });
+    }
   }
 
-  // ignore: unused_element
-  Future<void> _generateThumbnail(File file) async {
-    final directory = await getApplicationDocumentsDirectory();
+  Future<void> _generateThumbnail({File? file, String? assetPath}) async {
     try {
-      dev.log('exists ${file.existsSync()}');
+      String? videoPath;
 
-      dev.log('tempPath ${directory.path}');
-      var imageData = await VideoThumbnail.thumbnailData(
-        video: file.path,
+      if (file != null) {
+        // Case 1: Direct file (gallery/camera)
+        dev.log("Using file path: ${file.path}");
+        videoPath = file.path;
+      } else if (assetPath != null) {
+        // Case 2: Asset file → copy to temp directory first
+        dev.log("Using asset path: $assetPath");
+
+        final tempDir = await getTemporaryDirectory();
+        final tempVideo = File('${tempDir.path}/temp_asset_video.mov');
+
+        final byteData = await rootBundle.load(assetPath);
+        await tempVideo.writeAsBytes(
+          byteData.buffer.asUint8List(),
+          flush: true,
+        );
+
+        videoPath = tempVideo.path;
+      }
+
+      if (videoPath == null) {
+        dev.log("No valid video source provided!");
+        return;
+      }
+
+      // Generate thumbnail
+      final imageData = await VideoThumbnail.thumbnailData(
+        video: videoPath,
         imageFormat: ImageFormat.PNG,
         maxWidth: 256,
         maxHeight: 256,
         quality: 50,
       );
 
-      dev.log('$imageData');
       if (imageData != null) {
-        setState(() {
-          generatedFile = imageData;
-        });
+        generatedThumbnailData = imageData;
+        dev.log("Thumbnail generated successfully ✅");
+      } else {
+        dev.log("Thumbnail generation failed ❌");
       }
     } catch (e) {
-      dev.log('$e');
-      // eventBus.fire(showToast(CommonUtils.getLocale(null).noThumbnail));
-      return null;
+      dev.log("Thumbnail error: $e");
     }
   }
 
+  Future<void> _generateAndSetThumbnail() async {
+    setLoading(true);
+
+    if (widget.video.isEmpty) {
+      dev.log('Video path is empty, cannot generate thumbnail.',
+          name: 'VideoUploadWidget');
+      setLoading(false);
+      return;
+    }
+
+    String videoPathToThumbnail = widget.video;
+    bool isAsset = widget.video.startsWith('assets/');
+
+    if (isAsset) {
+      try {
+        final ByteData data = await rootBundle.load(widget.video);
+        final List<int> bytes = data.buffer.asUint8List();
+        final Directory tempDir = await getTemporaryDirectory();
+
+        final String tempFileName =
+            p.join(tempDir.path, p.basename(widget.video));
+        final File tempFile = File(tempFileName);
+        await tempFile.writeAsBytes(bytes);
+        videoPathToThumbnail = tempFile.path;
+        dev.log('Asset copied to temporary file: $videoPathToThumbnail',
+            name: 'VideoUploadWidget');
+      } catch (e) {
+        dev.log('Error copying asset to temporary file: $e',
+            name: 'VideoUploadWidget');
+        setLoading(false);
+        return;
+      }
+    } else {
+      File videoFile = File(widget.video);
+      if (!await videoFile.exists()) {
+        dev.log('Video file does not exist at path: ${widget.video}',
+            name: 'VideoUploadWidget');
+        setLoading(false);
+        return;
+      }
+      videoPathToThumbnail = videoFile.path; // Device file ka path hi use hoga
+    }
+
+    try {
+      final Directory tempDirForThumb =
+          await getTemporaryDirectory(); // Thumbnail ke liye bhi temp dir
+      final String? thumbnailPath = await VideoThumbnail.thumbnailFile(
+        video:
+            videoPathToThumbnail, // Ab hum correct path use kar rahe hain (device file ya temp asset file)
+        thumbnailPath: tempDirForThumb.path,
+        imageFormat: ImageFormat.PNG,
+        maxWidth: 256,
+        maxHeight: 256,
+        quality: 50,
+      );
+
+      if (thumbnailPath != null) {
+        generatedThumbnailData = await File(thumbnailPath).readAsBytes();
+        dev.log('Thumbnail generated successfully for: ${widget.video}',
+            name: 'VideoUploadWidget');
+      } else {
+        dev.log('Failed to generate thumbnail for: ${widget.video}',
+            name: 'VideoUploadWidget');
+      }
+    } catch (e) {
+      dev.log('Error generating thumbnail: $e', name: 'VideoUploadWidget');
+    } finally {
+      // Clean up temporary asset file if it was created
+      if (isAsset && videoPathToThumbnail != widget.video) {
+        try {
+          await File(videoPathToThumbnail).delete();
+          dev.log('Temporary asset file deleted: $videoPathToThumbnail',
+              name: 'VideoUploadWidget');
+        } catch (e) {
+          dev.log('Error deleting temporary asset file: $e',
+              name: 'VideoUploadWidget');
+        }
+      }
+      setLoading(false);
+    }
+  }
   // Future generateThumbnail() async {
   //    Directory dir = await getApplicationCacheDirectory();
   //     var fileName = await VideoThumbnail.thumbnailData(
@@ -175,8 +280,11 @@ class _VideoUploadWidgetState extends State<VideoUploadWidget> {
 
   @override
   void initState() {
-    // Future.microtask(()=> _generateThumbnail(File(widget.video)));
+    // Future.microtask(() => _generateThumbnail(File(widget.video)));
+
     super.initState();
+    _generateAndSetThumbnail();
+    // _generateThumbnail(assetPath: (widget.video));
   }
 
   @override
@@ -220,23 +328,48 @@ class _VideoUploadWidgetState extends State<VideoUploadWidget> {
               Expanded(
                 child: Container(
                   height: context.height * 0.4,
+                  margin: EdgeInsets.symmetric(vertical: 2),
                   decoration: BoxDecoration(
                     border: Border.all(
                         color: AppColor.borderColor3.withOpacity(0.7)),
                     borderRadius: BorderRadius.circular(5),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(6),
                     child: Stack(
+                      fit: StackFit.expand,
                       children: [
-                        Container(
-                          color: Colors.black,
-                        ),
+                        if (isLoading)
+                          Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                                child: CircularProgressIndicator()),
+                          )
+                        else if (generatedThumbnailData != null)
+                          Image.memory(
+                            generatedThumbnailData!,
+                            fit: BoxFit.cover,
+                          )
+                        else
+                          Container(
+                            color: Colors.black,
+                            child: Center(
+                              child: Icon(
+                                Icons.videocam_off, // No video icon
+                                color: Colors.grey[400],
+                                size: 40,
+                              ),
+                            ),
+                          ),
                         const Positioned.fill(
+                          child: Center(
                             child: Icon(
-                          Icons.play_circle,
-                          size: 30,
-                        ))
+                              Icons.play_circle_fill,
+                              size: 40,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
