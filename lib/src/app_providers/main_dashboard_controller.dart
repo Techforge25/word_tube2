@@ -85,6 +85,14 @@ class MainDashboardController extends ChangeNotifier {
   String _findWordImagePath = "";
   String get findWordImagePath => _findWordImagePath;
 
+  bool _isTapped = false;
+  bool get isTapped => _isTapped;
+
+  void setIsTapped(bool value) {
+    _isTapped = value;
+    notifyListeners();
+  }
+
   int _randomListIndex = 0;
   int get randomListIndex => _randomListIndex;
 
@@ -160,8 +168,9 @@ class MainDashboardController extends ChangeNotifier {
       await speechToText.listen(
         onResult: (result) {
           dev.log(result.recognizedWords);
-
-          onSpeechResult(result, context);
+          if (_speechToTextCheck) {
+            onSpeechResult(result, context);
+          }
         },
         listenFor: Duration(hours: 50),
         onSoundLevelChange: (level) {
@@ -208,6 +217,10 @@ class MainDashboardController extends ChangeNotifier {
       GridModel matchedModel = gridSizedModel.listData?[index] ?? GridModel();
       // Log the matched path
       dev.log("Matched video paths: ${matchedModel.videosPath}");
+
+      if (matchedModel.title != null) {
+        await flutterTts.speak(matchedModel.title!);
+      }
 
       if (matchedModel.videosPath != null &&
           matchedModel.videosPath!.isNotEmpty) {
@@ -620,8 +633,16 @@ class MainDashboardController extends ChangeNotifier {
   Future<void> setRandomIndex() async {
     if (gridSizedModel.listData != null) {
       List<GridModel> l = gridSizedModel.listData!
-          .where((a) => a.hideImage == false && a.hidetitle == false)
+          .where((a) =>
+              a.hideImage == false &&
+              a.hidetitle == false &&
+              (a.title?.isNotEmpty ?? false))
           .toList();
+
+      if (l.isEmpty) {
+        dev.log("No valid items found in gridSizedModel.listData");
+        return;
+      }
 
       int i = 0;
       if (l.length > 1) {
@@ -857,3 +878,70 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+/*Future<void> initTextToSpeech() async {
+    await flutterTts.setSharedInstance(true);
+    flutterTts.setVolume(1.0);
+    flutterTts.setPitch(1.0);
+    await flutterTts.setLanguage("en-US");
+
+    _flutterTts.setProgressHandler((text, start, end, word) {
+      _currentWordStart = start;
+      _currentWordEnd = end;
+      notifyListeners();
+    });
+    _flutterTts.getVoices.then((data) {
+      try {
+        List<Map> voices = List<Map>.from(data);
+        voices.removeWhere((voice) => voice['name'] == 'Zoe');
+
+        Map<String, List<Map>> groupedVoices = {};
+        for (var voice in voices) {
+          if (voice['gender'] != 'unspecified') {
+            String locale = voice['locale'];
+            if (!groupedVoices.containsKey(locale)) {
+              groupedVoices[locale] = [];
+            }
+            groupedVoices[locale]!.add(voice);
+          }
+        }
+
+        List<Map> filteredVoices = [];
+        groupedVoices.forEach((locale, voiceList) {
+          Map? maleVoice;
+          Map? femaleVoice;
+
+          for (var voice in voiceList) {
+            if (voice['gender'] == 'male' && maleVoice == null) {
+              maleVoice = voice;
+            } else if (voice['gender'] == 'female' && femaleVoice == null) {
+              femaleVoice = voice;
+            }
+          }
+
+          if (maleVoice != null) {
+            filteredVoices.add(maleVoice);
+          }
+          if (femaleVoice != null) {
+            filteredVoices.add(femaleVoice);
+          }
+        });
+
+        _voices = filteredVoices;
+
+        var existingVoice = hiveStorage.getData(DBKey.voiceKey);
+        _currentVoice = existingVoice != null
+            ? jsonDecode(existingVoice)
+            : _voices.firstWhere(
+                (v) => v['name'] == 'Nikki',
+                orElse: () => _voices.first,
+              );
+
+        setVoice(_currentVoice!);
+
+        notifyListeners();
+      } catch (e) {
+        dev.log('$e', name: 'Voice TTS Error');
+      }
+    });
+  }*/

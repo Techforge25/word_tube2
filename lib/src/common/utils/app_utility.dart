@@ -15,6 +15,8 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
@@ -161,6 +163,14 @@ abstract class AppUtility {
         .pickImage(source: ImageSource.gallery, imageQuality: 30);
 
     return image;
+  }
+
+  static Future<File> saveImagePermanently(File imageFile) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final name = path.basename(imageFile.path);
+    final image = File('${directory.path}/$name');
+
+    return File(imageFile.path).copy(image.path);
   }
 
   static Future<XFile?> pickImage(BuildContext context) async {
@@ -924,7 +934,8 @@ abstract class AppUtility {
                               gridSizeY: item.gridSizeY,
                               listData: List.generate(
                                 item.listData?.length ?? 0,
-                                (i) => GridModel(),
+                                (i) => GridModel(
+                                    hideImage: false, hidetitle: false),
                               ),
                             );
 
@@ -1175,10 +1186,6 @@ Future<bool> checkInternetConnection() async {
   return false;
 }
 
-
-
-
-
 // class RatingBuilderWidget extends StatelessWidget {
 //   const RatingBuilderWidget({
 //     super.key,
@@ -1214,4 +1221,3 @@ Future<bool> checkInternetConnection() async {
 //     );
 //   }
 // }
-

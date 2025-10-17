@@ -171,19 +171,31 @@ class _GridViewWidgetState extends State<GridViewWidget>
               const Gap(5),
               Visibility(
                 visible: widget.value.findTheWord,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Find '${widget.value.gridSizedModel.listData?[widget.value.randomListIndex].title}'",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColor.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: fontSize + 4,
-                        ),
-                  ),
+                child: Column(
+                  children: [
+                    Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          (widget
+                                      .value
+                                      .gridSizedModel
+                                      .listData?[widget.value.randomListIndex]
+                                      .title ==
+                                  null)
+                              ? "No items available. Please add items first."
+                              : "Find '${widget.value.gridSizedModel.listData![widget.value.randomListIndex].title}'",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                  color: AppColor.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontSize),
+                        )),
+                    const Gap(5),
+                  ],
                 ),
               ),
-              const Gap(5),
               Expanded(
                 child: widget.value.isMobile
                     ? gridBoard(

@@ -133,7 +133,7 @@ class _MyAppState extends State<MyApp> {
           //     const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
           //   ],
           // ),
-          // home: child,
+          // home: GridViewTestingPage1(),
           builder: (context, child) => child!,
           title: AppString.appName,
           theme: AppTheme.lightTheme,
@@ -145,5 +145,205 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+}
+
+// class GridViewTestingPage extends StatelessWidget {
+//   const GridViewTestingPage({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     const int itemCount = 84;
+
+//     final screenWidth = MediaQuery.of(context).size.width;
+//     final screenHeight = MediaQuery.of(context).size.height;
+
+//     // Landscape check (optional)
+//     final isLandscape = screenWidth > screenHeight;
+
+//     // Set desired item count and layout
+//     int crossAxisCount = 14; // Adjust as per width
+//     double itemSize = screenWidth / crossAxisCount;
+//     int rowCount = (itemCount / crossAxisCount).ceil();
+//     double gridHeight = itemSize * rowCount;
+
+//     return Scaffold(
+//       body: Center(
+//         child: SizedBox(
+//           height: gridHeight,
+//           width: screenWidth,
+//           child: GridView.builder(
+//             physics: const NeverScrollableScrollPhysics(), // Disable scroll
+//             itemCount: itemCount,
+//             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//               crossAxisCount: crossAxisCount,
+//               childAspectRatio: 1, // Square
+//             ),
+//             itemBuilder: (context, index) {
+//               return Container(
+//                 margin: const EdgeInsets.all(2),
+//                 decoration: BoxDecoration(
+//                   color: Colors.orange.shade100,
+//                   border: Border.all(color: Colors.orange.shade400),
+//                   borderRadius: BorderRadius.circular(6),
+//                 ),
+//                 child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
+//                     const Icon(Icons.apps, size: 20, color: Colors.black54),
+//                     const SizedBox(height: 4),
+//                     Text("Item ${index + 1}",
+//                         style: const TextStyle(fontSize: 10)),
+//                   ],
+//                 ),
+//               );
+//             },
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class GridViewTestingPage1 extends StatelessWidget {
+  const GridViewTestingPage1({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Dynamic Grid - Auto Adjust Squares")),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          const int itemCount = 60; // 👈 Try changing this value dynamically
+          final screenWidth = constraints.maxWidth;
+          final screenHeight = constraints.maxHeight;
+
+          // Try to find best crossAxisCount that keeps squares visible
+          int bestCrossAxisCount = 1;
+          double bestItemSize = screenWidth;
+
+          for (int i = 1; i <= itemCount; i++) {
+            double itemSize = screenWidth / i;
+            int rowCount = (itemCount / i).ceil();
+            double gridHeight = itemSize * rowCount;
+
+            if (gridHeight <= screenHeight) {
+              bestCrossAxisCount = i;
+              bestItemSize = itemSize;
+              break;
+            }
+          }
+
+          // If none fit, fallback to max possible
+          bestCrossAxisCount = bestCrossAxisCount.clamp(1, itemCount);
+
+          return Center(
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: itemCount,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: bestCrossAxisCount,
+                childAspectRatio: 1, // 👈 makes perfect square
+              ),
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100,
+                    border: Border.all(color: Colors.green.shade400),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.star, size: 20, color: Colors.black54),
+                      const SizedBox(height: 4),
+                      Text("Item ${index + 1}",
+                          style: const TextStyle(fontSize: 10)),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class GridViewTestingPage extends StatelessWidget {
+  const GridViewTestingPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(title: const Text("Dynamic Grid - 84 Items")),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            const int itemCount = 84;
+
+            final screenWidth = constraints.maxWidth;
+            final screenHeight = constraints.maxHeight;
+
+            // Define minimum item size (can tweak as needed)
+            const double minItemSize = 60;
+
+            // Dynamically calculate how many items can fit horizontally
+            int crossAxisCount = (screenWidth / minItemSize).floor();
+
+            // Recalculate actual item size based on exact fit
+            double itemSize = screenWidth / crossAxisCount;
+
+            // How many rows are needed?
+            int rowCount = (itemCount / crossAxisCount).ceil();
+
+            // Total grid height
+            double gridHeight = itemSize * rowCount;
+
+            // If gridHeight > screenHeight, reduce crossAxisCount until it fits
+            while (gridHeight > screenHeight && crossAxisCount < itemCount) {
+              crossAxisCount++;
+              itemSize = screenWidth / crossAxisCount;
+              rowCount = (itemCount / crossAxisCount).ceil();
+              gridHeight = itemSize * rowCount;
+            }
+
+            return Center(
+              child: SizedBox(
+                height: gridHeight,
+                width: screenWidth,
+                child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: itemCount,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio: 1,
+                  ),
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade100,
+                        border: Border.all(color: Colors.green.shade400),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.star,
+                              size: 20, color: Colors.black54),
+                          const SizedBox(height: 4),
+                          Text("Item ${index + 1}",
+                              style: const TextStyle(fontSize: 10)),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ));
   }
 }

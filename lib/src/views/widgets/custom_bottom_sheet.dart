@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
@@ -41,12 +43,15 @@ class CustomBottomSheet extends StatelessWidget {
                     onTap: () async {
                       var image = await AppUtility.imageFromCamera();
                       if (image != null) {
-                        controller.getImagePath(image.path);
+                        final permanentImage =
+                            await AppUtility.saveImagePermanently(
+                                File(image.path));
+                        controller.getImagePath(permanentImage.path);
 
                         await contentProvider.updateListDataItem(
                             id: controller.gridSizedModel.id ?? -1,
                             itemIndex: index,
-                            imagePath: image.path);
+                            imagePath: permanentImage.path);
 
                         controller.setGridSize(
                             contentProvider
@@ -79,10 +84,14 @@ class CustomBottomSheet extends StatelessWidget {
                     onTap: () async {
                       var image = await AppUtility.imageFromGallery();
                       if (image != null) {
-                        controller.getImagePath(image.path);
-                        controller.getImagePath(image.path);
+                        final permanentImage =
+                            await AppUtility.saveImagePermanently(
+                                File(image.path));
+                        controller.getImagePath(permanentImage.path);
                         await contentProvider.updateListDataItem(
-                            id: id, itemIndex: index, imagePath: image.path);
+                            id: id,
+                            itemIndex: index,
+                            imagePath: permanentImage.path);
 
                         controller.setGridSize(
                             contentProvider

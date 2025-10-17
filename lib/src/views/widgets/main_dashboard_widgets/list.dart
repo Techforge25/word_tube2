@@ -20,21 +20,31 @@ Widget mainBoardList({
 }) {
   int gridSizeX = value.gridSizedModel.gridSizeX ?? 1;
   int gridSizeY = value.gridSizedModel.gridSizeY ?? 1;
+  final List<GridModel> listData = value.gridSizedModel.listData ?? [];
+
+  final bool isEightyFour = (listData.length == 84) || (listData.length == 60);
 
   return LayoutBuilder(builder: (context, constraints) {
     double size = constraints.maxHeight;
+
+    // Debug print (optional)
+    debugPrint('GridX: $gridSizeX, GridY: $gridSizeY, Size: $size');
+
+    final int rowCount = isEightyFour ? gridSizeY : gridSizeX;
+    final int colCount = isEightyFour ? gridSizeX : gridSizeY;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: List.generate(
-        gridSizeX,
+        rowCount,
         (x) => Flexible(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: List.generate(gridSizeY, (y) {
+            children: List.generate(colCount, (y) {
               // to finalizing index
-              int index = x * gridSizeY + y;
+              int index = x * colCount + y;
               if (value.gridSizedModel.listData == null) {
                 return Container();
               }
@@ -69,6 +79,8 @@ Widget mainBoardList({
                             index: index,
                             fontSize: fontSize,
                             size: size,
+                            screenWidth: constraints.maxWidth,
+                            screenHeight: constraints.maxHeight,
                           ),
                         )
                       : Flexible(child: Container());
