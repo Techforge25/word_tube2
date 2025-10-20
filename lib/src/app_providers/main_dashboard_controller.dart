@@ -2,12 +2,15 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -876,6 +879,46 @@ class MainDashboardController extends ChangeNotifier {
     boradTitleController.text =
         grid.title ?? ''; // Edit controller ko update karein
     notifyListeners();
+  }
+
+  Future<void> shareCurrentBoard() async {
+    if (_gridSizedModel.title == null || _gridSizedModel.listData == null) {
+      // User ko message dikhayein ki board khali hai ya save nahi hai
+      dev.log("Cannot share an empty or unsaved board.");
+      return;
+    }
+
+    try {
+      // 1. GridSizeModel ko JSON string mein convert karein
+      final boardJson = jsonEncode(_gridSizedModel.toJson());
+
+      // 2. Ek temporary file banayein
+      final directory = await getTemporaryDirectory();
+      // File ka naam unique rakhein, jaise board ke title aur ek custom extension ke saath
+      // Custom extension (e.g., .wtcard) zaroori hai taaki iOS pehchan sake
+      final safeTitle =
+          _gridSizedModel.title!.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+      final filePath = '${directory.path}/$safeTitle.wtdata';
+      final file = File(filePath);
+
+      // 3. JSON data ko file mein likhein
+      await file.writeAsString(boardJson);
+
+      // 4. share_plus ka istemal karke file ko share karein
+      final result = await Share.shareXFiles(
+        [XFile(filePath)],
+        subject: 'Check out this board: ${_gridSizedModel.title}',
+        text: 'I created a board in Word Toob and wanted to share it with you!',
+      );
+
+      // Sharing ke result ko handle karein (optional)
+      if (result.status == ShareResultStatus.success) {
+        dev.log('Board shared successfully!');
+      }
+    } catch (e) {
+      dev.log('Error sharing board: $e');
+      // User ko error message dikhayein
+    }
   }
 }
 

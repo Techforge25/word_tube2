@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/views/screens/main_dashboard/widget/button/help.dart';
 import 'package:word_toob/src/views/screens/main_dashboard/widget/button/setting.dart';
@@ -61,6 +62,16 @@ class RightRow extends StatelessWidget {
                   fontSize: fontSize,
                 ),
           ),
+        ),
+        Gap(sizeWidth),
+        IconButton(
+          icon: Icon(Icons.share),
+          onPressed: () {
+            // Apne MainDashboardController ke instance se method call karein
+            // Yeh aap Provider, Riverpod, ya GetIt ke zariye access kar sakte hain
+            Provider.of<MainDashboardController>(context, listen: false)
+                .shareCurrentBoard();
+          },
         ),
         Gap(sizeWidth),
         SettingButton(
