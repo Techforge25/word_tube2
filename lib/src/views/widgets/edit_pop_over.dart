@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gap/gap.dart';
@@ -39,6 +40,13 @@ class _EditPopOverState extends State<EditPopOver> {
   @override
   void initState() {
     super.initState();
+    // Automatically enter edit mode when the pop-over is opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MainDashboardController>(context, listen: false)
+          .isEditPressedFun(true);
+      Provider.of<MainDashboardController>(context, listen: false)
+          .setEditTitleControllerText(widget.title);
+    });
   }
 
   @override
@@ -140,17 +148,34 @@ class _EditPopOverState extends State<EditPopOver> {
                                                 height: context.width * 0.25,
                                                 width: context.width * 0.25,
                                               )
-                                            : Image.file(
-                                                File(widget.picture),
+                                            : widget.picture.startsWith('http')
+                                                ? CachedNetworkImage(
+                                                    imageUrl: widget.picture,
+                                                    height:
+                                                        context.width * 0.25,
+                                                    width: context.width * 0.25,
+                                                  )
+                                                : Image.file(
+                                                    File(widget.picture),
+                                                    height:
+                                                        context.width * 0.25,
+                                                    width: context.width * 0.25,
+                                                  )
+                                        : mainDashboardController.imagePath
+                                                .startsWith('http')
+                                            ? CachedNetworkImage(
+                                                imageUrl:
+                                                    mainDashboardController
+                                                        .imagePath,
                                                 height: context.width * 0.25,
                                                 width: context.width * 0.25,
                                               )
-                                        : Image.file(
-                                            File(mainDashboardController
-                                                .imagePath),
-                                            height: context.width * 0.25,
-                                            width: context.width * 0.25,
-                                          ),
+                                            : Image.file(
+                                                File(mainDashboardController
+                                                    .imagePath),
+                                                height: context.width * 0.25,
+                                                width: context.width * 0.25,
+                                              ),
                               ),
                               const Gap(10),
                               Visibility(

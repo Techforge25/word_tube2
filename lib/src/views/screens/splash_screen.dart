@@ -1,77 +1,64 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
+import 'dart:math' show sqrt;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:word_toob/src/common/globals.dart' as globals;
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
+import 'package:word_toob/src/common/route_generator.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'dart:developer' as dev;
-import 'dart:math';
 
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/grids/normal.dart';
 
-class DispatcherScreen extends StatefulWidget {
-  const DispatcherScreen({super.key});
+class SplashScreen extends StatefulWidget {
+  final String? filePath;
+
+  const SplashScreen({super.key, this.filePath});
 
   @override
-  State<DispatcherScreen> createState() => _DispatcherScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _DispatcherScreenState extends State<DispatcherScreen> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _handleInitialIntent();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleInitialIntent();
+    });
   }
 
-  Future<void> _handleInitialIntent() async {
-    // Sirf us intent ko handle karein jis se app khuli hai (initial media)
-    final List<SharedMediaFile> initialMedia =
-        await ReceiveSharingIntent.instance.getInitialMedia();
+  _handleInitialIntent() async {
+    log('widget.filePath ${widget.filePath}');
 
-    if (initialMedia.isNotEmpty) {
-      final path = initialMedia.first.path;
-      dev.log("Dispatcher: Found initial media at $path");
-
-      if (path.endsWith('.wtdata')) {
-        try {
-          final file = File(path);
-          final jsonString = await file.readAsString();
-          final jsonData = jsonDecode(jsonString);
-          final boardData = GridSizeModel.fromJson(jsonData);
-          Get.put(MainDashboardController());
-
-          // Agar board sahi se parse ho gaya, to Preview Screen par bhej do
-          // `pushReplacement` ka istemal karein taaki user back karke is loading screen par na aaye
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => SharedBoardPreviewScreen(board: boardData)),
-            );
-          }
-          return; // Yahan se function khatam kar dein
-        } catch (e) {
-          dev.log("Dispatcher: Error handling initial file: $e");
-          // Agar koi error aaye, to normal dashboard par chale jao
-        }
-      }
+    if (widget.filePath != null && widget.filePath!.endsWith('.wtdata')) {
+      _navigateToBoardLoader(widget.filePath!);
+    } else {
+      Navigator.of(context)
+          .pushReplacementNamed(RouteStrings.mainDashboardView);
     }
+  }
 
-    // Agar koi shared file nahi hai, to normal dashboard par jao
-    dev.log("Dispatcher: No initial media found, navigating to dashboard.");
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, RouteStrings.mainDashboardView);
-    }
+  void _navigateToBoardLoader(String path) {
+    print('From Logs Dispatcher $path');
+
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => BoardLoaderScreen(filePath: path),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    // Yeh screen user ko zyada der nazar nahi aani chahiye
     return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),
@@ -106,6 +93,15 @@ class SharedBoardPreviewScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: Text('Board Preview: ${board.title ?? "Untitled"}'),
         actions: [
           TextButton(
@@ -116,13 +112,16 @@ class SharedBoardPreviewScreen extends StatelessWidget {
                 const SnackBar(content: Text('Board saved successfully!')),
               );
             },
-            child: const Text('Save'),
+            child: const Text(
+              'Save',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

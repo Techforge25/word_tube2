@@ -70,7 +70,7 @@ class RightRow extends StatelessWidget {
             // Apne MainDashboardController ke instance se method call karein
             // Yeh aap Provider, Riverpod, ya GetIt ke zariye access kar sakte hain
             Provider.of<MainDashboardController>(context, listen: false)
-                .shareCurrentBoard();
+                .shareCurrentBoard(context);
           },
         ),
         Gap(sizeWidth),

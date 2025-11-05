@@ -1,12 +1,14 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
 import 'package:word_toob/src/common/utils/navigation_animation.dart';
-import 'package:word_toob/src/views/screens/dispatcher_screen.dart';
-import 'package:word_toob/src/views/screens/main_dashboard/main_dashboard.dart';
+import 'package:word_toob/src/views/screens/splash_screen.dart';
+import 'package:word_toob/src/views/screens/main_dashboard/main_dashboard.dart'
+    hide SharedBoardPreviewScreen;
 import 'package:word_toob/src/views/screens/video/video_player.dart';
 // import 'package:responsive_framework/responsive_framework.dart';
-
+import 'package:path/path.dart' as p;
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -18,26 +20,31 @@ class RouteGenerator {
     log("Route -> ${settings.name}");
 
     if (settings.name != null && settings.name!.endsWith('.wtdata')) {
+      print('From Logs Router ${settings.name}');
       return MaterialPageRoute(
         builder: (_) => BoardLoaderScreen(filePath: settings.name!),
       );
-    }
-    final args = settings.arguments;
-    switch (settings.name) {
-      case RouteStrings
-            .dispatcher: // Aapko yeh string constants mein add karni hogi
-        return MaterialPageRoute(builder: (_) => const DispatcherScreen());
-      case RouteStrings.mainDashboardView:
-        return MaterialPageRoute(
-            // builder: (_) => const ResponsiveWrap(child: MainDashboard()));
-            builder: (_) => const MainDashboard());
-      case RouteStrings.videoPlayer:
-        return SwipeLeftAnimationRoute(
-            widget:
-                // ResponsiveWrap(child: VideoPlayerView(url: args as String)));
-                VideoPlayerView(url: args as String));
-      default:
-        return _errorRoute();
+    } else {
+      final args = settings.arguments;
+      switch (settings.name) {
+        case RouteStrings
+              .dispatcher: // Aapko yeh string constants mein add karni hogi
+          return MaterialPageRoute(
+              builder: (_) => SplashScreen(
+                    filePath: settings.name,
+                  ));
+        case RouteStrings.mainDashboardView:
+          return MaterialPageRoute(
+              // builder: (_) => const ResponsiveWrap(child: MainDashboard()));
+              builder: (_) => const MainDashboard());
+        case RouteStrings.videoPlayer:
+          return SwipeLeftAnimationRoute(
+              widget:
+                  // ResponsiveWrap(child: VideoPlayerView(url: args as String)));
+                  VideoPlayerView(url: args as String));
+        default:
+          return _errorRoute();
+      }
     }
   }
 
@@ -55,31 +62,6 @@ class RouteGenerator {
   }
 }
 
-// class ResponsiveWrap extends StatelessWidget {
-//   final Widget child;
-//   const ResponsiveWrap({super.key, required this.child});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaxWidthBox(
-//       maxWidth: 2000,
-//       // background: Container(color: Colors.red),
-
-//       child: ResponsiveScaledBox(
-//         width: ResponsiveValue<double>(context,
-//             defaultValue: 500,
-//             conditionalValues: [
-//               // const Condition.equals(name: MOBILE, value: 1000),
-//               const Condition.between(start: 400, end: 700, value: 700),
-//               const Condition.between(start: 700, end: 2000, value: 2000),
-//             ]).value,
-//         child:
-//             BouncingScrollWrapper.builder(context, child, dragWithMouse: true),
-//       ),
-//     );
-//   }
-// }
-
 class BoardLoaderScreen extends StatelessWidget {
   final String filePath;
 
@@ -89,6 +71,7 @@ class BoardLoaderScreen extends StatelessWidget {
   Future<GridSizeModel> _loadBoard() async {
     try {
       dev.log("BoardLoader: Loading board from $filePath");
+      print("BoardLoader: Loading board from $filePath");
       final file = File(filePath);
       final jsonString = await file.readAsString();
       if (jsonString.isEmpty) {
@@ -100,6 +83,41 @@ class BoardLoaderScreen extends StatelessWidget {
       dev.log("BoardLoader: Failed to load board.", error: e);
       // Error ko aage pass karein taaki FutureBuilder use handle kar sake
       throw Exception("Could not load the board. The file might be corrupted.");
+    }
+  }
+
+  Future<GridSizeModel> _copyAndLoadBoard() async {
+    try {
+      dev.log("BoardLoader: Received shared file path: $filePath");
+
+      final directory = await getApplicationDocumentsDirectory();
+      final String fileName = p.basename(filePath);
+      final String newPath = '${directory.path}/$fileName';
+      dev.log("BoardLoader: Creating new path at: $newPath");
+
+      // Path ko decode karke sahi file object banayein
+      final Uri uri = Uri.parse(filePath);
+      final File originalFile = File(uri.path);
+
+      dev.log(
+          "BoardLoader: File copied successfully!  ${originalFile.readAsLinesSync()}");
+
+      await originalFile.copy(newPath);
+      dev.log("BoardLoader: File copied successfully!");
+
+      final File copiedFile = File(newPath);
+      final jsonString = await copiedFile.readAsString();
+
+      if (jsonString.isEmpty) {
+        throw Exception("Shared file is empty after copying.");
+      }
+
+      final jsonData = jsonDecode(jsonString);
+      return GridSizeModel.fromJson(jsonData);
+    } catch (e) {
+      dev.log("BoardLoader: Failed to copy or load board.", error: e);
+      throw Exception(
+          "Could not load the board. The file might be corrupted or inaccessible.");
     }
   }
 

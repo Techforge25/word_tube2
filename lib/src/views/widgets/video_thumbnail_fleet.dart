@@ -185,9 +185,22 @@ class _VideoUploadWidgetState extends State<VideoUploadWidget> {
     }
 
     String videoPathToThumbnail = widget.video;
+    Uint8List? thumbnailBytes;
     bool isAsset = widget.video.startsWith('assets/');
+    bool isNetwork = widget.video.startsWith('http');
 
-    if (isAsset) {
+    if (isNetwork) {
+      // CASE 3: URL se video - DIRECT THUMBNAIL (Baghair download kiye)
+      dev.log('Generating thumbnail from network URL: ${widget.video}',
+          name: 'VideoUploadWidget');
+      thumbnailBytes = await VideoThumbnail.thumbnailData(
+        video: widget.video, // Library khud network se handle karegi
+        imageFormat: ImageFormat.PNG,
+        maxWidth: 256,
+        maxHeight: 256,
+        quality: 50,
+      );
+    } else if (isAsset) {
       try {
         final ByteData data = await rootBundle.load(widget.video);
         final List<int> bytes = data.buffer.asUint8List();
@@ -232,6 +245,10 @@ class _VideoUploadWidgetState extends State<VideoUploadWidget> {
 
       if (thumbnailPath != null) {
         generatedThumbnailData = await File(thumbnailPath).readAsBytes();
+        dev.log('Thumbnail generated successfully for: ${widget.video}',
+            name: 'VideoUploadWidget');
+      } else if (thumbnailBytes != null && thumbnailBytes.isNotEmpty) {
+        generatedThumbnailData = thumbnailBytes; // Direct bytes save karein
         dev.log('Thumbnail generated successfully for: ${widget.video}',
             name: 'VideoUploadWidget');
       } else {

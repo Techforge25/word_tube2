@@ -56,6 +56,11 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
           widget.url,
           videoPlayerOptions: VideoPlayerOptions(),
         );
+      } else if (widget.url.startsWith('http')) {
+        _controller = VideoPlayerController.networkUrl(
+          Uri.parse(widget.url),
+          videoPlayerOptions: VideoPlayerOptions(),
+        );
       } else {
         _controller = VideoPlayerController.file(
           File(widget.url),
@@ -163,10 +168,19 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
             children: [
               Center(
                 child: _controller.value.isInitialized
-                    ? AspectRatio(
-                        aspectRatio: _controller.value.aspectRatio,
-                        child: VideoPlayer(_controller),
-                      )
+                    ? _controller.value.hasError
+                        ? const Text('Error playing video')
+                        : AspectRatio(
+                            aspectRatio: _controller.value.aspectRatio,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                VideoPlayer(_controller),
+                                if (_controller.value.isBuffering)
+                                  const CircularProgressIndicator(),
+                              ],
+                            ),
+                          )
                     : const CircularProgressIndicator(),
               ),
               // IconButton(

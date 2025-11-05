@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
@@ -96,20 +97,30 @@ Widget basicGrid({
                       // Add spacing between text and image
                       SizedBox(height: context.height * 0.008),
                       if (value.settingsWordOnlyShow == 1)
-                        grid.imagepath != null
-                            ? grid.imagepath!.contains("assets")
-                                ? Image.asset(
-                                    grid.imagepath!,
-                                    height: screenHeight * 0.1,
-                                    width: screenHeight * 0.12,
-                                  )
-                                : Flexible(
-                                    child: Image.file(
-                                      File(grid.imagepath!),
+                        Flexible(
+                          child: grid.imagepath != null
+                              ? grid.imagepath!.startsWith("http")
+                                  ? CachedNetworkImage(
+                                      imageUrl: grid.imagepath!,
+                                      height: screenHeight * 0.1,
+                                      width: screenHeight * 0.12,
                                       fit: BoxFit.contain,
-                                    ),
-                                  )
-                            : Container()
+                                    )
+                                  : grid.imagepath!.startsWith("assets")
+                                      ? Image.asset(
+                                          grid.imagepath!,
+                                          height: screenHeight * 0.1,
+                                          width: screenHeight * 0.12,
+                                          fit: BoxFit.contain,
+                                        )
+                                      : Image.file(
+                                          File(grid.imagepath!),
+                                          height: screenHeight * 0.1,
+                                          width: screenHeight * 0.12,
+                                          fit: BoxFit.contain,
+                                        )
+                              : Container(),
+                        )
                       else
                         Container(),
                     ],
@@ -152,17 +163,23 @@ Widget basicGrid({
                           if (value.settingsWordOnlyShow == 1)
                             Flexible(
                               child: grid.imagepath != null
-                                  ? grid.imagepath!.contains("assets")
-                                      ? Image.asset(
-                                          grid.imagepath!,
+                                  ? grid.imagepath!.startsWith("http")
+                                      ? CachedNetworkImage(
+                                          imageUrl: grid.imagepath!,
                                           height: context.height * 0.5,
                                           width: context.height * 0.5,
                                         )
-                                      : Image.file(
-                                          File(grid.imagepath!),
-                                          height: context.height * 0.5,
-                                          width: context.height * 0.5,
-                                        )
+                                      : grid.imagepath!.startsWith("assets")
+                                          ? Image.asset(
+                                              grid.imagepath!,
+                                              height: context.height * 0.5,
+                                              width: context.height * 0.5,
+                                            )
+                                          : Image.file(
+                                              File(grid.imagepath!),
+                                              height: context.height * 0.5,
+                                              width: context.height * 0.5,
+                                            )
                                   : Container(),
                             )
                           else

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
@@ -67,17 +68,26 @@ Widget gameGridCard({
                 findTheWrongWord
                     ? Flexible(
                         child: grid.imagepath != null
-                            ? grid.imagepath!.contains("assets")
-                                ? Image.asset(
-                                    grid.imagepath!,
+                            ? grid.imagepath!.startsWith("http")
+                                ? CachedNetworkImage(
+                                    imageUrl: grid.imagepath!,
                                     height: context.height * 0.5,
                                     width: context.height * 0.5,
+                                    fit: BoxFit.contain,
                                   )
-                                : Image.file(
-                                    File(grid.imagepath!),
-                                    height: context.height * 0.5,
-                                    width: context.height * 0.5,
-                                  )
+                                : grid.imagepath!.startsWith("assets")
+                                    ? Image.asset(
+                                        grid.imagepath!,
+                                        height: context.height * 0.5,
+                                        width: context.height * 0.5,
+                                        fit: BoxFit.contain,
+                                      )
+                                    : Image.file(
+                                        File(grid.imagepath!),
+                                        height: context.height * 0.5,
+                                        width: context.height * 0.5,
+                                        fit: BoxFit.contain,
+                                      )
                             : SizedBox(),
                       )
                     : SizedBox(),

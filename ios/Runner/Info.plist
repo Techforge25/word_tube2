@@ -47,13 +47,13 @@
 	<key>NSCameraUsageDescription</key>
 	<string>We need to use your camera to take pictures for the app.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Need microphone access for uploading audio</string>
+	<string>This app requires microphone access to enable speech-to-text functionality.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need to save images to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need to access your photo library to pick images for the app.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>recognize speech</string>
+	<string>This app requires speech recognition access to convert your voice into text.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -75,6 +75,27 @@
 	</array>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
+    <dict>
+        <key>UTTypeIdentifier</key>
+        <string>com.wordtoob.wordtube2</string>
+        <key>UTTypeDescription</key>
+        <string>Game Grid Data File</string>
+        <key>UTTypeConformsTo</key>
+        <array>
+            <string>public.data</string>
+        </array>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+            <key>public.filename-extension</key>
+            <array>
+                <string>wtdata</string>
+            </array>
+            <key>public.mime-type</key>
+            <string>application/wtdata</string>
+        </dict>
+    </dict>
+</array>
+	<!-- <array>
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
@@ -94,6 +115,6 @@
 				</array>
 			</dict>
 		</dict>
-	</array>
+	</array> -->
 </dict>
 </plist>

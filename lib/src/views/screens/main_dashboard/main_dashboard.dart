@@ -14,6 +14,39 @@ import '../../../common/app_constants/general.dart';
 import '../../../source/models/grid_size_model.dart';
 import 'widget/button/edit.dart';
 
+class SharedBoardPreviewScreen extends StatelessWidget {
+  final GridSizeModel board;
+
+  const SharedBoardPreviewScreen({super.key, required this.board});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Board Preview"),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Board Title: ${board.title}"),
+            Text("Grid Size: ${board.gridSizeX}x${board.gridSizeY}"),
+            ElevatedButton(
+              onPressed: () {
+                // Logic to add the board
+                final contentProvider = sl<ContentProvider>();
+                contentProvider.saveGridSizedModel(gridSizedModel: board);
+                Navigator.of(context).pushReplacementNamed('/');
+              },
+              child: Text("Add to My Boards"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
 

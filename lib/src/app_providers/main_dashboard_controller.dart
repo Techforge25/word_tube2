@@ -91,6 +91,14 @@ class MainDashboardController extends ChangeNotifier {
   bool _isTapped = false;
   bool get isTapped => _isTapped;
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  void setIsLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
   void setIsTapped(bool value) {
     _isTapped = value;
     notifyListeners();
@@ -157,7 +165,6 @@ class MainDashboardController extends ChangeNotifier {
   void onError(SpeechRecognitionError e) {
     dev.log(e.errorMsg, name: 'Listening Error');
     _speechToTextCheck = false;
-    speechEnabled = false;
     notifyListeners();
   }
 
@@ -175,7 +182,9 @@ class MainDashboardController extends ChangeNotifier {
             onSpeechResult(result, context);
           }
         },
-        listenFor: Duration(hours: 50),
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 3),
+        cancelOnError: true,
         onSoundLevelChange: (level) {
           _soundLevel = level;
           notifyListeners();
@@ -195,8 +204,10 @@ class MainDashboardController extends ChangeNotifier {
   ///
 
   void stopListening() async {
+    if (speechToText.isListening) {
+      await speechToText.stop();
+    }
     _speechToTextCheck = false;
-    await speechToText.stop();
   }
 
   bool isWatchingVideo = false;
@@ -614,6 +625,7 @@ class MainDashboardController extends ChangeNotifier {
         ),
       );
 
+      dismissedVideos.clear();
       _videos.clear();
       _videos.addAll(videoPath);
       notifyListeners();
@@ -881,7 +893,7 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> shareCurrentBoard() async {
+  Future<void> shareCurrentBoard(BuildContext context) async {
     if (_gridSizedModel.title == null || _gridSizedModel.listData == null) {
       // User ko message dikhayein ki board khali hai ya save nahi hai
       dev.log("Cannot share an empty or unsaved board.");
@@ -904,11 +916,17 @@ class MainDashboardController extends ChangeNotifier {
       // 3. JSON data ko file mein likhein
       await file.writeAsString(boardJson);
 
-      // 4. share_plus ka istemal karke file ko share karein
+      // 4. iOS ke liye sharePositionOrigin calculate karein (iPad par zaroori hai)
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin =
+          box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+      // 5. share_plus ka istemal karke file ko share karein
       final result = await Share.shareXFiles(
         [XFile(filePath)],
         subject: 'Check out this board: ${_gridSizedModel.title}',
         text: 'I created a board in Word Toob and wanted to share it with you!',
+        sharePositionOrigin: sharePositionOrigin,
       );
 
       // Sharing ke result ko handle karein (optional)
@@ -919,6 +937,15 @@ class MainDashboardController extends ChangeNotifier {
       dev.log('Error sharing board: $e');
       // User ko error message dikhayein
     }
+  }
+
+  // === YEH LINES ADD KAREIN ===
+  double _uploadProgress = 0.0;
+  double get uploadProgress => _uploadProgress;
+
+  void setUploadProgress(double value) {
+    _uploadProgress = value;
+    notifyListeners();
   }
 }
 

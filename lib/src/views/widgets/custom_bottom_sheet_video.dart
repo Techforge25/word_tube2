@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:word_toob/src/services/firebase_storage_service.dart';
 import 'package:provider/provider.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
@@ -32,71 +33,122 @@ class CustomBottomSheetVideo extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 color: Colors.white,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  InkWell(
-                    onTap: () async {
-                      var video = await AppUtility.videoFromCamera();
+              child: controller.isLoading
+                  ? SizedBox(
+                      height: 20,
+                      child: const Center(
+                          child: CircularProgressIndicator.adaptive()))
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        InkWell(
+                          onTap: () async {
+                            var video = await AppUtility.videoFromCamera();
 
-                      if (video != null) {
-                        printLog("index of each grid model$index");
-                        printLog("index of each grid model: $index");
+                            if (video != null) {
+                              controller.setIsLoading(true);
+                              controller.setUploadProgress(0.0);
+                              printLog("index of each grid model$index");
+                              printLog("index of each grid model: $index");
 
-                        controller.addVideoToList(video!.path);
-                        await contentProvider.updateListDataItem(
-                            id: controller.gridSizedModel.id ?? -1,
-                            itemIndex: index,
-                            videosPath: controller.videos);
-                        await controller.setGridSizedModel(
-                            contentProvider
-                                .allGridSizedModel[controller.gridIndex],
-                            controller.gridIndex);
-                        controller.toggleBottomSheetOffVideo();
-                      } else {
-                        printLog(
-                            "Video picking cancelled or permission denied.");
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 6),
-                      child: Text(
-                        'Take Video',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold, color: AppColor.blue),
-                      ),
+                              final downloadUrl = await FirebaseStorageService()
+                                  .uploadFile(video.path,
+                                      'videos/${DateTime.now().millisecondsSinceEpoch}',
+                                      onProgress: (progress) {
+                                controller.setUploadProgress(progress);
+                              });
+
+                              if (downloadUrl != null) {
+                                controller.addVideoToList(downloadUrl);
+                                await contentProvider.updateListDataItem(
+                                    id: controller.gridSizedModel.id ?? -1,
+                                    itemIndex: index,
+                                    videosPath: controller.videos);
+                              }
+                              controller.setIsLoading(false);
+                              if (controller.gridIndex == gridIndex) {
+                                await controller.setGridSizedModel(
+                                    contentProvider.allGridSizedModel[
+                                        controller.gridIndex],
+                                    controller.gridIndex);
+                              }
+                              controller.toggleBottomSheetOffVideo();
+                            } else {
+                              printLog(
+                                  "Video picking cancelled or permission denied.");
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 6),
+                            child: Text(
+                              'Take Video',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColor.blue),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            try {
+                              var video = await AppUtility.videoFromGallery();
+                              if (video != null) {
+                                controller.setIsLoading(true);
+                                controller.setUploadProgress(0.0);
+                                dev.log(video.path, name: 'Video Path');
+
+                                final downloadUrl =
+                                    await FirebaseStorageService().uploadFile(
+                                        video.path,
+                                        'videos/${DateTime.now().millisecondsSinceEpoch}',
+                                        onProgress: (progress) {
+                                  controller.setUploadProgress(progress);
+                                });
+                                if (downloadUrl != null) {
+                                  controller.addVideoToList(downloadUrl);
+                                  contentProvider.updateListDataItem(
+                                      id: id,
+                                      itemIndex: index,
+                                      videosPath: controller.videos);
+                                }
+                                controller.setIsLoading(false);
+                              }
+                              if (controller.gridIndex == gridIndex) {
+                                controller.setGridSizedModel(
+                                    contentProvider.allGridSizedModel[
+                                        controller.gridIndex],
+                                    controller.gridIndex);
+                              }
+                            } catch (e) {
+                              print(e);
+                              controller.setIsLoading(false);
+                            } finally {
+                              controller.setIsLoading(false);
+
+                              controller.toggleBottomSheetOffVideo();
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 6),
+                            child: Text(
+                              'Choose Existing',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColor.blue),
+                            ),
+                          ),
+                        ),
+                        const Gap(10),
+                      ],
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      var video = await AppUtility.videoFromGallery();
-                      dev.log(video!.path, name: 'Video Path');
-
-                      controller.addVideoToList(video.path);
-                      contentProvider.updateListDataItem(
-                          id: id,
-                          itemIndex: index,
-                          videosPath: controller.videos);
-                      controller.setGridSizedModel(
-                          contentProvider
-                              .allGridSizedModel[controller.gridIndex],
-                          controller.gridIndex);
-                      controller.toggleBottomSheetOffVideo();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 6),
-                      child: Text(
-                        'Choose Existing',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold, color: AppColor.blue),
-                      ),
-                    ),
-                  ),
-                  const Gap(10),
-                ],
-              ),
             ),
             const Gap(3),
             GestureDetector(
