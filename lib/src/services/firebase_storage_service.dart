@@ -23,7 +23,9 @@ class FirebaseStorageService {
       final uploadTask = ref.putFile(file);
 
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        final progress = snapshot.bytesTransferred / snapshot.totalBytes;
+        final double progress = snapshot.totalBytes > 0
+            ? snapshot.bytesTransferred / snapshot.totalBytes
+            : 0.0;
         onProgress(progress);
       });
 

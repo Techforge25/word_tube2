@@ -34,10 +34,29 @@ class CustomBottomSheetVideo extends StatelessWidget {
                 color: Colors.white,
               ),
               child: controller.isLoading
-                  ? SizedBox(
-                      height: 20,
-                      child: const Center(
-                          child: CircularProgressIndicator.adaptive()))
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 20.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LinearProgressIndicator(
+                            value: controller.uploadProgress,
+                            backgroundColor: Colors.grey[300],
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(AppColor.blue),
+                          ),
+                          const Gap(8),
+                          Text(
+                            'Uploading... ${(controller.uploadProgress * 100).toStringAsFixed(0)}%',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AppColor.blue),
+                          ),
+                        ],
+                      ),
+                    )
                   : Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[

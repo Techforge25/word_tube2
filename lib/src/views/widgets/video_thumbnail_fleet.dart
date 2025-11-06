@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:get/get_utils/get_utils.dart';
@@ -115,193 +116,137 @@ class VideoUploadWidget extends StatefulWidget {
 }
 
 class _VideoUploadWidgetState extends State<VideoUploadWidget> {
-  Uint8List? generatedThumbnailData;
-  bool isLoading = true;
-  void setLoading(bool loading) {
+  Uint8List? _thumbnailData;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _generateThumbnail();
+  }
+
+  @override
+  void didUpdateWidget(covariant VideoUploadWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Agar video path change ho to dobara thumbnail generate karein
+    if (widget.video != oldWidget.video) {
+      _generateThumbnail();
+    }
+  }
+
+  Future<void> _generateThumbnail() async {
     if (mounted) {
       setState(() {
-        isLoading = loading;
+        _isLoading = true;
+        _thumbnailData = null;
+      });
+    }
+
+    if (widget.video.isEmpty) {
+      dev.log('Video path is empty.', name: 'VideoThumbnail');
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
+    try {
+      if (widget.video.startsWith('http')) {
+        // --- Network Video (Cache ke saath) ---
+        _thumbnailData = await _getThumbnailFromNetwork(widget.video);
+      } else if (widget.video.startsWith('assets/')) {
+        // --- Asset Video ---
+        _thumbnailData = await _getThumbnailFromAsset(widget.video);
+      } else {
+        // --- File Video (Local Storage) ---
+        _thumbnailData = await _getThumbnailFromFile(widget.video);
+      }
+    } catch (e) {
+      dev.log('Failed to generate thumbnail for ${widget.video}: $e',
+          name: 'VideoThumbnail');
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
 
-  Future<void> _generateThumbnail({File? file, String? assetPath}) async {
-    try {
-      String? videoPath;
+  // Network video ke liye alag function (Bohat tez)
+  Future<Uint8List?> _getThumbnailFromNetwork(String videoUrl) async {
+    dev.log('Getting thumbnail from network: $videoUrl',
+        name: 'VideoThumbnail');
+    // Cache se file check karein
+    final fileInfo = await DefaultCacheManager().getFileFromCache(videoUrl);
+    String videoPath;
 
-      if (file != null) {
-        // Case 1: Direct file (gallery/camera)
-        dev.log("Using file path: ${file.path}");
-        videoPath = file.path;
-      } else if (assetPath != null) {
-        // Case 2: Asset file → copy to temp directory first
-        dev.log("Using asset path: $assetPath");
-
-        final tempDir = await getTemporaryDirectory();
-        final tempVideo = File('${tempDir.path}/temp_asset_video.mov');
-
-        final byteData = await rootBundle.load(assetPath);
-        await tempVideo.writeAsBytes(
-          byteData.buffer.asUint8List(),
-          flush: true,
-        );
-
-        videoPath = tempVideo.path;
-      }
-
-      if (videoPath == null) {
-        dev.log("No valid video source provided!");
-        return;
-      }
-
-      // Generate thumbnail
-      final imageData = await VideoThumbnail.thumbnailData(
-        video: videoPath,
-        imageFormat: ImageFormat.PNG,
-        maxWidth: 256,
-        maxHeight: 256,
-        quality: 50,
-      );
-
-      if (imageData != null) {
-        generatedThumbnailData = imageData;
-        dev.log("Thumbnail generated successfully ✅");
-      } else {
-        dev.log("Thumbnail generation failed ❌");
-      }
-    } catch (e) {
-      dev.log("Thumbnail error: $e");
-    }
-  }
-
-  Future<void> _generateAndSetThumbnail() async {
-    setLoading(true);
-
-    if (widget.video.isEmpty) {
-      dev.log('Video path is empty, cannot generate thumbnail.',
-          name: 'VideoUploadWidget');
-      setLoading(false);
-      return;
-    }
-
-    String videoPathToThumbnail = widget.video;
-    Uint8List? thumbnailBytes;
-    bool isAsset = widget.video.startsWith('assets/');
-    bool isNetwork = widget.video.startsWith('http');
-
-    if (isNetwork) {
-      // CASE 3: URL se video - DIRECT THUMBNAIL (Baghair download kiye)
-      dev.log('Generating thumbnail from network URL: ${widget.video}',
-          name: 'VideoUploadWidget');
-      thumbnailBytes = await VideoThumbnail.thumbnailData(
-        video: widget.video, // Library khud network se handle karegi
-        imageFormat: ImageFormat.PNG,
-        maxWidth: 256,
-        maxHeight: 256,
-        quality: 50,
-      );
-    } else if (isAsset) {
-      try {
-        final ByteData data = await rootBundle.load(widget.video);
-        final List<int> bytes = data.buffer.asUint8List();
-        final Directory tempDir = await getTemporaryDirectory();
-
-        final String tempFileName =
-            p.join(tempDir.path, p.basename(widget.video));
-        final File tempFile = File(tempFileName);
-        await tempFile.writeAsBytes(bytes);
-        videoPathToThumbnail = tempFile.path;
-        dev.log('Asset copied to temporary file: $videoPathToThumbnail',
-            name: 'VideoUploadWidget');
-      } catch (e) {
-        dev.log('Error copying asset to temporary file: $e',
-            name: 'VideoUploadWidget');
-        setLoading(false);
-        return;
-      }
+    if (fileInfo != null) {
+      // Agar video cache mein hai to uska path use karein
+      videoPath = fileInfo.file.path;
+      dev.log('Video found in cache: $videoPath', name: 'VideoThumbnail');
     } else {
-      File videoFile = File(widget.video);
-      if (!await videoFile.exists()) {
-        dev.log('Video file does not exist at path: ${widget.video}',
-            name: 'VideoUploadWidget');
-        setLoading(false);
-        return;
-      }
-      videoPathToThumbnail = videoFile.path; // Device file ka path hi use hoga
+      // Agar nahi hai to download karein
+      dev.log('Downloading video for thumbnail...', name: 'VideoThumbnail');
+      final downloadedFile = await DefaultCacheManager().downloadFile(videoUrl);
+      videoPath = downloadedFile.file.path;
     }
+
+    return await VideoThumbnail.thumbnailData(
+      video: videoPath,
+      imageFormat: ImageFormat.PNG,
+      maxWidth: 200,
+      quality: 25,
+    );
+  }
+
+  Future<Uint8List?> _getThumbnailFromAsset(String assetPath) async {
+    dev.log('Getting thumbnail from asset: $assetPath', name: 'VideoThumbnail');
+    File? tempFile;
 
     try {
-      final Directory tempDirForThumb =
-          await getTemporaryDirectory(); // Thumbnail ke liye bhi temp dir
-      final String? thumbnailPath = await VideoThumbnail.thumbnailFile(
-        video:
-            videoPathToThumbnail, // Ab hum correct path use kar rahe hain (device file ya temp asset file)
-        thumbnailPath: tempDirForThumb.path,
+      final tempDir = await getTemporaryDirectory();
+
+      final String uniqueFileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${p.basename(assetPath)}';
+      tempFile = File(p.join(tempDir.path, uniqueFileName));
+
+      final byteData = await rootBundle.load(assetPath);
+      await tempFile.writeAsBytes(byteData.buffer
+          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+      final thumbnail = await VideoThumbnail.thumbnailData(
+        video: tempFile.path,
         imageFormat: ImageFormat.PNG,
-        maxWidth: 256,
-        maxHeight: 256,
-        quality: 50,
+        maxWidth: 200,
+        quality: 25,
       );
 
-      if (thumbnailPath != null) {
-        generatedThumbnailData = await File(thumbnailPath).readAsBytes();
-        dev.log('Thumbnail generated successfully for: ${widget.video}',
-            name: 'VideoUploadWidget');
-      } else if (thumbnailBytes != null && thumbnailBytes.isNotEmpty) {
-        generatedThumbnailData = thumbnailBytes; // Direct bytes save karein
-        dev.log('Thumbnail generated successfully for: ${widget.video}',
-            name: 'VideoUploadWidget');
-      } else {
-        dev.log('Failed to generate thumbnail for: ${widget.video}',
-            name: 'VideoUploadWidget');
-      }
+      return thumbnail;
     } catch (e) {
-      dev.log('Error generating thumbnail: $e', name: 'VideoUploadWidget');
+      dev.log('Error handling asset video: $e', name: 'VideoThumbnail');
+      return null;
     } finally {
-      // Clean up temporary asset file if it was created
-      if (isAsset && videoPathToThumbnail != widget.video) {
-        try {
-          await File(videoPathToThumbnail).delete();
-          dev.log('Temporary asset file deleted: $videoPathToThumbnail',
-              name: 'VideoUploadWidget');
-        } catch (e) {
-          dev.log('Error deleting temporary asset file: $e',
-              name: 'VideoUploadWidget');
-        }
+      if (tempFile != null && await tempFile.exists()) {
+        await tempFile.delete();
+        dev.log('Temporary file cleaned up: ${tempFile.path}',
+            name: 'VideoThumbnail');
       }
-      setLoading(false);
     }
   }
-  // Future generateThumbnail() async {
-  //    Directory dir = await getApplicationCacheDirectory();
-  //     var fileName = await VideoThumbnail.thumbnailData(
-  //      video: widget.video,
-  //      // thumbnailPath: (await getTemporaryDirectory()).path, /// path_provider
-  //      imageFormat: ImageFormat.PNG,
-  //      maxHeight: 50,
-  //      quality: 50,
-  //    );
-  //
-  //
-  //    dev.log(fileName);
-  //    if(fileName != null){
-  //      setState(() {
-  //        String decodedString = utf8.decode(fileName);
-  //        generatedFile =decodedString;
-  //
-  //      });
-  //    }
-  //    dev.log(generatedFile);
-  //    setLoading(false);
-  //  }
 
-  @override
-  void initState() {
-    // Future.microtask(() => _generateThumbnail(File(widget.video)));
-
-    super.initState();
-    _generateAndSetThumbnail();
-    // _generateThumbnail(assetPath: (widget.video));
+  // Local file video ke liye alag function
+  Future<Uint8List?> _getThumbnailFromFile(String filePath) async {
+    dev.log('Getting thumbnail from file: $filePath', name: 'VideoThumbnail');
+    final file = File(filePath);
+    if (!await file.exists()) {
+      dev.log('File does not exist.', name: 'VideoThumbnail');
+      return null;
+    }
+    return await VideoThumbnail.thumbnailData(
+      video: filePath,
+      imageFormat: ImageFormat.PNG,
+      maxWidth: 200, // Choti size rakhein taake jaldi ban jaye
+      quality: 25, // Quality kam rakhein
+    );
   }
 
   @override
@@ -356,15 +301,15 @@ class _VideoUploadWidgetState extends State<VideoUploadWidget> {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        if (isLoading)
+                        if (_isLoading)
                           Container(
                             color: Colors.grey[200],
                             child: const Center(
                                 child: CircularProgressIndicator()),
                           )
-                        else if (generatedThumbnailData != null)
+                        else if (_thumbnailData != null)
                           Image.memory(
-                            generatedThumbnailData!,
+                            _thumbnailData!,
                             fit: BoxFit.cover,
                           )
                         else

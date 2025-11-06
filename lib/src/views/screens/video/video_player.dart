@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
@@ -16,7 +17,7 @@ class VideoPlayerView extends StatefulWidget {
 }
 
 class VideoPlayerViewState extends State<VideoPlayerView> {
-  late VideoPlayerController _controller;
+  late CachedVideoPlayerPlus _controller;
   bool _hasNavigated = false;
   final _mainDashBoard = sl<MainDashboardController>();
 
@@ -33,9 +34,10 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
 
     _initController().then((v) {
       if (v) {
-        _controller.addListener(() {
+        _controller.controller.addListener(() {
           if (!_hasNavigated &&
-              _controller.value.position >= _controller.value.duration) {
+              _controller.controller.value.position >=
+                  _controller.controller.value.duration) {
             _hasNavigated = true;
             _mainDashBoard.isWatchingVideo = false;
 
@@ -52,25 +54,22 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
     try {
       // Check if the video is an asset or a file
       if (widget.url.contains("asset")) {
-        _controller = VideoPlayerController.asset(
+        _controller = CachedVideoPlayerPlus.asset(
           widget.url,
-          videoPlayerOptions: VideoPlayerOptions(),
         );
       } else if (widget.url.startsWith('http')) {
-        _controller = VideoPlayerController.networkUrl(
+        _controller = CachedVideoPlayerPlus.networkUrl(
           Uri.parse(widget.url),
-          videoPlayerOptions: VideoPlayerOptions(),
         );
       } else {
-        _controller = VideoPlayerController.file(
+        _controller = CachedVideoPlayerPlus.file(
           File(widget.url),
-          videoPlayerOptions: VideoPlayerOptions(),
         );
       }
 
       await _controller.initialize().then((v) {
         setState(() {
-          _controller.play();
+          _controller.controller.play();
         });
       });
 
@@ -167,17 +166,16 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
           child: Stack(
             children: [
               Center(
-                child: _controller.value.isInitialized
-                    ? _controller.value.hasError
+                child: _controller.isInitialized
+                    ? _controller.controller.value.hasError
                         ? const Text('Error playing video')
                         : AspectRatio(
-                            aspectRatio: _controller.value.aspectRatio,
+                            aspectRatio:
+                                _controller.controller.value.aspectRatio,
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                VideoPlayer(_controller),
-                                if (_controller.value.isBuffering)
-                                  const CircularProgressIndicator(),
+                                VideoPlayer(_controller.controller),
                               ],
                             ),
                           )
@@ -223,13 +221,17 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             setState(() {
-              _controller.value.isPlaying
-                  ? _controller.pause()
-                  : _controller.play();
+              if (_controller.isInitialized) {
+                _controller.controller.value.isPlaying
+                    ? _controller.controller.pause()
+                    : _controller.controller.play();
+              }
             });
           },
           child: Icon(
-            _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+            _controller.isInitialized && _controller.controller.value.isPlaying
+                ? Icons.pause
+                : Icons.play_arrow,
           ),
         ),
 

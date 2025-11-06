@@ -29,6 +29,7 @@ dependencies:
   path_provider: ^2.1.4
   image: ^4.2.0
   video_player: ^2.9.1
+  cached_video_player_plus: ^4.0.4
   responsive_grid_list: ^1.4.0
   chewie: ^1.8.3
   video_thumbnail: ^0.5.3
@@ -55,7 +56,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   firebase_core: ^4.2.0
   firebase_storage: ^13.0.4
-
+  flutter_cache_manager: ^3.4.1 
 dev_dependencies:
   flutter_test:
     sdk: flutter
