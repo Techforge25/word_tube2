@@ -69,6 +69,7 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
 
       await _controller.initialize().then((v) {
         setState(() {
+          // _controller.controller.setPlaybackSpeed(1.5);
           _controller.controller.play();
         });
       });
@@ -107,10 +108,6 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
 
   @override
   void dispose() {
-    if (_mainDashBoard.speechToTextCheck) {
-// It will start the listening what the user says
-      _mainDashBoard.startListening(context);
-    }
     _mainDashBoard.isWatchingVideo = false;
 
     _controller.dispose();

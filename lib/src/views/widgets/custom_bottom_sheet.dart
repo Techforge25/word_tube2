@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import 'package:word_toob/src/views/theme/app_color.dart';
 import '../../app_providers/content_provider.dart';
 import 'dart:developer' as dev;
 
-class CustomBottomSheet extends StatelessWidget {
+class CustomBottomSheet extends StatefulWidget {
   final int id;
   final int index;
   final int gridIndex;
@@ -23,10 +24,17 @@ class CustomBottomSheet extends StatelessWidget {
   });
 
   @override
+  State<CustomBottomSheet> createState() => _CustomBottomSheetState();
+}
+
+class _CustomBottomSheetState extends State<CustomBottomSheet> {
+  Completer<void>? _cancelCompleter;
+
+  @override
   Widget build(BuildContext context) {
-    dev.log("Index at grid :$index");
-    dev.log("List index  :$gridIndex");
-    dev.log("id of   :$gridIndex");
+    dev.log("Index at grid :${widget.index}");
+    dev.log("List index  :${widget.gridIndex}");
+    dev.log("id of   :${widget.gridIndex}");
     return Consumer2<ContentProvider, MainDashboardController>(
       builder: (context, contentProvider, controller, child) => Padding(
         padding: const EdgeInsets.all(5.0),
@@ -69,6 +77,8 @@ class CustomBottomSheet extends StatelessWidget {
                           onTap: () async {
                             var image = await AppUtility.imageFromCamera();
                             if (image != null) {
+                              _cancelCompleter = Completer<void>();
+
                               controller.setIsLoading(true);
                               controller.setUploadProgress(0.0);
                               final compressedImage =
@@ -78,21 +88,21 @@ class CustomBottomSheet extends StatelessWidget {
                                       'images/${DateTime.now().millisecondsSinceEpoch}',
                                       onProgress: (progress) {
                                 controller.setUploadProgress(progress);
-                              });
+                              }, cancelToken: _cancelCompleter!.future);
                               if (downloadUrl != null) {
                                 controller.getImagePath(downloadUrl);
                                 await contentProvider.updateListDataItem(
                                     id: controller.gridSizedModel.id ?? -1,
-                                    itemIndex: index,
+                                    itemIndex: widget.index,
                                     imagePath: downloadUrl);
                               }
                               controller.setIsLoading(false);
 
-                              if (controller.gridIndex == gridIndex) {
+                              if (controller.gridIndex == widget.gridIndex) {
                                 controller.setGridSizedModel(
                                     contentProvider
-                                        .allGridSizedModel[gridIndex],
-                                    gridIndex);
+                                        .allGridSizedModel[widget.gridIndex],
+                                    widget.gridIndex);
                               }
                               // printLog("Picked image path:"+image.path);
                               // printLog("Index at grid :"+index.toString());
@@ -120,6 +130,8 @@ class CustomBottomSheet extends StatelessWidget {
                             try {
                               var image = await AppUtility.imageFromGallery();
                               if (image != null) {
+                                _cancelCompleter = Completer<void>();
+
                                 controller.setIsLoading(true);
                                 controller.setUploadProgress(0.0);
                                 final compressedImage =
@@ -130,22 +142,22 @@ class CustomBottomSheet extends StatelessWidget {
                                         'images/${DateTime.now().millisecondsSinceEpoch}',
                                         onProgress: (progress) {
                                   controller.setUploadProgress(progress);
-                                });
+                                }, cancelToken: _cancelCompleter!.future);
 
                                 if (downloadUrl != null) {
                                   controller.getImagePath(downloadUrl);
                                   await contentProvider.updateListDataItem(
-                                      id: id,
-                                      itemIndex: index,
+                                      id: widget.id,
+                                      itemIndex: widget.index,
                                       imagePath: downloadUrl);
                                 }
                                 controller.setIsLoading(false);
 
-                                if (controller.gridIndex == gridIndex) {
+                                if (controller.gridIndex == widget.gridIndex) {
                                   controller.setGridSizedModel(
                                       contentProvider
-                                          .allGridSizedModel[gridIndex],
-                                      gridIndex);
+                                          .allGridSizedModel[widget.gridIndex],
+                                      widget.gridIndex);
                                 }
                               }
                             } catch (e) {
@@ -174,13 +186,14 @@ class CustomBottomSheet extends StatelessWidget {
                           onTap: () async {
                             controller.getImagePath('');
                             await contentProvider.updateListDataItem(
-                              id: id,
-                              itemIndex: index,
+                              id: widget.id,
+                              itemIndex: widget.index,
                               imagePath: '',
                             );
                             controller.setGridSizedModel(
-                                contentProvider.allGridSizedModel[gridIndex],
-                                gridIndex);
+                                contentProvider
+                                    .allGridSizedModel[widget.gridIndex],
+                                widget.gridIndex);
                             controller.toggleBottomSheetOff();
                           },
                           child: Container(
@@ -204,6 +217,9 @@ class CustomBottomSheet extends StatelessWidget {
             const Gap(3),
             GestureDetector(
               onTap: () {
+                if (controller.isLoading) {
+                  _cancelCompleter?.complete();
+                }
                 controller.toggleBottomSheetOff();
               },
               child: Container(

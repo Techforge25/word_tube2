@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,7 @@ class FirebaseStorageService {
     String filePath,
     String destination, {
     required Function(double) onProgress,
+    Future<void>? cancelToken,
   }) async {
     try {
       final file = File(filePath);
@@ -22,16 +24,31 @@ class FirebaseStorageService {
       final ref = _storage.ref(destination);
       final uploadTask = ref.putFile(file);
 
-      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+      final completer = Completer<String?>();
+
+      final sub = uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
         final double progress = snapshot.totalBytes > 0
             ? snapshot.bytesTransferred / snapshot.totalBytes
             : 0.0;
         onProgress(progress);
       });
 
-      final snapshot = await uploadTask.whenComplete(() => {});
+      cancelToken?.then((_) async {
+        if (!completer.isCompleted) {
+          await sub.cancel();
+          await uploadTask.cancel();
+          completer.complete(null);
+        }
+      });
+
+      final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
+
+      if (!completer.isCompleted) {
+        await sub.cancel();
+        completer.complete(downloadUrl);
+      }
+      return completer.future;
     } on FirebaseException catch (e) {
       if (kDebugMode) {
         print('Firebase error: ${e.code} - ${e.message}');

@@ -173,6 +173,11 @@ class MainDashboardController extends ChangeNotifier {
 
   void startListening(BuildContext context) async {
     if (!speechEnabled) await initSpeechToText();
+    if (speechToText.isListening) {
+      dev.log('Already listening, ignoring duplicate startListening call.',
+          name: 'Microphone');
+      return;
+    }
 
     try {
       await speechToText.listen(
@@ -183,8 +188,8 @@ class MainDashboardController extends ChangeNotifier {
           }
         },
         listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 3),
-        cancelOnError: true,
+        //pauseFor: const Duration(seconds: 20),
+        // cancelOnError: true,
         onSoundLevelChange: (level) {
           _soundLevel = level;
           notifyListeners();
@@ -224,6 +229,7 @@ class MainDashboardController extends ChangeNotifier {
     lastWords = "";
 
     if (index >= 0 && !isWatchingVideo) {
+      stopListening();
 // Setting this true so the other words will not make further instences of VideoPlayerView.
       isWatchingVideo = true;
 
@@ -247,6 +253,7 @@ class MainDashboardController extends ChangeNotifier {
         )
             .then((_) {
           isWatchingVideo = false;
+          setSpeechToText(context);
         });
       } else {
         dev.log("No valid video path found.");
@@ -294,8 +301,9 @@ class MainDashboardController extends ChangeNotifier {
 
   Future<void> initTextToSpeech() async {
     await flutterTts.setSharedInstance(true);
-    flutterTts.setVolume(1.0);
-    flutterTts.setPitch(1.0);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+    // await flutterTts.setSpeechRate(0.8);
     await flutterTts.setLanguage("en-US");
 
     _flutterTts.setProgressHandler((text, start, end, word) {

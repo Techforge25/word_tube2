@@ -75,7 +75,10 @@ class NormalNavBar extends StatelessWidget {
             iconSize: iconSize + 2,
             fontSize: fontSize + 2,
           ),
-          CenterTitle(value: value, fontSize: fontSize + 6),
+          Expanded(child: CenterTitle(value: value, fontSize: fontSize + 6)),
+          SizedBox(
+            width: 4,
+          ),
           !value.findTheWord
               ? RightRow(
                   menuController: menuController,

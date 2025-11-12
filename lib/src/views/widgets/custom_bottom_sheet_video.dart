@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:word_toob/src/services/firebase_storage_service.dart';
@@ -9,7 +11,7 @@ import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import 'dart:developer' as dev;
 
-class CustomBottomSheetVideo extends StatelessWidget {
+class CustomBottomSheetVideo extends StatefulWidget {
   final int id;
   final int index;
   final int gridIndex;
@@ -19,6 +21,13 @@ class CustomBottomSheetVideo extends StatelessWidget {
     required this.index,
     required this.gridIndex,
   });
+
+  @override
+  State<CustomBottomSheetVideo> createState() => _CustomBottomSheetVideoState();
+}
+
+class _CustomBottomSheetVideoState extends State<CustomBottomSheetVideo> {
+  Completer<void>? _cancelCompleter;
 
   @override
   Widget build(BuildContext context) {
@@ -65,27 +74,30 @@ class CustomBottomSheetVideo extends StatelessWidget {
                             var video = await AppUtility.videoFromCamera();
 
                             if (video != null) {
+                              _cancelCompleter = Completer<void>();
                               controller.setIsLoading(true);
                               controller.setUploadProgress(0.0);
-                              printLog("index of each grid model$index");
-                              printLog("index of each grid model: $index");
+                              printLog(
+                                  "index of each grid model${widget.index}");
+                              printLog(
+                                  "index of each grid model: ${widget.index}");
 
                               final downloadUrl = await FirebaseStorageService()
                                   .uploadFile(video.path,
                                       'videos/${DateTime.now().millisecondsSinceEpoch}',
                                       onProgress: (progress) {
                                 controller.setUploadProgress(progress);
-                              });
+                              }, cancelToken: _cancelCompleter!.future);
 
                               if (downloadUrl != null) {
                                 controller.addVideoToList(downloadUrl);
                                 await contentProvider.updateListDataItem(
                                     id: controller.gridSizedModel.id ?? -1,
-                                    itemIndex: index,
+                                    itemIndex: widget.index,
                                     videosPath: controller.videos);
                               }
                               controller.setIsLoading(false);
-                              if (controller.gridIndex == gridIndex) {
+                              if (controller.gridIndex == widget.gridIndex) {
                                 await controller.setGridSizedModel(
                                     contentProvider.allGridSizedModel[
                                         controller.gridIndex],
@@ -116,6 +128,7 @@ class CustomBottomSheetVideo extends StatelessWidget {
                             try {
                               var video = await AppUtility.videoFromGallery();
                               if (video != null) {
+                                _cancelCompleter = Completer<void>();
                                 controller.setIsLoading(true);
                                 controller.setUploadProgress(0.0);
                                 dev.log(video.path, name: 'Video Path');
@@ -126,17 +139,17 @@ class CustomBottomSheetVideo extends StatelessWidget {
                                         'videos/${DateTime.now().millisecondsSinceEpoch}',
                                         onProgress: (progress) {
                                   controller.setUploadProgress(progress);
-                                });
+                                }, cancelToken: _cancelCompleter!.future);
                                 if (downloadUrl != null) {
                                   controller.addVideoToList(downloadUrl);
                                   contentProvider.updateListDataItem(
-                                      id: id,
-                                      itemIndex: index,
+                                      id: widget.id,
+                                      itemIndex: widget.index,
                                       videosPath: controller.videos);
                                 }
                                 controller.setIsLoading(false);
                               }
-                              if (controller.gridIndex == gridIndex) {
+                              if (controller.gridIndex == widget.gridIndex) {
                                 controller.setGridSizedModel(
                                     contentProvider.allGridSizedModel[
                                         controller.gridIndex],
@@ -171,7 +184,12 @@ class CustomBottomSheetVideo extends StatelessWidget {
             ),
             const Gap(3),
             GestureDetector(
-              onTap: () => controller.toggleBottomSheetOffVideo(),
+              onTap: () {
+                if (controller.isLoading) {
+                  _cancelCompleter?.complete();
+                }
+                controller.toggleBottomSheetOffVideo();
+              },
               child: Container(
                 width: double.infinity,
                 padding:

@@ -54,7 +54,11 @@ class _MyAppState extends State<MyApp> {
       child: Consumer<AppSettingsProvider>(
         builder: (_, appSettings, child) => MaterialApp(
           debugShowCheckedModeBanner: false,
-          builder: (context, child) => child!,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(1)),
+            child: child!,
+          ),
           title: AppString.appName,
           theme: AppTheme.lightTheme,
           navigatorKey: AppUtility.navigatorKey,
