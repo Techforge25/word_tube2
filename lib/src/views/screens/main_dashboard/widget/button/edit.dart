@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
@@ -80,6 +81,9 @@ class _EditWidgetState extends State<EditWidget> {
               maxLines: 1,
               padding: EdgeInsets.all(context.height * 0.02),
               controller: widget.controler,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(8),
+              ],
             ),
           ),
           Gap(widget.sizeWidth + 30),
