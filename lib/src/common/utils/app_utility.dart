@@ -173,6 +173,14 @@ abstract class AppUtility {
     return File(imageFile.path).copy(image.path);
   }
 
+  static Future<File> saveVideoPermanently(File videoFile) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final name = path.basename(videoFile.path);
+    final video = File('${directory.path}/$name');
+
+    return File(videoFile.path).copy(video.path);
+  }
+
   static Future<XFile?> pickImage(BuildContext context) async {
     final image = await showModalBottomSheet(
         context: context,

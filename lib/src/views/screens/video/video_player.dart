@@ -10,17 +10,20 @@ import 'dart:developer' as dev;
 
 class VideoPlayerView extends StatefulWidget {
   final String url;
-  const VideoPlayerView({super.key, required this.url});
+  final String? localUrl;
+  const VideoPlayerView({super.key, required this.url, this.localUrl});
 
   @override
   VideoPlayerViewState createState() => VideoPlayerViewState();
 }
 
 class VideoPlayerViewState extends State<VideoPlayerView> {
-  late CachedVideoPlayerPlus _controller;
+  CachedVideoPlayerPlus? _controller;
   bool _hasNavigated = false;
   final _mainDashBoard = sl<MainDashboardController>();
 
+  bool _isLoading = true;
+  bool _hasError = false;
   final _contentProvider =
       sl<ContentProvider>(); // Get ContentProvider instance
 
@@ -32,86 +35,74 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
   void initState() {
     super.initState();
 
-    _initController().then((v) {
-      if (v) {
-        _controller.controller.addListener(() {
-          if (!_hasNavigated &&
-              _controller.controller.value.position >=
-                  _controller.controller.value.duration) {
-            _hasNavigated = true;
-            _mainDashBoard.isWatchingVideo = false;
-
-            _onVideoEnd();
-          }
-        });
-      } else {
-        _onVideoEnd();
-      }
-    });
+    _initController();
   }
 
-  Future<bool> _initController() async {
+  Future<void> _initController() async {
     try {
-      // Check if the video is an asset or a file
-      if (widget.url.contains("asset")) {
-        _controller = CachedVideoPlayerPlus.asset(
-          widget.url,
-        );
+      CachedVideoPlayerPlus newController;
+
+      if (widget.localUrl != null &&
+          widget.localUrl!.isNotEmpty &&
+          await File(widget.localUrl!).exists()) {
+        newController = CachedVideoPlayerPlus.file(File(widget.localUrl!));
+      } else if (widget.url.contains("asset")) {
+        newController = CachedVideoPlayerPlus.asset(widget.url);
       } else if (widget.url.startsWith('http')) {
-        _controller = CachedVideoPlayerPlus.networkUrl(
-          Uri.parse(widget.url),
-        );
+        newController = CachedVideoPlayerPlus.networkUrl(Uri.parse(widget.url));
       } else {
-        _controller = CachedVideoPlayerPlus.file(
-          File(widget.url),
-        );
+        newController = CachedVideoPlayerPlus.file(File(widget.url));
       }
 
-      await _controller.initialize().then((v) {
-        setState(() {
-          // _controller.controller.setPlaybackSpeed(1.5);
-          _controller.controller.play();
-        });
-      });
+      await newController.initialize();
 
-      return true;
+      // Jab sab kuch theek ho jaye, tab asal controller ko value dein aur UI update karein
+      if (mounted) {
+        setState(() {
+          _controller = newController;
+          _isLoading = false;
+          _controller?.controller.play();
+
+          // Listener ko yahan set karein
+          _controller?.controller.addListener(() {
+            if (_controller != null &&
+                !_hasNavigated &&
+                _controller!.controller.value.position >=
+                    _controller!.controller.value.duration) {
+              _hasNavigated = true;
+              _mainDashBoard.isWatchingVideo = false;
+              _onVideoEnd();
+            }
+          });
+        });
+      }
     } catch (e) {
       dev.log('$e', name: 'Video Error');
-      return false;
+      // Agar error aaye to UI ko batayein
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
     }
   }
 
   Future<void> _onVideoEnd() async {
     if (_mainDashBoard.speechToTextCheck) {
-// It will start the listening what the user says
       _mainDashBoard.startListening(context);
       _mainDashBoard.isWatchingVideo = false;
     }
-
     if (mounted) {
-      // dev.log('i Poped');
-      // await _mainDashBoard.setRandomIndex();
-
-// ignore: use_build_context_synchronously
       Navigator.of(context).pop();
     }
   }
-
-//   @override
-//   void didChangeAppLifecycleState(AppLifecycleState state) {
-//     if (state == AppLifecycleState.resumed &&
-//         _mainDashBoard.speechToTextCheck) {
-// // It will start the listening what the user says
-//       _mainDashBoard.startListening(context);
-//     }
-//   }
 
   @override
   void dispose() {
     _mainDashBoard.isWatchingVideo = false;
 
-    _controller.dispose();
-
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -159,74 +150,37 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
       canPop: false,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Center(
-                child: _controller.isInitialized
-                    ? _controller.controller.value.hasError
-                        ? const Text('Error playing video')
-                        : AspectRatio(
-                            aspectRatio:
-                                _controller.controller.value.aspectRatio,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                VideoPlayer(_controller.controller),
-                              ],
-                            ),
-                          )
-                    : const CircularProgressIndicator(),
-              ),
-              // IconButton(
-              //   onPressed: (){
-              //     Navigator.of(context).pop();
-              //   },
-              //   icon: Container(
-              //
-              //     padding: const EdgeInsets.all(5),
-              //     decoration: BoxDecoration(
-              //         color: Colors.grey[300]!.withOpacity(0.4),
-              //         borderRadius: BorderRadius.circular(200)
-              //     ),
-              //     child: Icon(Icons.arrow_back,
-              //         size: 10,
-              //         color: Theme.of(context).inputDecorationTheme.iconColor),
-              //   ),
-              // ),
-              // Center(
-              //   child: IconButton(
-              //     onPressed: (){
-              //       Navigator.of(context).pop();
-              //     },
-              //     icon: Container(
-              //
-              //       padding: const EdgeInsets.all(5),
-              //       decoration: BoxDecoration(
-              //           color: Colors.grey[300]!,
-              //           borderRadius: BorderRadius.circular(200)
-              //       ),
-              //       child: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-              //           size: 20,
-              //           color: Theme.of(context).inputDecorationTheme.iconColor),
-              //     ),
-              //   ),
-              // ),
-            ],
-          ),
+        body: Center(
+          child: _isLoading
+              ? const CircularProgressIndicator() // Jab tak loading ho rahi hai
+              : _hasError
+                  ? const Text('Error playing video',
+                      style: TextStyle(color: Colors.white)) // Agar error aaye
+                  : _controller != null && _controller!.isInitialized
+                      ? AspectRatio(
+                          // Jab sab tayyar ho
+                          aspectRatio:
+                              _controller!.controller.value.aspectRatio,
+                          child: VideoPlayer(_controller!.controller),
+                        )
+                      : const Text('Could not initialize video',
+                          style: TextStyle(
+                              color: Colors.white)), // Ek fallback case
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            setState(() {
-              if (_controller.isInitialized) {
-                _controller.controller.value.isPlaying
-                    ? _controller.controller.pause()
-                    : _controller.controller.play();
-              }
-            });
+            if (_controller != null && _controller!.isInitialized) {
+              setState(() {
+                _controller!.controller.value.isPlaying
+                    ? _controller!.controller.pause()
+                    : _controller!.controller.play();
+              });
+            }
           },
           child: Icon(
-            _controller.isInitialized && _controller.controller.value.isPlaying
+            _controller != null &&
+                    _controller!.isInitialized &&
+                    _controller!.controller.value.isPlaying
                 ? Icons.pause
                 : Icons.play_arrow,
           ),

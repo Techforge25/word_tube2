@@ -1,6 +1,9 @@
 // ignore_for_file: prefer_final_fields
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/app_setting_provider.dart';
@@ -66,8 +69,15 @@ class ContentProvider extends ChangeNotifier {
         itemIndex < parentGrid.listData!.length) {
       GridModel gridItemToUpdate = parentGrid.listData![itemIndex];
 
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = path.basename(videoPath);
+      final newPath = path.join(directory.path, fileName);
+      final newFile = await File(videoPath).copy(newPath);
+
       gridItemToUpdate.videosPath ??= [];
       gridItemToUpdate.videosPath!.add(videoPath);
+      gridItemToUpdate.localVideosPath ??= [];
+      gridItemToUpdate.localVideosPath!.add(newFile.path);
 
       dev.log(
           "Adding video: $videoPath to GridItem at index $itemIndex on board $gridSizeModelId",

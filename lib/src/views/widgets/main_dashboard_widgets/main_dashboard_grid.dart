@@ -120,7 +120,10 @@ class _GridViewWidgetState extends State<GridViewWidget>
             Navigator.pushNamed(
               context,
               RouteStrings.videoPlayer,
-              arguments: grid.videosPath?[rand],
+              arguments: {
+                'url': grid.videosPath?[rand],
+                'localUrl': grid.localVideosPath?[rand],
+              },
             ).then((_) {
               if (widget.value.findTheWord) {
                 widget.value.setRandomIndex();

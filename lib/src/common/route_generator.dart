@@ -38,10 +38,14 @@ class RouteGenerator {
               // builder: (_) => const ResponsiveWrap(child: MainDashboard()));
               builder: (_) => const MainDashboard());
         case RouteStrings.videoPlayer:
+          final Map<String, dynamic> argsMap = args as Map<String, dynamic>;
           return SwipeLeftAnimationRoute(
               widget:
                   // ResponsiveWrap(child: VideoPlayerView(url: args as String)));
-                  VideoPlayerView(url: args as String));
+                  VideoPlayerView(
+            url: argsMap['url'] as String,
+            localUrl: argsMap['localUrl'] as String?,
+          ));
         default:
           return _errorRoute();
       }

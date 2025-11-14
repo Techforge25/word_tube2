@@ -63,7 +63,10 @@ Widget basicGrid({
                 Navigator.pushNamed(
                   context,
                   RouteStrings.videoPlayer,
-                  arguments: grid.videosPath?[rand],
+                  arguments: {
+                    'url': grid.videosPath?[rand],
+                    'localUrl': grid.localVideosPath?[rand],
+                  },
                 ).then((_) => value.setIsTapped(false));
               } else {
                 dev.log("Error occured no item  ");

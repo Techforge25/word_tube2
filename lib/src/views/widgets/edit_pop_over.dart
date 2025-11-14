@@ -471,7 +471,8 @@ class GrayNavBarOnEdit extends StatelessWidget {
                       id: widget.id,
                       itemIndex: widget.index,
                       title: mainDashboardController
-                          .editTitleTextEditingController.text);
+                          .editTitleTextEditingController.text
+                          .trim());
                   mainDashboardController.setGridSizedModel(
                       contentProvider
                           .allGridSizedModel[mainDashboardController.gridIndex],

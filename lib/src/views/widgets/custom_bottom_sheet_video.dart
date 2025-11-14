@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -90,11 +91,31 @@ class _CustomBottomSheetVideoState extends State<CustomBottomSheetVideo> {
                               }, cancelToken: _cancelCompleter!.future);
 
                               if (downloadUrl != null) {
+                                final localFile =
+                                    await AppUtility.saveVideoPermanently(
+                                        File(video.path));
                                 controller.addVideoToList(downloadUrl);
                                 await contentProvider.updateListDataItem(
-                                    id: controller.gridSizedModel.id ?? -1,
-                                    itemIndex: widget.index,
-                                    videosPath: controller.videos);
+                                  id: controller.gridSizedModel.id ?? -1,
+                                  itemIndex: widget.index,
+                                  videosPath: controller.videos,
+                                );
+                                contentProvider
+                                    .allGridSizedModel[widget.gridIndex]
+                                    .listData![widget.index]
+                                    .localVideosPath ??= [];
+                                contentProvider
+                                    .allGridSizedModel[widget.gridIndex]
+                                    .listData![widget.index]
+                                    .localVideosPath!
+                                    .add(localFile.path);
+                                await contentProvider.updateGridSizeModelData(
+                                    id: contentProvider
+                                        .allGridSizedModel[widget.gridIndex]
+                                        .id!,
+                                    listData: contentProvider
+                                        .allGridSizedModel[widget.gridIndex]
+                                        .listData);
                               }
                               controller.setIsLoading(false);
                               if (controller.gridIndex == widget.gridIndex) {
@@ -141,11 +162,31 @@ class _CustomBottomSheetVideoState extends State<CustomBottomSheetVideo> {
                                   controller.setUploadProgress(progress);
                                 }, cancelToken: _cancelCompleter!.future);
                                 if (downloadUrl != null) {
+                                  final localFile =
+                                      await AppUtility.saveVideoPermanently(
+                                          File(video.path));
                                   controller.addVideoToList(downloadUrl);
-                                  contentProvider.updateListDataItem(
-                                      id: widget.id,
-                                      itemIndex: widget.index,
-                                      videosPath: controller.videos);
+                                  await contentProvider.updateListDataItem(
+                                    id: widget.id,
+                                    itemIndex: widget.index,
+                                    videosPath: controller.videos,
+                                  );
+                                  contentProvider
+                                      .allGridSizedModel[widget.gridIndex]
+                                      .listData![widget.index]
+                                      .localVideosPath ??= [];
+                                  contentProvider
+                                      .allGridSizedModel[widget.gridIndex]
+                                      .listData![widget.index]
+                                      .localVideosPath!
+                                      .add(localFile.path);
+                                  await contentProvider.updateGridSizeModelData(
+                                      id: contentProvider
+                                          .allGridSizedModel[widget.gridIndex]
+                                          .id!,
+                                      listData: contentProvider
+                                          .allGridSizedModel[widget.gridIndex]
+                                          .listData);
                                 }
                                 controller.setIsLoading(false);
                               }

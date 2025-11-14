@@ -246,12 +246,13 @@ class MainDashboardController extends ChangeNotifier {
           matchedModel.videosPath!.isNotEmpty) {
         var rand = Random().nextInt(matchedModel.videosPath?.length ?? 0 + 1);
         dev.log("Navigating to: ${matchedModel.videosPath?[rand]}");
-        AppUtility.navigatorKey.currentState
-            ?.pushNamed(
+        AppUtility.navigatorKey.currentState?.pushNamed(
           RouteStrings.videoPlayer,
-          arguments: matchedModel.videosPath![rand],
-        )
-            .then((_) {
+          arguments: {
+            'url': matchedModel.videosPath![rand],
+            'localUrl': matchedModel.localVideosPath?[rand],
+          },
+        ).then((_) {
           isWatchingVideo = false;
           setSpeechToText(context);
         });
