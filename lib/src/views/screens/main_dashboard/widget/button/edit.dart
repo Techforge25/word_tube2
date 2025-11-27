@@ -43,75 +43,80 @@ class _EditWidgetState extends State<EditWidget> {
       height: context.height * 0.12,
       color: AppColor.yellow,
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          TextButton(
-            onPressed: () async =>
-                await widget.value.setHideButton(widget.contentProvider),
-            child: Text(
-              "Hide All",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: fontSize + 2,
-                  color: AppColor.appPrimaryColor),
-            ),
-          ),
-          Gap(widget.sizeWidth + 20),
-          TextButton(
-            onPressed: () async =>
-                await widget.value.showAllButton(widget.contentProvider),
-            child: Text(
-              "Show All",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: fontSize + 2,
-                  color: AppColor.appPrimaryColor),
-            ),
-          ),
-          Gap(widget.sizeWidth + 60),
-          Flexible(
-            child: CupertinoTextField(
-              style: TextStyle(fontSize: fontSize + 4),
-              decoration: BoxDecoration(
-                color: AppColor.white,
-                borderRadius: BorderRadius.circular(7.5),
+      child: SizedBox(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: TextButton(
+                onPressed: () async =>
+                    await widget.value.setHideButton(widget.contentProvider),
+                child: Text(
+                  "Hide All",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: fontSize + 2,
+                      color: AppColor.appPrimaryColor),
+                ),
               ),
-              cursorColor: AppColor.yellow,
-              maxLines: 1,
-              padding: EdgeInsets.all(context.height * 0.02),
-              controller: widget.controler,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(8),
-              ],
             ),
-          ),
-          Gap(widget.sizeWidth + 30),
-          // TextButton(
-          //   onPressed: () async =>
-          //       await widget.value.deleteBoardButton(widget.contentProvider),
-          //   child: Text(
-          //     "Delete Board",
-          //     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          //           fontWeight: FontWeight.w600,
-          //           fontSize: fontSize + 2,
-          //           color: AppColor.red,
-          //         ),
-          //   ),
-          // ),
-          // Gap(10),
-          TextButton(
-            onPressed: () async => widget.value.setDone(widget.contentProvider),
-            child: Text(
-              "Done",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            Gap(widget.sizeWidth + 20),
+            TextButton(
+              onPressed: () async =>
+                  await widget.value.showAllButton(widget.contentProvider),
+              child: Text(
+                "Show All",
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: fontSize + 2,
-                    color: AppColor.appPrimaryColor,
-                  ),
+                    color: AppColor.appPrimaryColor),
+              ),
             ),
-          ),
-        ],
+            Gap(widget.sizeWidth + 60),
+            Flexible(
+              child: CupertinoTextField(
+                style: TextStyle(fontSize: fontSize + 4),
+                decoration: BoxDecoration(
+                  color: AppColor.white,
+                  borderRadius: BorderRadius.circular(7.5),
+                ),
+                cursorColor: AppColor.yellow,
+                maxLines: 1,
+                padding: EdgeInsets.all(context.height * 0.02),
+                controller: widget.controler,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(8),
+                ],
+              ),
+            ),
+            Gap(widget.sizeWidth + 30),
+            // TextButton(
+            //   onPressed: () async =>
+            //       await widget.value.deleteBoardButton(widget.contentProvider),
+            //   child: Text(
+            //     "Delete Board",
+            //     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            //           fontWeight: FontWeight.w600,
+            //           fontSize: fontSize + 2,
+            //           color: AppColor.red,
+            //         ),
+            //   ),
+            // ),
+            // Gap(10),
+            TextButton(
+              onPressed: () async =>
+                  widget.value.setDone(widget.contentProvider),
+              child: Text(
+                "Done",
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: fontSize + 2,
+                      color: AppColor.appPrimaryColor,
+                    ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

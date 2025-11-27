@@ -38,6 +38,17 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
     _initController();
   }
 
+  @override
+  void didUpdateWidget(covariant VideoPlayerView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.localUrl != oldWidget.localUrl || widget.url != oldWidget.url) {
+      _isLoading = true;
+      _hasError = false;
+      _controller?.dispose();
+      _initController();
+    }
+  }
+
   Future<void> _initController() async {
     try {
       CachedVideoPlayerPlus newController;
@@ -147,25 +158,41 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(
-          child: _isLoading
-              ? const CircularProgressIndicator() // Jab tak loading ho rahi hai
-              : _hasError
-                  ? const Text('Error playing video',
-                      style: TextStyle(color: Colors.white)) // Agar error aaye
-                  : _controller != null && _controller!.isInitialized
-                      ? AspectRatio(
-                          // Jab sab tayyar ho
-                          aspectRatio:
-                              _controller!.controller.value.aspectRatio,
-                          child: VideoPlayer(_controller!.controller),
-                        )
-                      : const Text('Could not initialize video',
-                          style: TextStyle(
-                              color: Colors.white)), // Ek fallback case
+
+        body: Stack(
+          children: [
+            Center(
+              child: _isLoading
+                  ? const CircularProgressIndicator() // Jab tak loading ho rahi hai
+                  : _hasError
+                      ? const Text('Error playing video',
+                          style:
+                              TextStyle(color: Colors.white)) // Agar error aaye
+                      : _controller != null && _controller!.isInitialized
+                          ? AspectRatio(
+                              // Jab sab tayyar ho
+                              aspectRatio:
+                                  _controller!.controller.value.aspectRatio,
+                              child: VideoPlayer(_controller!.controller),
+                            )
+                          : const Text('Could not initialize video',
+                              style: TextStyle(
+                                  color: Colors.white)), // Ek fallback case
+            ),
+            Positioned(
+              left: 50,
+              top: 10,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                onPressed: () {
+                  _onVideoEnd();
+                },
+              ),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {

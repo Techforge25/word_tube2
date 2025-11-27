@@ -119,8 +119,12 @@ class FindTheWordRow extends StatelessWidget {
       children: [
         TextButton(
           onPressed: () {
-            mainDashboardController.setCurrentIndex();
-            mainDashboardController.clearFindTheWrongList();
+            if (!mainDashboardController.isRepeateTap) {
+              mainDashboardController.setIsRepeate(true);
+              mainDashboardController.setCurrentIndex();
+              mainDashboardController.clearFindTheWrongList();
+              mainDashboardController.setIsRepeate(false);
+            }
           },
           child: Text(
             "Repeat",

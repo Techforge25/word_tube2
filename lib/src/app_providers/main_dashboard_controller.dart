@@ -94,6 +94,9 @@ class MainDashboardController extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _isRepeateTap = false;
+  bool get isRepeateTap => _isRepeateTap;
+
   void setIsLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -101,6 +104,11 @@ class MainDashboardController extends ChangeNotifier {
 
   void setIsTapped(bool value) {
     _isTapped = value;
+    notifyListeners();
+  }
+
+  void setIsRepeate(bool value) {
+    _isRepeateTap = value;
     notifyListeners();
   }
 
@@ -147,11 +155,28 @@ class MainDashboardController extends ChangeNotifier {
   String lastWords = '';
 
   Future<void> initSpeechToText() async {
-    speechEnabled = await speechToText.initialize(
-      onStatus: onStatus,
-      onError: onError,
-    );
-    notifyListeners();
+    try {
+      // Stop any existing listening session before initializing
+      if (speechToText.isListening) {
+        await speechToText.stop();
+      }
+
+      speechEnabled = await speechToText.initialize(
+        onStatus: onStatus,
+        onError: onError,
+      );
+
+      if (!speechEnabled) {
+        dev.log('Speech recognition not available', name: 'Microphone');
+      }
+
+      notifyListeners();
+    } catch (e) {
+      dev.log('Error initializing speech recognition: $e', name: 'Microphone');
+      speechEnabled = false;
+      _speechToTextCheck = false;
+      notifyListeners();
+    }
   }
 
   void onStatus(String s) {
@@ -172,34 +197,59 @@ class MainDashboardController extends ChangeNotifier {
   double get soundLevel => _soundLevel;
 
   void startListening(BuildContext context) async {
-    if (!speechEnabled) await initSpeechToText();
-    if (speechToText.isListening) {
-      dev.log('Already listening, ignoring duplicate startListening call.',
-          name: 'Microphone');
-      return;
-    }
-
     try {
+      if (!speechEnabled) {
+        await initSpeechToText();
+        // If still not enabled after initialization, return
+        if (!speechEnabled) {
+          dev.log('Speech recognition not available, cannot start listening',
+              name: 'Microphone');
+          _speechToTextCheck = false;
+          notifyListeners();
+          return;
+        }
+      }
+
+      // Ensure any existing session is stopped
+      if (speechToText.isListening) {
+        await speechToText.stop();
+        // Wait a bit for cleanup
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+
       await speechToText.listen(
         onResult: (result) {
-          dev.log(result.recognizedWords);
-          if (_speechToTextCheck) {
+          if (result.finalResult) {
+            dev.log('Final result: ${result.recognizedWords}',
+                name: 'Microphone');
+          } else {
+            dev.log('Partial: ${result.recognizedWords}', name: 'Microphone');
+          }
+
+          if (_speechToTextCheck && result.recognizedWords.isNotEmpty) {
             onSpeechResult(result, context);
           }
         },
         listenFor: const Duration(seconds: 30),
-        //pauseFor: const Duration(seconds: 20),
-        // cancelOnError: true,
+        pauseFor: const Duration(seconds: 3),
+        partialResults: true,
+        cancelOnError: false, // Don't cancel on error, handle it gracefully
+        localeId: "en_US", // Specify locale for better recognition
         onSoundLevelChange: (level) {
           _soundLevel = level;
           notifyListeners();
         },
       );
-    } catch (e) {
-      dev.log('$e', name: 'Microphone Error');
-    }
 
-    notifyListeners();
+      _speechToTextCheck = true;
+      notifyListeners();
+    } catch (e) {
+      dev.log('Error starting speech recognition: $e',
+          name: 'Microphone Error');
+      _speechToTextCheck = false;
+      speechEnabled = false;
+      notifyListeners();
+    }
   }
 
   /// Manually stop the active speech recognition session
@@ -333,15 +383,22 @@ class MainDashboardController extends ChangeNotifier {
         //     return false;
         //   }
         // }).toList();
-        var existingVoice = hiveStorage.getData(DBKey.voiceKey);
-        _currentVoice = existingVoice != null
-            ? jsonDecode(existingVoice)
+        // Try to load voice for current board, fallback to global/default
+        final savedVoice = hiveStorage.getData(DBKey.voiceKey);
+        _currentVoice = savedVoice != null
+            ? jsonDecode(savedVoice)
             : _voices
                 .where(
                     (v) => (v['gender'] == 'female' && v['locale'] == 'en-US'))
                 .first;
 
-        setVoice(_currentVoice!);
+        try {
+          setVoice(_currentVoice!).catchError((e) {
+            dev.log('Error setting initial voice: $e', name: 'Voice TTS Error');
+          });
+        } catch (e) {
+          dev.log('Error setting initial voice: $e', name: 'Voice TTS Error');
+        }
 
         notifyListeners();
       } catch (e) {
@@ -351,17 +408,125 @@ class MainDashboardController extends ChangeNotifier {
   }
 
   onVoiceTap(Map v, BuildContext context) async {
-    _currentVoice = v;
-    dev.log(v.toString(), name: 'SelectedVoice');
-    Navigator.pop(context);
-    await setVoice(v);
+    try {
+      // Stop any ongoing speech before changing voice (important for iPad)
+      try {
+        await _flutterTts.stop();
+        // Wait a bit for TTS to fully stop (important for iPad)
+        await Future.delayed(const Duration(milliseconds: 200));
+      } catch (e) {
+        // If stop fails, continue anyway
+        dev.log('Error stopping TTS: $e', name: 'Voice TTS');
+      }
+
+      _currentVoice = v;
+      dev.log(v.toString(), name: 'SelectedVoice');
+
+      // Pop navigator before setting voice to avoid context issues
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      await setVoice(v);
+    } catch (e) {
+      dev.log('Error in onVoiceTap: $e', name: 'Voice TTS Error');
+      // Still pop if voice setting fails
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      // Optionally show error to user
+    }
   }
 
   Future<void> setVoice(Map voice) async {
-    await _flutterTts
-        .setVoice({"name": voice["name"], "locale": voice["locale"]});
+    try {
+      // Validate voice data before setting
+      if (voice["name"] == null || voice["locale"] == null) {
+        dev.log('Invalid voice data: missing name or locale',
+            name: 'Voice TTS Error');
+        return;
+      }
 
+      // Stop any ongoing speech first
+      try {
+        await _flutterTts.stop();
+        await Future.delayed(const Duration(milliseconds: 100));
+      } catch (e) {
+        // If stop fails, continue anyway - might not be speaking
+        dev.log('TTS stop error (might not be speaking): $e',
+            name: 'Voice TTS');
+      }
+
+      // Set voice with error handling
+      final result = await _flutterTts
+          .setVoice({"name": voice["name"], "locale": voice["locale"]});
+
+      if (result == 1) {
+        dev.log('Voice set successfully: ${voice["name"]}', name: 'Voice TTS');
+        // Save voice per board/page instead of globally
+        await _saveVoiceForCurrentBoard(voice);
+      } else {
+        dev.log('Failed to set voice. Result: $result',
+            name: 'Voice TTS Error');
+      }
+    } catch (e) {
+      dev.log('Error setting voice: $e', name: 'Voice TTS Error');
+      // Re-throw or handle error as needed
+      rethrow;
+    }
+  }
+
+  // Save voice per board/page
+  Future<void> _saveVoiceForCurrentBoard(Map voice) async {
+    if (_gridSizedModel.id != null) {
+      final voiceKey = '${DBKey.voiceKey}_${_gridSizedModel.id}';
+      hiveStorage.putData(voiceKey, jsonEncode(voice));
+    }
+    // Also save as global fallback
     hiveStorage.putData(DBKey.voiceKey, jsonEncode(voice));
+  }
+
+  // Load voice for current board/page
+  Future<void> loadVoiceForCurrentBoard() async {
+    try {
+      Map? voice;
+
+      // Try to load voice for current board first
+      if (_gridSizedModel.id != null) {
+        final voiceKey = '${DBKey.voiceKey}_${_gridSizedModel.id}';
+        final savedVoice = hiveStorage.getData(voiceKey);
+        if (savedVoice != null) {
+          voice = jsonDecode(savedVoice);
+          dev.log(
+              'Loaded voice for board ${_gridSizedModel.id}: ${voice?["name"]}',
+              name: 'Voice TTS');
+        }
+      }
+
+      // Fallback to global voice if board-specific not found
+      if (voice == null) {
+        final savedVoice = hiveStorage.getData(DBKey.voiceKey);
+        if (savedVoice != null) {
+          voice = jsonDecode(savedVoice);
+          dev.log('Loaded global voice: ${voice?["name"]}', name: 'Voice TTS');
+        }
+      }
+
+      // If still no voice found, use default
+      if (voice == null && _voices.isNotEmpty) {
+        voice = _voices.firstWhere(
+          (v) => (v['gender'] == 'female' && v['locale'] == 'en-US'),
+          orElse: () => _voices.first,
+        );
+      }
+
+      if (voice != null) {
+        _currentVoice = voice;
+        await setVoice(voice);
+      }
+    } catch (e) {
+      dev.log('Error loading voice for board: $e', name: 'Voice TTS Error');
+    }
   }
 
 //   setGridSizedModel(GridSizeModel grid, int index) {
@@ -513,27 +678,164 @@ class MainDashboardController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeVideosFromList(int index, int gridIndex, int id, int itemIndex,
-      ContentProvider contentProvider) {
-    if (index < 0 || index >= _videos.length) return;
-    dismissedVideos.add(_videos[index]);
-    _videos.removeAt(index);
-    if (_videos.isEmpty) {
-      dev.log("No videos left, will play only word sound.");
+  // void removeVideosFromList(int index, int gridIndex, int id, int itemIndex,
+  //     ContentProvider contentProvider) {
+  //   if (index < 0 || index >= _videos.length) return;
+  //   dismissedVideos.add(_videos[index]);
+  //   _videos.removeAt(index);
+  //   if (_videos.isEmpty) {
+  //     dev.log("No videos left, will play only word sound.");
+  //   }
+
+  //   contentProvider.updateListDataItem(
+  //     id: id,
+  //     itemIndex: itemIndex,
+  //     videosPath: _videos,
+  //   );
+
+  //   setGridSizedModel(contentProvider.allGridSizedModel[gridIndex], gridIndex);
+
+  //   dev.log("Video removed at index $index, remaining: ${_videos.length}");
+
+  //   notifyListeners();
+  // }
+  // MainDashboardController class ke andar is function ko replace karein
+
+  void removeVideosFromList(
+    int index,
+    int gridIndex,
+    int id,
+    int itemIndex,
+    ContentProvider contentProvider,
+  ) {
+    // Safety check
+    if (index < 0 || index >= _videos.length) {
+      dev.log("Invalid index, cannot remove video.");
+      return;
     }
 
-    contentProvider.updateListDataItem(
-      id: id,
-      itemIndex: itemIndex,
-      videosPath: _videos,
-    );
+    final String remoteUrlToDelete = _videos[index];
+    String localPathToDelete = "";
 
-    setGridSizedModel(contentProvider.allGridSizedModel[gridIndex], gridIndex);
+    _videos.removeAt(index);
 
-    dev.log("Video removed at index $index, remaining: ${_videos.length}");
+    // Data source (ContentProvider) se bhi local path (agar hai) aur remote path foran remove karein
+    final listDataItem =
+        contentProvider.allGridSizedModel[gridIndex].listData![itemIndex];
 
+    // Remote URL list se remove karein
+    if (listDataItem.videosPath != null &&
+        index < listDataItem.videosPath!.length) {
+      listDataItem.videosPath!.removeAt(index);
+    }
+
+    if (listDataItem.localVideosPath != null &&
+        index < listDataItem.localVideosPath!.length) {
+      localPathToDelete =
+          listDataItem.localVideosPath![index]; // Path hasil karein
+      listDataItem.localVideosPath!.removeAt(index); // Remove karein
+    }
     notifyListeners();
+    _deleteVideoFromStorage(remoteUrlToDelete, localPathToDelete, id,
+        contentProvider.allGridSizedModel[gridIndex]);
+
+    dev.log("UI updated instantly. Background deletion started.");
   }
+
+// YEH NAYA HELPER FUNCTION HAI JO BACKGROUND MEIN CHALEGA
+  Future<void> _deleteVideoFromStorage(String remoteUrl, String localPath,
+      int gridId, GridSizeModel updatedGridModel) async {
+    try {
+      if (localPath.isNotEmpty) {
+        final file = File(localPath);
+        if (await file.exists()) {
+          await file.delete();
+          dev.log("Deleted from local storage.");
+        }
+      }
+
+      final contentProvider = sl<ContentProvider>();
+      await contentProvider.updateGridSizeModelData(
+        id: gridId,
+        listData: updatedGridModel.listData,
+      );
+      dev.log("Database updated after background deletion.");
+    } catch (e) {
+      dev.log("Error during background deletion: $e");
+      // Yahan par error handling kar sakte hain, jaise user ko batana ke delete fail ho gaya
+    }
+  }
+
+  // Future<void> removeVideosFromList(
+  //   int index,
+  //   int gridIndex,
+  //   int id,
+  //   int itemIndex,
+  //   ContentProvider contentProvider,
+  // ) async {
+  //   try {
+  //     final listDataItem =
+  //         contentProvider.allGridSizedModel[gridIndex].listData![itemIndex];
+
+  //     if (listDataItem.videosPath == null ||
+  //         index >= listDataItem.videosPath!.length) {
+  //       dev.log(
+  //           "Error: Remote video list is null or index is out of bounds. Cannot delete.");
+  //       return; // Function ko yahin rok dein
+  //     }
+
+  //     final String remoteUrlToDelete = listDataItem.videosPath![index];
+  //     String localPathToDelete = "";
+
+  //     if (listDataItem.localVideosPath != null &&
+  //         index < listDataItem.localVideosPath!.length) {
+  //       localPathToDelete = listDataItem.localVideosPath![index];
+  //     }
+  //     notifyListeners();
+
+  //     dev.log("Attempting to delete video at index $index...");
+  //     dev.log("Remote URL: $remoteUrlToDelete");
+  //     dev.log("Local Path (if available): $localPathToDelete");
+
+  //     // Step 4: Local storage se delete karein (agar path valid hai to)
+  //     if (localPathToDelete.isNotEmpty) {
+  //       final localFile = File(localPathToDelete);
+  //       if (await localFile.exists()) {
+  //         // Yeh check Invalid Path ke issue ko solve karta hai
+  //         await localFile.delete();
+  //         dev.log("Local file deleted successfully: $localPathToDelete");
+  //       } else {
+  //         dev.log(
+  //             "Local file not found at path (this is expected after sharing). Skipping delete: $localPathToDelete");
+  //       }
+  //     }
+
+  //     listDataItem.videosPath!.removeAt(index);
+  //     notifyListeners();
+
+  //     // Sirf tab local list se remove karein agar woh valid thi
+  //     if (listDataItem.localVideosPath != null &&
+  //         index < listDataItem.localVideosPath!.length) {
+  //       listDataItem.localVideosPath!.removeAt(index);
+  //     }
+
+  //     await contentProvider.updateGridSizeModelData(
+  //       id: contentProvider.allGridSizedModel[gridIndex].id!,
+  //       listData: contentProvider.allGridSizedModel[gridIndex].listData,
+  //     );
+
+  //     // Controller ki state ko update karein
+  //     await setGridSizedModel(
+  //       contentProvider.allGridSizedModel[gridIndex],
+  //       gridIndex,
+  //     );
+  //     notifyListeners();
+
+  //     dev.log("Cleanup complete. Video reference removed from data source.");
+  //   } catch (e) {
+  //     dev.log("An unexpected error occurred during video deletion: $e");
+  //   }
+  // }
 
   getImagePath(String imagePath) {
     _imagePath = imagePath;
@@ -899,6 +1201,10 @@ class MainDashboardController extends ChangeNotifier {
     _gridIndex = index;
     boradTitleController.text =
         grid.title ?? ''; // Edit controller ko update karein
+
+    // Load voice settings for this board/page
+    await loadVoiceForCurrentBoard();
+
     notifyListeners();
   }
 
@@ -932,7 +1238,12 @@ class MainDashboardController extends ChangeNotifier {
 
       // 5. share_plus ka istemal karke file ko share karein
       final result = await Share.shareXFiles(
-        [XFile(filePath)],
+        [
+          XFile(
+            filePath,
+            mimeType: 'application/wtdata',
+          )
+        ],
         subject: 'Check out this board: ${_gridSizedModel.title}',
         text: 'I created a board in Word Toob and wanted to share it with you!',
         sharePositionOrigin: sharePositionOrigin,

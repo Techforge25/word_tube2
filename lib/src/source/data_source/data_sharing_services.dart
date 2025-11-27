@@ -24,8 +24,12 @@ class DataSharingService {
       dev.log('File created for sharing at: $filePath');
 
       // 3. Share sheet open karo
-      await Share.shareXFiles([XFile(filePath)],
-          text: 'Check out this game data!');
+      await Share.shareXFiles([
+        XFile(
+          filePath,
+          mimeType: 'application/wtdata',
+        ),
+      ], text: 'Check out this game data!');
 
       dev.log('Share sheet opened for grid data.');
 
@@ -52,8 +56,12 @@ class DataSharingService {
 
       dev.log('Multiple models file created for sharing at: $filePath');
 
-      await Share.shareXFiles([XFile(filePath)],
-          text: 'Check out these game data files!');
+      await Share.shareXFiles([
+        XFile(
+          filePath,
+          mimeType: 'application/wtdata',
+        )
+      ], text: 'Check out these game data files!');
 
       dev.log('Share sheet opened for multiple grid data files.');
     } catch (e) {

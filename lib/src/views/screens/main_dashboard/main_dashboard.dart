@@ -32,11 +32,65 @@ class SharedBoardPreviewScreen extends StatelessWidget {
             Text("Board Title: ${board.title}"),
             Text("Grid Size: ${board.gridSizeX}x${board.gridSizeY}"),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 // Logic to add the board
                 final contentProvider = sl<ContentProvider>();
-                contentProvider.saveGridSizedModel(gridSizedModel: board);
-                Navigator.of(context).pushReplacementNamed('/');
+                final mainDashboardController = sl<MainDashboardController>();
+
+                // Save the board
+                await contentProvider.saveGridSizedModel(gridSizedModel: board);
+
+                // Refresh the list to get the newly saved board with its ID
+                await contentProvider.getAllGridSizeModel();
+
+                // Find the newly saved board (it should have the same title)
+                GridSizeModel? savedBoard;
+                int? savedBoardIndex;
+
+                for (int i = 0;
+                    i < contentProvider.allGridSizedModel.length;
+                    i++) {
+                  if (contentProvider.allGridSizedModel[i].title ==
+                          board.title &&
+                      contentProvider.allGridSizedModel[i].id != null) {
+                    savedBoard = contentProvider.allGridSizedModel[i];
+                    savedBoardIndex = i;
+                    break;
+                  }
+                }
+
+                // If board was found, set it as current and navigate to main dashboard
+                if (savedBoard != null && savedBoardIndex != null) {
+                  // Set this board as selected
+                  await contentProvider.updateGridSizeModelData(
+                    id: savedBoard.id!,
+                    currentSelected: true,
+                  );
+
+                  // Unselect all other boards
+                  for (var otherBoard in contentProvider.allGridSizedModel) {
+                    if (otherBoard.id != savedBoard.id &&
+                        otherBoard.currentSelected == true) {
+                      await contentProvider.updateGridSizeModelData(
+                        id: otherBoard.id!,
+                        currentSelected: false,
+                      );
+                    }
+                  }
+
+                  // Refresh again to get updated state
+                  await contentProvider.getAllGridSizeModel();
+
+                  // Set the board in controller
+                  await mainDashboardController.setGridSizedModel(
+                      savedBoard, savedBoardIndex);
+
+                  // Navigate to main dashboard - it will automatically show the new board
+                  Navigator.of(context).pushReplacementNamed('/');
+                } else {
+                  // Fallback: just navigate if board not found
+                  Navigator.of(context).pushReplacementNamed('/');
+                }
               },
               child: Text("Add to My Boards"),
             ),

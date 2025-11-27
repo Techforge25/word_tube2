@@ -38,6 +38,29 @@ Widget basicGrid({
               value.stopListening();
             }
 
+            // Safely handle missing image - check if imagepath exists and is valid
+            String picturePath = "";
+            try {
+              if (grid.imagepath != null &&
+                  grid.imagepath!.isNotEmpty &&
+                  grid.imagepath! != "null") {
+                // Verify file exists if it's a local file path
+                if (!grid.imagepath!.startsWith("http") &&
+                    !grid.imagepath!.startsWith("assets") &&
+                    !grid.imagepath!.startsWith("asset")) {
+                  final file = File(grid.imagepath!);
+                  if (await file.exists()) {
+                    picturePath = grid.imagepath!;
+                  }
+                } else {
+                  picturePath = grid.imagepath!;
+                }
+              }
+            } catch (e) {
+              dev.log('Error checking image path: $e', name: 'Grid Normal');
+              picturePath = "";
+            }
+
             // value.setItemOnEditState(index,context,title: "Happy",picture: MyAssets.happy );
             await value.flutterTts.speak(grid.title ?? "");
             await Future.delayed(Duration(milliseconds: 500));
@@ -46,7 +69,7 @@ Widget basicGrid({
               index,
               context,
               title: grid.title ?? '',
-              picture: grid.imagepath ?? "",
+              picture: picturePath, // Use validated picture path
               id: value.gridSizedModel.id ?? -1,
               videoPath: grid.videosPath ?? [],
               gridIndex: value.gridIndex,
@@ -56,16 +79,25 @@ Widget basicGrid({
 
             if (!value.editPressedYello) {
               if (grid.videosPath?.isNotEmpty ?? false) {
-                var rand = Random().nextInt(grid.videosPath?.length ?? 0 + 1);
+                final videos = grid.videosPath!;
+                final localVideos = grid.localVideosPath;
+                final rand = Random().nextInt(videos.length);
 
-                dev.log(grid.videosPath!.length.toString());
+                dev.log(videos.length.toString() + ' ${rand}');
+
+                String? localUrl;
+                if (localVideos != null &&
+                    localVideos.isNotEmpty &&
+                    rand < localVideos.length) {
+                  localUrl = localVideos[rand];
+                }
 
                 Navigator.pushNamed(
                   context,
                   RouteStrings.videoPlayer,
                   arguments: {
-                    'url': grid.videosPath?[rand],
-                    'localUrl': grid.localVideosPath?[rand],
+                    'url': videos[rand],
+                    'localUrl': localUrl,
                   },
                 ).then((_) => value.setIsTapped(false));
               } else {
@@ -101,7 +133,8 @@ Widget basicGrid({
                       SizedBox(height: context.height * 0.008),
                       if (value.settingsWordOnlyShow == 1)
                         Flexible(
-                          child: grid.imagepath != null
+                          child: grid.imagepath != null &&
+                                  grid.imagepath!.isNotEmpty
                               ? grid.imagepath!.startsWith("http")
                                   ? CachedNetworkImage(
                                       imageUrl: grid.imagepath!,
@@ -165,7 +198,8 @@ Widget basicGrid({
                           SizedBox(height: context.height * 0.008),
                           if (value.settingsWordOnlyShow == 1)
                             Flexible(
-                              child: grid.imagepath != null
+                              child: grid.imagepath != null &&
+                                      grid.imagepath!.isNotEmpty
                                   ? grid.imagepath!.startsWith("http")
                                       ? CachedNetworkImage(
                                           imageUrl: grid.imagepath!,

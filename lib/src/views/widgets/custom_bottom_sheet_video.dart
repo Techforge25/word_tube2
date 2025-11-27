@@ -175,6 +175,7 @@ class _CustomBottomSheetVideoState extends State<CustomBottomSheetVideo> {
                                       .allGridSizedModel[widget.gridIndex]
                                       .listData![widget.index]
                                       .localVideosPath ??= [];
+
                                   contentProvider
                                       .allGridSizedModel[widget.gridIndex]
                                       .listData![widget.index]

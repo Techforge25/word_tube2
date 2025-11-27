@@ -99,19 +99,23 @@ class _EditPopOverState extends State<EditPopOver> {
                               const Gap(10),
                               mainDashboardController.isEditPressed
                                   ? SizedBox(
-                                      width: context.width * 0.1,
                                       child: TextFormField(
                                         onTapOutside: (e) => FocusManager
                                             .instance.primaryFocus
                                             ?.unfocus(),
-
+                                        maxLength: 20,
                                         style: TextStyle(
                                             fontSize: fontSize,
                                             color: AppColor.appPrimaryColor),
-
                                         controller: mainDashboardController
                                             .editTitleTextEditingController,
-                                        // decoration: InputDecoration(),
+                                        decoration: InputDecoration(
+                                          hintText: 'store key',
+                                          hintStyle: TextStyle(
+                                              fontSize: fontSize * 0.9,
+                                              color: Colors.grey.shade700,
+                                              fontWeight: FontWeight.w400),
+                                        ),
                                       ),
                                     )
                                   : Text(
@@ -140,27 +144,168 @@ class _EditPopOverState extends State<EditPopOver> {
                                         decoration: BoxDecoration(
                                           border: Border.all(),
                                         ),
+                                        child: Icon(
+                                          Icons.image_outlined,
+                                          color: Colors.grey,
+                                          size: context.width * 0.1,
+                                        ),
                                       )
                                     : mainDashboardController.imagePath == ""
-                                        ? widget.picture.contains("asset")
+                                        ? widget.picture.isNotEmpty &&
+                                                widget.picture != "null" &&
+                                                (widget.picture
+                                                        .contains("asset") ||
+                                                    widget.picture
+                                                        .contains("assets"))
                                             ? Image.asset(
                                                 widget.picture,
                                                 height: context.width * 0.25,
                                                 width: context.width * 0.25,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return Container(
+                                                    width: context.width * 0.25,
+                                                    height:
+                                                        context.width * 0.25,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  );
+                                                },
                                               )
-                                            : widget.picture.startsWith('http')
+                                            : widget.picture.isNotEmpty &&
+                                                    widget.picture != "null" &&
+                                                    widget.picture
+                                                        .startsWith('http')
                                                 ? CachedNetworkImage(
                                                     imageUrl: widget.picture,
                                                     height:
                                                         context.width * 0.25,
                                                     width: context.width * 0.25,
+                                                    errorWidget:
+                                                        (context, url, error) {
+                                                      return Container(
+                                                        width: context.width *
+                                                            0.25,
+                                                        height: context.width *
+                                                            0.25,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(),
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.broken_image,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      );
+                                                    },
                                                   )
-                                                : Image.file(
-                                                    File(widget.picture),
-                                                    height:
-                                                        context.width * 0.25,
-                                                    width: context.width * 0.25,
-                                                  )
+                                                : widget.picture.isNotEmpty &&
+                                                        widget.picture != "null"
+                                                    ? Builder(
+                                                        builder: (context) {
+                                                          try {
+                                                            final file = File(
+                                                                widget.picture);
+                                                            if (file
+                                                                .existsSync()) {
+                                                              return Image.file(
+                                                                file,
+                                                                height: context
+                                                                        .width *
+                                                                    0.25,
+                                                                width: context
+                                                                        .width *
+                                                                    0.25,
+                                                                errorBuilder:
+                                                                    (context,
+                                                                        error,
+                                                                        stackTrace) {
+                                                                  return Container(
+                                                                    width: context
+                                                                            .width *
+                                                                        0.25,
+                                                                    height: context
+                                                                            .width *
+                                                                        0.25,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      border: Border
+                                                                          .all(),
+                                                                    ),
+                                                                    child: Icon(
+                                                                      Icons
+                                                                          .broken_image,
+                                                                      color: Colors
+                                                                          .grey,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              );
+                                                            } else {
+                                                              return Container(
+                                                                width: context
+                                                                        .width *
+                                                                    0.25,
+                                                                height: context
+                                                                        .width *
+                                                                    0.25,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  border: Border
+                                                                      .all(),
+                                                                ),
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .image_outlined,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              );
+                                                            }
+                                                          } catch (e) {
+                                                            return Container(
+                                                              width: context
+                                                                      .width *
+                                                                  0.25,
+                                                              height: context
+                                                                      .width *
+                                                                  0.25,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                border: Border
+                                                                    .all(),
+                                                              ),
+                                                              child: Icon(
+                                                                Icons
+                                                                    .broken_image,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                            );
+                                                          }
+                                                        },
+                                                      )
+                                                    : Container(
+                                                        width: context.width *
+                                                            0.25,
+                                                        height: context.width *
+                                                            0.25,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(),
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.image_outlined,
+                                                          color: Colors.grey,
+                                                          size: context.width *
+                                                              0.1,
+                                                        ),
+                                                      )
                                         : mainDashboardController.imagePath
                                                 .startsWith('http')
                                             ? CachedNetworkImage(
@@ -169,12 +314,90 @@ class _EditPopOverState extends State<EditPopOver> {
                                                         .imagePath,
                                                 height: context.width * 0.25,
                                                 width: context.width * 0.25,
+                                                errorWidget:
+                                                    (context, url, error) {
+                                                  return Container(
+                                                    width: context.width * 0.25,
+                                                    height:
+                                                        context.width * 0.25,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  );
+                                                },
                                               )
-                                            : Image.file(
-                                                File(mainDashboardController
-                                                    .imagePath),
-                                                height: context.width * 0.25,
-                                                width: context.width * 0.25,
+                                            : Builder(
+                                                builder: (context) {
+                                                  try {
+                                                    final file = File(
+                                                        mainDashboardController
+                                                            .imagePath);
+                                                    if (file.existsSync()) {
+                                                      return Image.file(
+                                                        file,
+                                                        height: context.width *
+                                                            0.25,
+                                                        width: context.width *
+                                                            0.25,
+                                                        errorBuilder: (context,
+                                                            error, stackTrace) {
+                                                          return Container(
+                                                            width:
+                                                                context.width *
+                                                                    0.25,
+                                                            height:
+                                                                context.width *
+                                                                    0.25,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              border:
+                                                                  Border.all(),
+                                                            ),
+                                                            child: Icon(
+                                                              Icons
+                                                                  .broken_image,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    } else {
+                                                      return Container(
+                                                        width: context.width *
+                                                            0.25,
+                                                        height: context.width *
+                                                            0.25,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(),
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.image_outlined,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      );
+                                                    }
+                                                  } catch (e) {
+                                                    return Container(
+                                                      width:
+                                                          context.width * 0.25,
+                                                      height:
+                                                          context.width * 0.25,
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(),
+                                                      ),
+                                                      child: Icon(
+                                                        Icons.broken_image,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
                                               ),
                               ),
                               const Gap(10),
@@ -295,6 +518,7 @@ class _EditPopOverState extends State<EditPopOver> {
                                       // onDismissed: (direction) {
 
                                       // },
+
                                       endActionPane: ActionPane(
                                         motion: const ScrollMotion(),
                                         dismissible:
@@ -346,7 +570,10 @@ class _EditPopOverState extends State<EditPopOver> {
                                         onTap: () => Navigator.pushNamed(
                                           context,
                                           RouteStrings.videoPlayer,
-                                          arguments: video,
+                                          arguments: {
+                                            'url': video,
+                                            'localUrl': video
+                                          },
                                         ),
                                       ),
                                     );
@@ -366,7 +593,10 @@ class _EditPopOverState extends State<EditPopOver> {
                                       onTap: () => Navigator.pushNamed(
                                         context,
                                         RouteStrings.videoPlayer,
-                                        arguments: video,
+                                        arguments: {
+                                          'url': video,
+                                          'localUrl': video
+                                        },
                                       ),
                                     );
                                   }
@@ -478,7 +708,7 @@ class GrayNavBarOnEdit extends StatelessWidget {
                           .allGridSizedModel[mainDashboardController.gridIndex],
                       mainDashboardController.gridIndex);
                   mainDashboardController.clearEditTitleControllerText();
-// ignore: use_build_context_synchronously
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                 }
               },
