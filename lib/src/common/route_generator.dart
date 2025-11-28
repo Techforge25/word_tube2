@@ -13,6 +13,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
+import 'package:word_toob/src/services/firebase_storage_service.dart';
+import 'package:word_toob/src/common/utils/app_utility.dart';
+
 import 'dart:developer' as dev;
 
 class RouteGenerator {
@@ -82,7 +85,93 @@ class BoardLoaderScreen extends StatelessWidget {
         throw Exception("Shared file is empty.");
       }
       final jsonData = jsonDecode(jsonString);
-      return GridSizeModel.fromJson(jsonData);
+      final board = GridSizeModel.fromJson(jsonData);
+
+      // Ab cloud URLs se media files download karke locally save karein
+      final firebaseService = FirebaseStorageService();
+      final appDocumentsDir = await getApplicationDocumentsDirectory();
+
+      for (var item in board.listData ?? []) {
+        // Download image if it's a cloud URL
+        if (item.imagepath != null &&
+            item.imagepath!.isNotEmpty &&
+            item.imagepath!.startsWith('http')) {
+          try {
+            final fileName =
+                '${DateTime.now().millisecondsSinceEpoch}_${item.imagepath!.split('/').last.split('?').first}';
+            final localImagePath = '${appDocumentsDir.path}/$fileName';
+
+            final downloadedFile = await firebaseService.downloadFile(
+              item.imagepath!,
+              localImagePath,
+              onProgress: (progress) {
+                // Progress can be shown if needed
+                dev.log(
+                    'Downloading image: ${(progress * 100).toStringAsFixed(0)}%');
+              },
+            );
+
+            if (downloadedFile != null && await downloadedFile.exists()) {
+              item.imagepath = downloadedFile.path;
+              dev.log(
+                  'Image downloaded and saved locally: ${downloadedFile.path}');
+            }
+          } catch (e) {
+            dev.log('Error downloading image: $e');
+            // Keep the cloud URL if download fails
+          }
+        }
+
+        // Download videos if they are cloud URLs
+        if (item.videosPath != null) {
+          final updatedVideos = <String>[];
+          final updatedLocalVideos = <String>[];
+
+          for (var videoUrl in item.videosPath!) {
+            if (videoUrl.isNotEmpty && videoUrl.startsWith('http')) {
+              try {
+                final fileName =
+                    '${DateTime.now().millisecondsSinceEpoch}_${videoUrl.split('/').last.split('?').first}';
+                final localVideoPath = '${appDocumentsDir.path}/$fileName';
+
+                final downloadedFile = await firebaseService.downloadFile(
+                  videoUrl,
+                  localVideoPath,
+                  onProgress: (progress) {
+                    dev.log(
+                        'Downloading video: ${(progress * 100).toStringAsFixed(0)}%');
+                  },
+                );
+
+                if (downloadedFile != null && await downloadedFile.exists()) {
+                  updatedVideos.add(downloadedFile.path);
+                  updatedLocalVideos.add(downloadedFile.path);
+                  dev.log(
+                      'Video downloaded and saved locally: ${downloadedFile.path}');
+                } else {
+                  updatedVideos.add(videoUrl); // Keep URL if download fails
+                }
+              } catch (e) {
+                dev.log('Error downloading video: $e');
+                updatedVideos.add(videoUrl); // Keep URL if download fails
+              }
+            } else {
+              // Already a local path
+              updatedVideos.add(videoUrl);
+              if (item.localVideosPath != null &&
+                  item.localVideosPath!.contains(videoUrl)) {
+                updatedLocalVideos.add(videoUrl);
+              }
+            }
+          }
+
+          item.videosPath = updatedVideos;
+          item.localVideosPath =
+              updatedLocalVideos.isNotEmpty ? updatedLocalVideos : null;
+        }
+      }
+
+      return board;
     } catch (e) {
       dev.log("BoardLoader: Failed to load board.", error: e);
       // Error ko aage pass karein taaki FutureBuilder use handle kar sake

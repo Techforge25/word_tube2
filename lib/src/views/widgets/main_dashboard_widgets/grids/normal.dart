@@ -21,6 +21,8 @@ Widget basicGrid({
   required double screenHeight,
   bool isFor84And64Grid = false,
 }) {
+  dev.log("Image path: ${grid.imagepath}");
+
   return Builder(
     builder: (context) => Stack(
       children: [
@@ -41,6 +43,7 @@ Widget basicGrid({
             // Safely handle missing image - check if imagepath exists and is valid
             String picturePath = "";
             try {
+              dev.log("Image path: ${grid.imagepath}");
               if (grid.imagepath != null &&
                   grid.imagepath!.isNotEmpty &&
                   grid.imagepath! != "null") {

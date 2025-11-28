@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class FirebaseStorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -110,6 +111,37 @@ class FirebaseStorageService {
     } catch (e) {
       if (kDebugMode) {
         print('Error uploading file to Firebase Storage: $e');
+      }
+      return null;
+    }
+  }
+
+  // Download file from Firebase Storage URL
+  Future<File?> downloadFile(
+    String downloadUrl,
+    String localPath, {
+    required Function(double) onProgress,
+  }) async {
+    try {
+      // Use DefaultCacheManager to download the file
+      final cacheManager = DefaultCacheManager();
+      final fileInfo = await cacheManager.downloadFile(
+        downloadUrl,
+        key: downloadUrl,
+      );
+
+      // Copy the cached file to the desired local path
+      final targetFile = File(localPath);
+      await targetFile.parent.create(recursive: true);
+      await fileInfo.file.copy(localPath);
+
+      // Report progress (cache manager doesn't provide progress, so we'll report completion)
+      onProgress(1.0);
+
+      return targetFile;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error downloading file from Firebase Storage: $e');
       }
       return null;
     }

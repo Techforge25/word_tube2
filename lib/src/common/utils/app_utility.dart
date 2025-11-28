@@ -165,6 +165,22 @@ abstract class AppUtility {
     return image;
   }
 
+  static Future<String> getFullPath(String filename) async {
+    // 1. Agar path pehle se complete hai (Android ya Temp), to wese hi wapis kardo
+    if (filename.startsWith('/var') ||
+        filename.startsWith('/data') ||
+        filename.length > 100) {
+      // Lekin iOS may ye risk hai, isliye hum check karengay file exist karti hai ya nahi
+      if (await File(filename).exists()) {
+        return filename;
+      }
+    }
+    // 2. Hamesha Current Documents Directory lo
+    final directory = await getApplicationDocumentsDirectory();
+    // 3. Naya path banao: CurrentFolder + Filename
+    return '${directory.path}/$filename';
+  }
+
   static Future<File> saveImagePermanently(File imageFile) async {
     final directory = await getApplicationDocumentsDirectory();
     final name = path.basename(imageFile.path);

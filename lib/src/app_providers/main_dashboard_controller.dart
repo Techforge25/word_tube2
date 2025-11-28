@@ -22,6 +22,7 @@ import 'package:word_toob/src/dependency_inject.dart';
 import 'package:word_toob/src/func/device_check.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
+import 'package:word_toob/src/services/firebase_storage_service.dart';
 import 'package:word_toob/src/views/widgets/edit_pop_over.dart';
 import '../common/app_constants/route_strings.dart';
 import 'dart:developer' as dev;
@@ -1216,9 +1217,145 @@ class MainDashboardController extends ChangeNotifier {
     }
 
     try {
-      // 1. GridSizeModel ko JSON string mein convert karein
-      final boardJson = jsonEncode(_gridSizedModel.toJson());
+      // 1. Pehle loading state set karein
+      setIsLoading(true);
+      setUploadProgress(0.0);
 
+      // 2. Ek copy banayein board ka taake original data modify na ho
+      final boardToShare = GridSizeModel(
+        id: _gridSizedModel.id,
+        gridSizeX: _gridSizedModel.gridSizeX,
+        gridSizeY: _gridSizedModel.gridSizeY,
+        title: _gridSizedModel.title,
+        hideModel: _gridSizedModel.hideModel,
+        listData: _gridSizedModel.listData?.map((item) {
+          return GridModel(
+            id: item.id,
+            title: item.title,
+            imagepath: item.imagepath,
+            videosPath: item.videosPath != null
+                ? List<String>.from(item.videosPath!)
+                : null,
+            localVideosPath: item.localVideosPath,
+            hideImage: item.hideImage,
+            hidetitle: item.hidetitle,
+          );
+        }).toList(),
+        duplicateCount: _gridSizedModel.duplicateCount,
+        currentSelected: _gridSizedModel.currentSelected,
+      );
+
+      // 3. Ab saare local media files ko cloud mein upload karein
+      final firebaseService = FirebaseStorageService();
+      int totalFiles = 0;
+      int uploadedFiles = 0;
+
+      // Count total files to upload
+      for (var item in boardToShare.listData ?? []) {
+        // Check image
+        if (item.imagepath != null &&
+            item.imagepath!.isNotEmpty &&
+            !item.imagepath!.startsWith('http')) {
+          totalFiles++;
+        }
+        // Check videos
+        if (item.videosPath != null) {
+          for (var videoPath in item.videosPath!) {
+            if (videoPath.isNotEmpty && !videoPath.startsWith('http')) {
+              totalFiles++;
+            }
+          }
+        }
+      }
+
+      if (totalFiles == 0) {
+        // Agar koi local file nahi hai, seedha share kar do
+        final boardJson = jsonEncode(boardToShare.toJson());
+        final directory = await getTemporaryDirectory();
+        final safeTitle =
+            _gridSizedModel.title!.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+        final filePath = '${directory.path}/$safeTitle.wtdata';
+        final file = File(filePath);
+        await file.writeAsString(boardJson);
+
+        final box = context.findRenderObject() as RenderBox?;
+        final sharePositionOrigin =
+            box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+        final result = await Share.shareXFiles(
+          [XFile(filePath, mimeType: 'application/wtdata')],
+          subject: 'Check out this board: ${_gridSizedModel.title}',
+          text:
+              'I created a board in Word Toob and wanted to share it with you!',
+          sharePositionOrigin: sharePositionOrigin,
+        );
+
+        setIsLoading(false);
+        if (result.status == ShareResultStatus.success) {
+          dev.log('Board shared successfully!');
+        }
+        return;
+      }
+
+      // Upload all local files
+      for (var item in boardToShare.listData ?? []) {
+        // Upload image if local
+        if (item.imagepath != null &&
+            item.imagepath!.isNotEmpty &&
+            !item.imagepath!.startsWith('http')) {
+          final localImageFile = File(item.imagepath!);
+          if (await localImageFile.exists()) {
+            final cloudUrl = await firebaseService.uploadFile(
+              item.imagepath!,
+              'images/${DateTime.now().millisecondsSinceEpoch}_${localImageFile.path.split('/').last}',
+              onProgress: (progress) {
+                // Individual file progress + overall progress
+                final overallProgress = (uploadedFiles + progress) / totalFiles;
+                setUploadProgress(overallProgress);
+              },
+            );
+            if (cloudUrl != null) {
+              item.imagepath = cloudUrl;
+              uploadedFiles++;
+            }
+          }
+        }
+
+        // Upload videos if local
+        if (item.videosPath != null) {
+          final updatedVideos = <String>[];
+          for (var videoPath in item.videosPath!) {
+            if (videoPath.isNotEmpty && !videoPath.startsWith('http')) {
+              final localVideoFile = File(videoPath);
+              if (await localVideoFile.exists()) {
+                final cloudUrl = await firebaseService.uploadFile(
+                  videoPath,
+                  'videos/${DateTime.now().millisecondsSinceEpoch}_${localVideoFile.path.split('/').last}',
+                  onProgress: (progress) {
+                    final overallProgress =
+                        (uploadedFiles + progress) / totalFiles;
+                    setUploadProgress(overallProgress);
+                  },
+                );
+                if (cloudUrl != null) {
+                  updatedVideos.add(cloudUrl);
+                  uploadedFiles++;
+                } else {
+                  updatedVideos.add(videoPath); // Keep original if upload fails
+                }
+              } else {
+                updatedVideos.add(videoPath);
+              }
+            } else {
+              updatedVideos.add(videoPath); // Already a URL
+            }
+          }
+          item.videosPath = updatedVideos;
+        }
+      }
+
+      // 4. Ab board ko JSON mein convert karein (ab cloud URLs ke saath)
+      final boardJson = jsonEncode(boardToShare.toJson());
       // 2. Ek temporary file banayein
       final directory = await getTemporaryDirectory();
       // File ka naam unique rakhein, jaise board ke title aur ek custom extension ke saath
@@ -1248,12 +1385,13 @@ class MainDashboardController extends ChangeNotifier {
         text: 'I created a board in Word Toob and wanted to share it with you!',
         sharePositionOrigin: sharePositionOrigin,
       );
-
+      setIsLoading(false);
       // Sharing ke result ko handle karein (optional)
       if (result.status == ShareResultStatus.success) {
         dev.log('Board shared successfully!');
       }
     } catch (e) {
+      setIsLoading(false);
       dev.log('Error sharing board: $e');
       // User ko error message dikhayein
     }

@@ -75,49 +75,33 @@ class _CustomBottomSheetVideoState extends State<CustomBottomSheetVideo> {
                             var video = await AppUtility.videoFromCamera();
 
                             if (video != null) {
-                              _cancelCompleter = Completer<void>();
-                              controller.setIsLoading(true);
-                              controller.setUploadProgress(0.0);
-                              printLog(
-                                  "index of each grid model${widget.index}");
-                              printLog(
-                                  "index of each grid model: ${widget.index}");
+                              // Pehle locally save karein (no internet needed)
+                              final localFile =
+                                  await AppUtility.saveVideoPermanently(
+                                      File(video.path));
 
-                              final downloadUrl = await FirebaseStorageService()
-                                  .uploadFile(video.path,
-                                      'videos/${DateTime.now().millisecondsSinceEpoch}',
-                                      onProgress: (progress) {
-                                controller.setUploadProgress(progress);
-                              }, cancelToken: _cancelCompleter!.future);
-
-                              if (downloadUrl != null) {
-                                final localFile =
-                                    await AppUtility.saveVideoPermanently(
-                                        File(video.path));
-                                controller.addVideoToList(downloadUrl);
-                                await contentProvider.updateListDataItem(
-                                  id: controller.gridSizedModel.id ?? -1,
-                                  itemIndex: widget.index,
-                                  videosPath: controller.videos,
-                                );
-                                contentProvider
-                                    .allGridSizedModel[widget.gridIndex]
-                                    .listData![widget.index]
-                                    .localVideosPath ??= [];
-                                contentProvider
-                                    .allGridSizedModel[widget.gridIndex]
-                                    .listData![widget.index]
-                                    .localVideosPath!
-                                    .add(localFile.path);
-                                await contentProvider.updateGridSizeModelData(
-                                    id: contentProvider
-                                        .allGridSizedModel[widget.gridIndex]
-                                        .id!,
-                                    listData: contentProvider
-                                        .allGridSizedModel[widget.gridIndex]
-                                        .listData);
-                              }
-                              controller.setIsLoading(false);
+                              // Local path ko directly add karein (no cloud upload)
+                              controller.addVideoToList(localFile.path);
+                              await contentProvider.updateListDataItem(
+                                id: controller.gridSizedModel.id ?? -1,
+                                itemIndex: widget.index,
+                                videosPath: controller.videos,
+                              );
+                              contentProvider
+                                  .allGridSizedModel[widget.gridIndex]
+                                  .listData![widget.index]
+                                  .localVideosPath ??= [];
+                              contentProvider
+                                  .allGridSizedModel[widget.gridIndex]
+                                  .listData![widget.index]
+                                  .localVideosPath!
+                                  .add(localFile.path);
+                              await contentProvider.updateGridSizeModelData(
+                                  id: contentProvider
+                                      .allGridSizedModel[widget.gridIndex].id!,
+                                  listData: contentProvider
+                                      .allGridSizedModel[widget.gridIndex]
+                                      .listData);
                               if (controller.gridIndex == widget.gridIndex) {
                                 await controller.setGridSizedModel(
                                     contentProvider.allGridSizedModel[
@@ -149,47 +133,35 @@ class _CustomBottomSheetVideoState extends State<CustomBottomSheetVideo> {
                             try {
                               var video = await AppUtility.videoFromGallery();
                               if (video != null) {
-                                _cancelCompleter = Completer<void>();
-                                controller.setIsLoading(true);
-                                controller.setUploadProgress(0.0);
-                                dev.log(video.path, name: 'Video Path');
+                                // Pehle locally save karein (no internet needed)
+                                final localFile =
+                                    await AppUtility.saveVideoPermanently(
+                                        File(video.path));
 
-                                final downloadUrl =
-                                    await FirebaseStorageService().uploadFile(
-                                        video.path,
-                                        'videos/${DateTime.now().millisecondsSinceEpoch}',
-                                        onProgress: (progress) {
-                                  controller.setUploadProgress(progress);
-                                }, cancelToken: _cancelCompleter!.future);
-                                if (downloadUrl != null) {
-                                  final localFile =
-                                      await AppUtility.saveVideoPermanently(
-                                          File(video.path));
-                                  controller.addVideoToList(downloadUrl);
-                                  await contentProvider.updateListDataItem(
-                                    id: widget.id,
-                                    itemIndex: widget.index,
-                                    videosPath: controller.videos,
-                                  );
-                                  contentProvider
-                                      .allGridSizedModel[widget.gridIndex]
-                                      .listData![widget.index]
-                                      .localVideosPath ??= [];
+                                // Local path ko directly add karein (no cloud upload)
+                                controller.addVideoToList(localFile.path);
+                                await contentProvider.updateListDataItem(
+                                  id: widget.id,
+                                  itemIndex: widget.index,
+                                  videosPath: controller.videos,
+                                );
+                                contentProvider
+                                    .allGridSizedModel[widget.gridIndex]
+                                    .listData![widget.index]
+                                    .localVideosPath ??= [];
 
-                                  contentProvider
-                                      .allGridSizedModel[widget.gridIndex]
-                                      .listData![widget.index]
-                                      .localVideosPath!
-                                      .add(localFile.path);
-                                  await contentProvider.updateGridSizeModelData(
-                                      id: contentProvider
-                                          .allGridSizedModel[widget.gridIndex]
-                                          .id!,
-                                      listData: contentProvider
-                                          .allGridSizedModel[widget.gridIndex]
-                                          .listData);
-                                }
-                                controller.setIsLoading(false);
+                                contentProvider
+                                    .allGridSizedModel[widget.gridIndex]
+                                    .listData![widget.index]
+                                    .localVideosPath!
+                                    .add(localFile.path);
+                                await contentProvider.updateGridSizeModelData(
+                                    id: contentProvider
+                                        .allGridSizedModel[widget.gridIndex]
+                                        .id!,
+                                    listData: contentProvider
+                                        .allGridSizedModel[widget.gridIndex]
+                                        .listData);
                               }
                               if (controller.gridIndex == widget.gridIndex) {
                                 controller.setGridSizedModel(
@@ -199,7 +171,6 @@ class _CustomBottomSheetVideoState extends State<CustomBottomSheetVideo> {
                               }
                             } catch (e) {
                               print(e);
-                              controller.setIsLoading(false);
                             } finally {
                               controller.setIsLoading(false);
 

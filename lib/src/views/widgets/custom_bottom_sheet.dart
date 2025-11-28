@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 import 'package:word_toob/src/services/firebase_storage_service.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
@@ -77,26 +78,22 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                           onTap: () async {
                             var image = await AppUtility.imageFromCamera();
                             if (image != null) {
-                              _cancelCompleter = Completer<void>();
-
-                              controller.setIsLoading(true);
-                              controller.setUploadProgress(0.0);
                               final compressedImage =
                                   await _compressImage(File(image.path));
-                              final downloadUrl = await FirebaseStorageService()
-                                  .uploadFile(compressedImage.path,
-                                      'images/${DateTime.now().millisecondsSinceEpoch}',
-                                      onProgress: (progress) {
-                                controller.setUploadProgress(progress);
-                              }, cancelToken: _cancelCompleter!.future);
-                              if (downloadUrl != null) {
-                                controller.getImagePath(downloadUrl);
-                                await contentProvider.updateListDataItem(
-                                    id: controller.gridSizedModel.id ?? -1,
-                                    itemIndex: widget.index,
-                                    imagePath: downloadUrl);
-                              }
-                              controller.setIsLoading(false);
+
+                              // final localFile =
+                              //     await AppUtility.saveImagePermanently(
+                              //         compressedImage);
+
+                              final localFile = compressedImage;
+
+                              dev.log("Local file path: ${localFile.path}");
+                              // Local path ko directly use karein (no cloud upload)
+                              controller.getImagePath(localFile.path);
+                              await contentProvider.updateListDataItem(
+                                  id: controller.gridSizedModel.id ?? -1,
+                                  itemIndex: widget.index,
+                                  imagePath: localFile.path);
 
                               if (controller.gridIndex == widget.gridIndex) {
                                 controller.setGridSizedModel(
@@ -125,33 +122,23 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                             ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () async {
+                        TextButton(
+                          onPressed: () async {
                             try {
                               var image = await AppUtility.imageFromGallery();
                               if (image != null) {
-                                _cancelCompleter = Completer<void>();
+                                // final compressedImage =
+                                //     await _compressImage(File(image.path));
+                                final localFile =
+                                    await AppUtility.saveImagePermanently(
+                                        File(image.path));
 
-                                controller.setIsLoading(true);
-                                controller.setUploadProgress(0.0);
-                                final compressedImage =
-                                    await _compressImage(File(image.path));
-                                final downloadUrl =
-                                    await FirebaseStorageService().uploadFile(
-                                        compressedImage.path,
-                                        'images/${DateTime.now().millisecondsSinceEpoch}',
-                                        onProgress: (progress) {
-                                  controller.setUploadProgress(progress);
-                                }, cancelToken: _cancelCompleter!.future);
-
-                                if (downloadUrl != null) {
-                                  controller.getImagePath(downloadUrl);
-                                  await contentProvider.updateListDataItem(
-                                      id: widget.id,
-                                      itemIndex: widget.index,
-                                      imagePath: downloadUrl);
-                                }
-                                controller.setIsLoading(false);
+                                dev.log("Local file path: ${localFile.path}");
+                                controller.getImagePath(localFile.path);
+                                await contentProvider.updateListDataItem(
+                                    id: widget.id,
+                                    itemIndex: widget.index,
+                                    imagePath: localFile.path);
 
                                 if (controller.gridIndex == widget.gridIndex) {
                                   controller.setGridSizedModel(
@@ -181,36 +168,36 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                             ),
                           ),
                         ),
-                        const Divider(),
-                        GestureDetector(
-                          onTap: () async {
-                            controller.getImagePath('');
-                            await contentProvider.updateListDataItem(
-                              id: widget.id,
-                              itemIndex: widget.index,
-                              imagePath: '',
-                            );
-                            controller.setGridSizedModel(
-                                contentProvider
-                                    .allGridSizedModel[widget.gridIndex],
-                                widget.gridIndex);
-                            controller.toggleBottomSheetOff();
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 6),
-                            child: Text(
-                              'Remove Image',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red),
-                            ),
-                          ),
-                        ),
-                        const Gap(10),
+                        // const Divider(),
+                        // GestureDetector(
+                        //   onTap: () async {
+                        //     controller.getImagePath('');
+                        //     await contentProvider.updateListDataItem(
+                        //       id: widget.id,
+                        //       itemIndex: widget.index,
+                        //       imagePath: '',
+                        //     );
+                        //     controller.setGridSizedModel(
+                        //         contentProvider
+                        //             .allGridSizedModel[widget.gridIndex],
+                        //         widget.gridIndex);
+                        //     controller.toggleBottomSheetOff();
+                        //   },
+                        //   child: Container(
+                        //     padding: const EdgeInsets.symmetric(
+                        //         horizontal: 16.0, vertical: 6),
+                        //     child: Text(
+                        //       'Remove Image',
+                        //       style: Theme.of(context)
+                        //           .textTheme
+                        //           .bodySmall
+                        //           ?.copyWith(
+                        //               fontWeight: FontWeight.bold,
+                        //               color: Colors.red),
+                        //     ),
+                        //   ),
+                        // ),
+                        // const Gap(10),
                       ],
                     ),
             ),
@@ -245,15 +232,30 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     );
   }
 
+  // Future<File> _compressImage(File file) async {
+  //   final image = img.decodeImage(await file.readAsBytes());
+  //   if (image == null) {
+  //     return file;
+  //   }
+
+  //   final compressedImage = img.encodeJpg(image, quality: 85);
+  //   final compressedFile = File('${file.path}_compressed.jpg')
+  //     ..writeAsBytesSync(compressedImage);
+
+  //   return compressedFile;
+  // }
+
   Future<File> _compressImage(File file) async {
     final image = img.decodeImage(await file.readAsBytes());
-    if (image == null) {
-      return file;
-    }
+    if (image == null) return file;
 
-    final compressedImage = img.encodeJpg(image, quality: 85);
-    final compressedFile = File('${file.path}_compressed.jpg')
-      ..writeAsBytesSync(compressedImage);
+    final directory = await getApplicationDocumentsDirectory();
+    final newName = "${DateTime.now().millisecondsSinceEpoch}.jpg";
+    final newPath = '${directory.path}/$newName';
+
+    final compressedBytes = img.encodeJpg(image, quality: 85);
+    final compressedFile = File(newPath);
+    await compressedFile.writeAsBytes(compressedBytes);
 
     return compressedFile;
   }
