@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
+import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 
@@ -83,7 +84,8 @@ Widget gameGridCard({
                                         fit: BoxFit.contain,
                                       )
                                     : Image.file(
-                                        File(grid.imagepath!),
+                                        File(AppUtility.getFullPathFromFileName(
+                                            grid.imagepath!)),
                                         height: context.height * 0.5,
                                         width: context.height * 0.5,
                                         fit: BoxFit.contain,

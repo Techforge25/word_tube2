@@ -114,9 +114,10 @@ class _GridViewWidgetState extends State<GridViewWidget>
         if (!widget.value.editPressedYello) {
           if (grid.videosPath?.isNotEmpty ?? false) {
             var rand = Random().nextInt(grid.videosPath!.length);
+            dev.log(
+                "Navigating to: ${Navigator.defaultRouteName}  ${Navigator.of(context).toString()}");
 
             await widget.value.flutterTts.speak(title);
-
             Navigator.pushNamed(
               context,
               RouteStrings.videoPlayer,

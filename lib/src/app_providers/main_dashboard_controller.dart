@@ -25,6 +25,9 @@ import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/services/firebase_storage_service.dart';
 import 'package:word_toob/src/views/widgets/edit_pop_over.dart';
 import '../common/app_constants/route_strings.dart';
+import 'package:provider/provider.dart';
+import 'package:gap/gap.dart';
+import 'package:word_toob/src/views/theme/app_color.dart';
 import 'dart:developer' as dev;
 
 class MainDashboardController extends ChangeNotifier {
@@ -98,8 +101,24 @@ class MainDashboardController extends ChangeNotifier {
   bool _isRepeateTap = false;
   bool get isRepeateTap => _isRepeateTap;
 
+  bool _isUploadCancelled = false;
+  bool get isUploadCancelled => _isUploadCancelled;
+  Completer<void>? _uploadCancelCompleter;
+
   void setIsLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
+  }
+
+  void cancelUpload() {
+    _isUploadCancelled = true;
+    _uploadCancelCompleter?.complete();
+    notifyListeners();
+  }
+
+  void resetUploadCancellation() {
+    _isUploadCancelled = false;
+    _uploadCancelCompleter = null;
     notifyListeners();
   }
 
@@ -1216,8 +1235,274 @@ class MainDashboardController extends ChangeNotifier {
       return;
     }
 
+    // Check if there are local files that need to be uploaded
+    bool hasLocalFiles = false;
+    for (var item in _gridSizedModel.listData ?? []) {
+      if (item.imagepath != null &&
+          item.imagepath!.isNotEmpty &&
+          !item.imagepath!.startsWith('http')) {
+        hasLocalFiles = true;
+        break;
+      }
+      if (item.videosPath != null) {
+        for (var videoPath in item.videosPath!) {
+          if (videoPath.isNotEmpty && !videoPath.startsWith('http')) {
+            hasLocalFiles = true;
+            break;
+          }
+        }
+        if (hasLocalFiles) break;
+      }
+    }
+
+    // If there are local files, check internet connection
+    if (hasLocalFiles) {
+      final hasInternet = await checkInternetConnection();
+      if (!hasInternet) {
+        AppUtility.snackBar(
+          message:
+              'Internet connection required to share board with local files',
+        );
+        return;
+      }
+    }
+
+    // Show loading dialog immediately
+    NavigatorState? dialogNavigator;
+    BuildContext? dialogContextRef;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.7),
+      builder: (dialogContext) {
+        dialogNavigator = Navigator.of(dialogContext);
+        dialogContextRef = dialogContext;
+        return Consumer<MainDashboardController>(
+          builder: (context, controller, child) {
+            return PopScope(
+              canPop: false, // Prevent closing by back button
+              child: Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: 8,
+                child: Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Icon Container
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: AppColor.blue.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              controller.uploadProgress > 0
+                                  ? Icons.cloud_upload
+                                  : Icons.file_present,
+                              size: 32,
+                              color: AppColor.blue,
+                            ),
+                          ),
+                          const Gap(16),
+                          // Title
+                          Text(
+                            controller.uploadProgress > 0
+                                ? 'Uploading Content'
+                                : 'Creating Share File',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: AppColor.textBodyColor,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const Gap(8),
+                          // Status Text
+                          Text(
+                            controller.uploadProgress > 0
+                                ? 'Uploading content to cloud...\nPlease wait while we process your files'
+                                : 'Preparing your board for sharing...',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.grey[600],
+                                  fontSize: 13,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const Gap(16),
+                          // Progress Indicator
+                          if (controller.uploadProgress > 0) ...[
+                            Container(
+                              width: double.infinity,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.grey[200],
+                              ),
+                              child: FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: controller.uploadProgress,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColor.blue,
+                                        AppColor.blue.withOpacity(0.7),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const Gap(8),
+                            // Percentage Text
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '${(controller.uploadProgress * 100).toStringAsFixed(0)}%',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: AppColor.blue,
+                                      ),
+                                ),
+                                const Gap(4),
+                                Text(
+                                  'Complete',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.grey[600],
+                                        fontSize: 13,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            // Loading indicator when preparing
+                            SizedBox(
+                              width: 36,
+                              height: 36,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColor.blue,
+                                ),
+                              ),
+                            ),
+                          ],
+                          const Gap(16),
+                          // Cancel Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: () {
+                                dev.log(
+                                    "Cancel button pressed - starting cancellation");
+                                controller.cancelUpload();
+                                // Close dialog immediately
+                                if (dialogContextRef != null) {
+                                  Navigator.of(dialogContextRef!).pop();
+                                } else if (dialogNavigator != null &&
+                                    dialogNavigator!.mounted) {
+                                  dialogNavigator!.pop();
+                                }
+                                dev.log(
+                                    "Cancel button - dialog should be closed");
+                              },
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                side: BorderSide(
+                                  color: Colors.grey[400]!,
+                                  width: 1.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Close button (X) at top-right
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            dev.log(
+                                "Close button (X) pressed - starting cancellation");
+                            controller.cancelUpload();
+                            // Close dialog immediately
+                            if (dialogContextRef != null) {
+                              Navigator.of(dialogContextRef!).pop();
+                            } else if (dialogNavigator != null &&
+                                dialogNavigator!.mounted) {
+                              dialogNavigator!.pop();
+                            }
+                            dev.log("Close button - dialog should be closed");
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 20,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
     try {
       // 1. Pehle loading state set karein
+      resetUploadCancellation();
       setIsLoading(true);
       setUploadProgress(0.0);
 
@@ -1291,29 +1576,60 @@ class MainDashboardController extends ChangeNotifier {
         );
 
         setIsLoading(false);
+        // Close the loading dialog
+        // if (dialogNavigator != null && dialogNavigator!.mounted) {
+        //   dialogNavigator!.pop();
+        // }
         if (result.status == ShareResultStatus.success) {
           dev.log('Board shared successfully!');
         }
         return;
       }
 
+      // Create a single cancel completer for all uploads
+      _uploadCancelCompleter = Completer<void>();
+      final cancelCompleter = _uploadCancelCompleter!;
+
       // Upload all local files
       for (var item in boardToShare.listData ?? []) {
+        // Check if cancelled
+        if (_isUploadCancelled || cancelCompleter.isCompleted) {
+          setIsLoading(false);
+          // if (dialogNavigator != null && dialogNavigator!.mounted) {
+          //   dialogNavigator!.pop();
+          // }
+          AppUtility.snackBar(message: 'Upload cancelled');
+          return;
+        }
+
         // Upload image if local
         if (item.imagepath != null &&
             item.imagepath!.isNotEmpty &&
             !item.imagepath!.startsWith('http')) {
-          final localImageFile = File(item.imagepath!);
+          final localImageFile =
+              File(AppUtility.getFullPathFromFileName(item.imagepath!));
           if (await localImageFile.exists()) {
             final cloudUrl = await firebaseService.uploadFile(
-              item.imagepath!,
+              localImageFile.path,
               'images/${DateTime.now().millisecondsSinceEpoch}_${localImageFile.path.split('/').last}',
               onProgress: (progress) {
+                if (_isUploadCancelled || cancelCompleter.isCompleted) {
+                  return;
+                }
                 // Individual file progress + overall progress
                 final overallProgress = (uploadedFiles + progress) / totalFiles;
                 setUploadProgress(overallProgress);
               },
+              cancelToken: cancelCompleter.future,
             );
+            if (_isUploadCancelled || cancelCompleter.isCompleted) {
+              setIsLoading(false);
+              // if (dialogNavigator != null && dialogNavigator!.mounted) {
+              //   dialogNavigator!.pop();
+              // }
+              AppUtility.snackBar(message: 'Upload cancelled');
+              return;
+            }
             if (cloudUrl != null) {
               item.imagepath = cloudUrl;
               uploadedFiles++;
@@ -1325,18 +1641,39 @@ class MainDashboardController extends ChangeNotifier {
         if (item.videosPath != null) {
           final updatedVideos = <String>[];
           for (var videoPath in item.videosPath!) {
+            if (_isUploadCancelled || cancelCompleter.isCompleted) {
+              setIsLoading(false);
+              // if (dialogNavigator != null && dialogNavigator!.mounted) {
+              //   dialogNavigator!.pop();
+              // }
+              AppUtility.snackBar(message: 'Upload cancelled');
+              return;
+            }
             if (videoPath.isNotEmpty && !videoPath.startsWith('http')) {
-              final localVideoFile = File(videoPath);
+              final localVideoFile =
+                  File(AppUtility.getFullPathFromFileName(videoPath));
               if (await localVideoFile.exists()) {
                 final cloudUrl = await firebaseService.uploadFile(
-                  videoPath,
+                  localVideoFile.path,
                   'videos/${DateTime.now().millisecondsSinceEpoch}_${localVideoFile.path.split('/').last}',
                   onProgress: (progress) {
+                    if (_isUploadCancelled || cancelCompleter.isCompleted) {
+                      return;
+                    }
                     final overallProgress =
                         (uploadedFiles + progress) / totalFiles;
                     setUploadProgress(overallProgress);
                   },
+                  cancelToken: cancelCompleter.future,
                 );
+                if (_isUploadCancelled || cancelCompleter.isCompleted) {
+                  setIsLoading(false);
+                  // if (dialogNavigator != null && dialogNavigator!.mounted) {
+                  //   dialogNavigator!.pop();
+                  // }
+                  AppUtility.snackBar(message: 'Upload cancelled');
+                  return;
+                }
                 if (cloudUrl != null) {
                   updatedVideos.add(cloudUrl);
                   uploadedFiles++;
@@ -1352,6 +1689,16 @@ class MainDashboardController extends ChangeNotifier {
           }
           item.videosPath = updatedVideos;
         }
+      }
+
+      // Check if cancelled before finalizing
+      if (_isUploadCancelled || cancelCompleter.isCompleted) {
+        setIsLoading(false);
+        // if (dialogNavigator != null && dialogNavigator!.mounted) {
+        //   dialogNavigator!.pop();
+        // }
+        AppUtility.snackBar(message: 'Upload cancelled');
+        return;
       }
 
       // 4. Ab board ko JSON mein convert karein (ab cloud URLs ke saath)
@@ -1374,6 +1721,12 @@ class MainDashboardController extends ChangeNotifier {
           box != null ? box.localToGlobal(Offset.zero) & box.size : null;
 
       // 5. share_plus ka istemal karke file ko share karein
+      setIsLoading(false);
+      // Close the loading dialog before showing share sheet
+      if (dialogNavigator != null && dialogNavigator!.mounted) {
+        dialogNavigator!.pop();
+      }
+
       final result = await Share.shareXFiles(
         [
           XFile(
@@ -1385,15 +1738,25 @@ class MainDashboardController extends ChangeNotifier {
         text: 'I created a board in Word Toob and wanted to share it with you!',
         sharePositionOrigin: sharePositionOrigin,
       );
-      setIsLoading(false);
+
       // Sharing ke result ko handle karein (optional)
       if (result.status == ShareResultStatus.success) {
         dev.log('Board shared successfully!');
       }
     } catch (e) {
       setIsLoading(false);
+      // Close the loading dialog on error
+      if (dialogNavigator != null && dialogNavigator!.mounted) {
+        dialogNavigator!.pop();
+      }
       dev.log('Error sharing board: $e');
       // User ko error message dikhayein
+      if (!_isUploadCancelled) {
+        AppUtility.snackBar(message: 'Error sharing board: ${e.toString()}');
+      }
+    } finally {
+      // Reset cancellation flag
+      resetUploadCancellation();
     }
   }
 

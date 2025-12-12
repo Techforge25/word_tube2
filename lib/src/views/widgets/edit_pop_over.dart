@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
+import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import 'package:word_toob/src/views/widgets/custom_bottom_sheet.dart';
 import 'package:word_toob/src/views/widgets/custom_bottom_sheet_video.dart';
@@ -333,9 +334,10 @@ class _EditPopOverState extends State<EditPopOver> {
                                             : Builder(
                                                 builder: (context) {
                                                   try {
-                                                    final file = File(
-                                                        mainDashboardController
-                                                            .imagePath);
+                                                    final file = File(AppUtility
+                                                        .getFullPathFromFileName(
+                                                            mainDashboardController
+                                                                .imagePath));
                                                     if (file.existsSync()) {
                                                       return Image.file(
                                                         file,

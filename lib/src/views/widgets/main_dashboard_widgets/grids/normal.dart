@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
+
+import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'dart:developer' as dev;
 import 'package:word_toob/src/views/theme/app_color.dart';
@@ -21,8 +23,6 @@ Widget basicGrid({
   required double screenHeight,
   bool isFor84And64Grid = false,
 }) {
-  dev.log("Image path: ${grid.imagepath}");
-
   return Builder(
     builder: (context) => Stack(
       children: [
@@ -47,16 +47,22 @@ Widget basicGrid({
               if (grid.imagepath != null &&
                   grid.imagepath!.isNotEmpty &&
                   grid.imagepath! != "null") {
-                // Verify file exists if it's a local file path
-                if (!grid.imagepath!.startsWith("http") &&
-                    !grid.imagepath!.startsWith("assets") &&
-                    !grid.imagepath!.startsWith("asset")) {
-                  final file = File(grid.imagepath!);
+                // HTTP ya asset paths ko directly use karo
+                if (grid.imagepath!.startsWith("http") ||
+                    grid.imagepath!.startsWith("assets") ||
+                    grid.imagepath!.startsWith("asset")) {
+                  picturePath = grid.imagepath!;
+                } else {
+                  // Local file path hai - filename extract karke global path ke saath concatenate karo
+                  final fullPath =
+                      await AppUtility.getFullPath(grid.imagepath!);
+                  final file = File(fullPath);
                   if (await file.exists()) {
+                    picturePath = fullPath;
+                  } else {
+                    // Agar file exist nahi karti, original path try karo
                     picturePath = grid.imagepath!;
                   }
-                } else {
-                  picturePath = grid.imagepath!;
                 }
               }
             } catch (e) {
@@ -92,14 +98,34 @@ Widget basicGrid({
                 if (localVideos != null &&
                     localVideos.isNotEmpty &&
                     rand < localVideos.length) {
-                  localUrl = localVideos[rand];
+                  // Filename extract karke global path ke saath concatenate karo
+                  final fullLocalPath =
+                      await AppUtility.getFullPath(localVideos[rand]);
+                  final file = File(fullLocalPath);
+                  if (await file.exists()) {
+                    localUrl = fullLocalPath;
+                  } else {
+                    localUrl = localVideos[rand];
+                  }
+                }
+
+                // Video URL bhi check karo - agar local file hai to global path use karo
+                String videoUrl = videos[rand];
+                if (!videoUrl.startsWith("http") &&
+                    !videoUrl.startsWith("assets") &&
+                    !videoUrl.startsWith("asset")) {
+                  final fullVideoPath = await AppUtility.getFullPath(videoUrl);
+                  final file = File(fullVideoPath);
+                  if (await file.exists()) {
+                    videoUrl = fullVideoPath;
+                  }
                 }
 
                 Navigator.pushNamed(
                   context,
                   RouteStrings.videoPlayer,
                   arguments: {
-                    'url': videos[rand],
+                    'url': videoUrl,
                     'localUrl': localUrl,
                   },
                 ).then((_) => value.setIsTapped(false));
@@ -216,7 +242,9 @@ Widget basicGrid({
                                               width: context.height * 0.5,
                                             )
                                           : Image.file(
-                                              File(grid.imagepath!),
+                                              File(AppUtility
+                                                  .getFullPathFromFileName(
+                                                      grid.imagepath!)),
                                               height: context.height * 0.5,
                                               width: context.height * 0.5,
                                             )

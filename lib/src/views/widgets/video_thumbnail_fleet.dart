@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import 'dart:developer' as dev;
 import 'package:path/path.dart' as p;
@@ -236,16 +237,33 @@ class _VideoUploadWidgetState extends State<VideoUploadWidget> {
   // Local file video ke liye alag function
   Future<Uint8List?> _getThumbnailFromFile(String filePath) async {
     dev.log('Getting thumbnail from file: $filePath', name: 'VideoThumbnail');
-    final file = File(filePath);
-    if (!await file.exists()) {
-      dev.log('File does not exist.', name: 'VideoThumbnail');
+
+    // Pehle original path check karo
+    File? videoFile = File(filePath);
+    if (await videoFile.exists()) {
+      return await VideoThumbnail.thumbnailData(
+        video: filePath,
+        imageFormat: ImageFormat.PNG,
+        maxWidth: 200,
+        quality: 25,
+      );
+    }
+
+    // Agar file exist nahi karti, to filename extract karke global path ke saath concatenate karo
+    final fullPath = await AppUtility.getFullPath(filePath);
+    videoFile = File(fullPath);
+
+    if (!await videoFile.exists()) {
+      dev.log('File does not exist at: $fullPath or $filePath',
+          name: 'VideoThumbnail');
       return null;
     }
+
     return await VideoThumbnail.thumbnailData(
-      video: filePath,
+      video: fullPath,
       imageFormat: ImageFormat.PNG,
-      maxWidth: 200, // Choti size rakhein taake jaldi ban jaye
-      quality: 25, // Quality kam rakhein
+      maxWidth: 200,
+      quality: 25,
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
+import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/dependency_inject.dart';
 import 'dart:developer' as dev;
 
@@ -53,16 +54,39 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
     try {
       CachedVideoPlayerPlus newController;
 
-      if (widget.localUrl != null &&
-          widget.localUrl!.isNotEmpty &&
-          await File(widget.localUrl!).exists()) {
-        newController = CachedVideoPlayerPlus.file(File(widget.localUrl!));
+      String? videoPath;
+
+      // Pehle localUrl check karo
+      if (widget.localUrl != null && widget.localUrl!.isNotEmpty) {
+        // Filename extract karke global path ke saath concatenate karo
+        final fullLocalPath = await AppUtility.getFullPath(widget.localUrl!);
+        final file = File(fullLocalPath);
+        if (await file.exists()) {
+          videoPath = fullLocalPath;
+        } else if (await File(widget.localUrl!).exists()) {
+          videoPath = widget.localUrl!;
+        }
+      }
+
+      // Agar local file mil gayi to use karo
+      if (videoPath != null) {
+        newController = CachedVideoPlayerPlus.file(File(videoPath));
       } else if (widget.url.contains("asset")) {
         newController = CachedVideoPlayerPlus.asset(widget.url);
       } else if (widget.url.startsWith('http')) {
         newController = CachedVideoPlayerPlus.networkUrl(Uri.parse(widget.url));
       } else {
-        newController = CachedVideoPlayerPlus.file(File(widget.url));
+        // URL se filename extract karke global path ke saath concatenate karo
+        final fullUrlPath = await AppUtility.getFullPath(widget.url);
+        final file = File(fullUrlPath);
+        if (await file.exists()) {
+          newController = CachedVideoPlayerPlus.file(File(fullUrlPath));
+        } else if (await File(widget.url).exists()) {
+          newController = CachedVideoPlayerPlus.file(File(widget.url));
+        } else {
+          throw Exception(
+              'Video file not found: $fullUrlPath or ${widget.url}');
+        }
       }
 
       await newController.initialize();

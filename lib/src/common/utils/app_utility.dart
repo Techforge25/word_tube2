@@ -27,6 +27,7 @@ import 'package:word_toob/src/common/app_constants/general.dart' show printLog;
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import '../../source/models/grid_model.dart';
+import 'package:word_toob/src/common/globals.dart' as globals;
 import 'dart:developer' as dev;
 
 abstract class AppUtility {
@@ -165,20 +166,59 @@ abstract class AppUtility {
     return image;
   }
 
-  static Future<String> getFullPath(String filename) async {
-    // 1. Agar path pehle se complete hai (Android ya Temp), to wese hi wapis kardo
-    if (filename.startsWith('/var') ||
-        filename.startsWith('/data') ||
-        filename.length > 100) {
-      // Lekin iOS may ye risk hai, isliye hum check karengay file exist karti hai ya nahi
-      if (await File(filename).exists()) {
-        return filename;
-      }
+  /// Global directory path use karke full path banata hai
+  /// Agar path already complete hai (http, assets, ya full path), to wese hi return karta hai
+  /// Warna filename extract karke global directory path ke saath concatenate karta hai
+  static Future<String> getFullPath(String filePath) async {
+    // 1. Agar path HTTP URL hai, to wese hi return karo
+    if (filePath.startsWith('http')) {
+      return filePath;
     }
-    // 2. Hamesha Current Documents Directory lo
-    final directory = await getApplicationDocumentsDirectory();
-    // 3. Naya path banao: CurrentFolder + Filename
-    return '${directory.path}/$filename';
+
+    // 2. Agar path asset hai, to wese hi return karo
+    if (filePath.startsWith('assets/') || filePath.startsWith('asset')) {
+      return filePath;
+    }
+
+    // 3. Agar path pehle se complete hai (Android ya Temp ya full path), aur file exist karti hai to wese hi return karo
+    if (filePath.startsWith('/var') ||
+        filePath.startsWith('/data') ||
+        filePath.startsWith('/private') ||
+        filePath.startsWith('/Users') ||
+        filePath.length > 100) {
+      // File exist karti hai ya nahi check karo
+      if (await File(filePath).exists()) {
+        return filePath;
+      }
+      // Agar file exist nahi karti to filename extract karke global path ke saath concatenate karo
+    }
+
+    // 4. Filename extract karo (basename)
+    final fileName = path.basename(filePath);
+
+    // 5. Global directory path use karo (agar initialize nahi hai to fresh lo)
+    String? directoryPath = globals.globalDocumentsDirectoryPath;
+    if (directoryPath == null) {
+      final directory = await getApplicationDocumentsDirectory();
+      directoryPath = directory.path;
+      globals.globalDocumentsDirectoryPath = directoryPath;
+    }
+
+    // 6. Naya path banao: GlobalFolder + Filename
+    final fullPath = path.join(directoryPath, fileName);
+    return fullPath;
+  }
+
+  /// Filename extract karta hai kisi bhi path se
+  static String extractFileName(String filePath) {
+    return path.basename(filePath);
+  }
+
+  static String getFullPathFromFileName(String filePath) {
+    String directoryPath = globals.globalDocumentsDirectoryPath!;
+    final fileName = extractFileName(filePath);
+    final fullPath = path.join(directoryPath, fileName);
+    return fullPath;
   }
 
   static Future<File> saveImagePermanently(File imageFile) async {

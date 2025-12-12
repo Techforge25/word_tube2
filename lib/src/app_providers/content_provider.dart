@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/app_setting_provider.dart';
 import 'package:word_toob/src/common/app_constants/assets.dart';
+import 'package:word_toob/src/common/globals.dart' as globals;
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/source/repository/app_repository.dart';
@@ -69,14 +70,24 @@ class ContentProvider extends ChangeNotifier {
         itemIndex < parentGrid.listData!.length) {
       GridModel gridItemToUpdate = parentGrid.listData![itemIndex];
 
-      final directory = await getApplicationDocumentsDirectory();
+      // Global directory path use karo
+      String? directoryPath = globals.globalDocumentsDirectoryPath;
+      if (directoryPath == null) {
+        final directory = await getApplicationDocumentsDirectory();
+        directoryPath = directory.path;
+        globals.globalDocumentsDirectoryPath = directoryPath;
+      }
+
+      // Filename extract karo aur global path ke saath concatenate karo
       final fileName = path.basename(videoPath);
-      final newPath = path.join(directory.path, fileName);
+      final newPath = path.join(directoryPath, fileName);
       final newFile = await File(videoPath).copy(newPath);
 
       gridItemToUpdate.videosPath ??= [];
+      // Original videoPath save karo (use time par filename extract hoga)
       gridItemToUpdate.videosPath!.add(videoPath);
       gridItemToUpdate.localVideosPath ??= [];
+      // Local path bhi original save karo (use time par filename extract hoga)
       gridItemToUpdate.localVideosPath!.add(newFile.path);
 
       dev.log(
