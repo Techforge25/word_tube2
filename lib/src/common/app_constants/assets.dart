@@ -110,4 +110,35 @@ class MyAssets {
   static String eight = "${basePathBasic}8.png";
   static String nine = "${basePathBasic}9.png";
   static String ten = "${basePathBasic}10.png";
+
+  ///Colors Board
+  static String basePathColors = "assets/images/symbolset-colors/";
+
+  static String red = "${basePathColors}red.png";
+  static String orange = "${basePathColors}orange.png";
+  static String yellow = "${basePathColors}yellow.png";
+  static String green = "${basePathColors}green.png";
+  static String blue = "${basePathColors}blue.png";
+  static String purple = "${basePathColors}purple.png";
+  static String pink = "${basePathColors}pink.png";
+  static String brown = "${basePathColors}brown.png";
+  static String black = "${basePathColors}black.png";
+  static String grey = "${basePathColors}grey.png";
+  static String white = "${basePathColors}white.png";
+  static String rainbow = "${basePathColors}rainbow.png";
+
+  ///Videos Colors
+  static String basePathVideoColors = "assets/images/videos/colors_videos/";
+  static String redVideo = "${basePathVideoColors}red.mov";
+  static String orangeVideo = "${basePathVideoColors}orange.mov";
+  static String yellowVideo = "${basePathVideoColors}yellow.mov";
+  static String greenVideo = "${basePathVideoColors}green.mov";
+  static String blueVideo = "${basePathVideoColors}blue.mov";
+  static String purpleVideo = "${basePathVideoColors}purple.mov";
+  static String pinkVideo = "${basePathVideoColors}pink.mov";
+  static String brownVideo = "${basePathVideoColors}brown.mov";
+  static String blackVideo = "${basePathVideoColors}black.mov";
+  static String grayVideo = "${basePathVideoColors}gray.mov";
+  static String whiteVideo = "${basePathVideoColors}white.mov";
+  static String rainbowVideo = "${basePathVideoColors}rainbow.mov";
 }

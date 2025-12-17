@@ -84,7 +84,9 @@ flutter:
   assets:
     - assets/images/symbolset-emotions/
     - assets/images/symbolset-basic/
+    - assets/images/symbolset-colors/
     - assets/images/videos/
+    - assets/images/videos/colors_videos/
     - assets/sounds/
     - assets/
     - .env

@@ -20,6 +20,89 @@ void printLog(dynamic data) {
 }
 
 List<GridSizeModel> gridModelList = [
+  ///colors
+  GridSizeModel(
+      title: AppString.colors,
+      gridSizeX: 3,
+      gridSizeY: 4,
+      hideModel: false,
+      duplicateCount: 1,
+      currentSelected: false,
+      listData: [
+        GridModel(
+            title: AppString.red,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.red,
+            videosPath: [MyAssets.redVideo]),
+        GridModel(
+            title: AppString.orange,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.orange,
+            videosPath: [MyAssets.orangeVideo]),
+        GridModel(
+            title: AppString.yellow,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.yellow,
+            videosPath: [MyAssets.yellowVideo]),
+        GridModel(
+            title: AppString.green,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.green,
+            videosPath: [MyAssets.greenVideo]),
+        GridModel(
+            title: AppString.blue,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.blue,
+            videosPath: [MyAssets.blueVideo]),
+        GridModel(
+            title: AppString.purple,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.purple,
+            videosPath: [MyAssets.purpleVideo]),
+        GridModel(
+            title: AppString.pink,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.pink,
+            videosPath: [MyAssets.pinkVideo]),
+        GridModel(
+            title: AppString.brown,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.brown,
+            videosPath: [MyAssets.brownVideo]),
+        GridModel(
+            title: AppString.black,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.black,
+            videosPath: [MyAssets.blackVideo]),
+        GridModel(
+            title: AppString.gray,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.grey,
+            videosPath: [MyAssets.grayVideo]),
+        GridModel(
+            title: AppString.white,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.white,
+            videosPath: [MyAssets.whiteVideo]),
+        GridModel(
+            title: AppString.rainbow,
+            hideImage: false,
+            hidetitle: false,
+            imagepath: MyAssets.rainbow,
+            videosPath: [MyAssets.rainbowVideo]),
+      ]),
+
   ///emotions
   GridSizeModel(
       title: AppString.emotions,

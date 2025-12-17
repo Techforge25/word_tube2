@@ -124,4 +124,19 @@ abstract class AppString {
   static const eight = "8";
   static const nine = "9";
   static const ten = "10";
+
+  ///Colors Board
+  static const colors = "Colors";
+  static const red = "Red";
+  static const orange = "Orange";
+  static const yellow = "Yellow";
+  static const green = "Green";
+  static const blue = "Blue";
+  static const purple = "Purple";
+  static const pink = "Pink";
+  static const brown = "Brown";
+  static const black = "Black";
+  static const gray = "Gray";
+  static const white = "White";
+  static const rainbow = "Rainbow";
 }

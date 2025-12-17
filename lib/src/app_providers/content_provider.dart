@@ -245,9 +245,26 @@ class ContentProvider extends ChangeNotifier {
     try {
       await getAllGridSizeModel();
       if (contenProvider.allGridSizedModel.isEmpty) {
+        // If database is empty, save all boards
         await iAppRepository.saveAllGridSizedModel(
           gridSizedModelList: gridSizedModelList,
         );
+      } else {
+        // If database has boards, check for new boards and add only those
+        List<String> existingBoardTitles = contenProvider.allGridSizedModel
+            .map((board) => board.title ?? '')
+            .toList();
+        
+        // Find boards that don't exist in database
+        List<GridSizeModel> newBoards = gridSizedModelList.where((board) {
+          return !existingBoardTitles.contains(board.title);
+        }).toList();
+        
+        // Save each new board
+        for (var newBoard in newBoards) {
+          await iAppRepository.saveGridSizedModel(gridSizedModel: newBoard);
+          dev.log("Added new board: ${newBoard.title}", name: 'ContentProvider');
+        }
       }
 
       await getAllGridSizeModel();
