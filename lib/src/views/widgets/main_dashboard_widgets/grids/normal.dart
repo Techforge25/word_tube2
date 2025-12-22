@@ -92,28 +92,34 @@ Widget basicGrid({
                 final localVideos = grid.localVideosPath;
                 final rand = Random().nextInt(videos.length);
 
-                dev.log(videos.length.toString() + ' ${rand}');
-
-                String? localUrl;
-                if (localVideos != null &&
-                    localVideos.isNotEmpty &&
-                    rand < localVideos.length) {
-                  // Filename extract karke global path ke saath concatenate karo
-                  final fullLocalPath =
-                      await AppUtility.getFullPath(localVideos[rand]);
-                  final file = File(fullLocalPath);
-                  if (await file.exists()) {
-                    localUrl = fullLocalPath;
-                  } else {
-                    localUrl = localVideos[rand];
-                  }
-                }
+                dev.log('Total videos: ${videos.length} $rand video index');
 
                 // Video URL bhi check karo - agar local file hai to global path use karo
                 String videoUrl = videos[rand];
-                if (!videoUrl.startsWith("http") &&
-                    !videoUrl.startsWith("assets") &&
-                    !videoUrl.startsWith("asset")) {
+                bool isNetworkUrl = videoUrl.startsWith("http");
+                bool isAssetFile = videoUrl.startsWith("assets") ||
+                    videoUrl.startsWith("asset");
+
+                String? localUrl;
+                // Sirf tab localUrl set karo jab selected video network URL ya asset file nahi hai
+                // Agar network URL ya asset file hai to localUrl null rahega taaki wo video play ho
+                if (!isNetworkUrl && !isAssetFile) {
+                  // Ye sirf local file paths ke liye hai
+                  if (localVideos != null &&
+                      localVideos.isNotEmpty &&
+                      rand < localVideos.length) {
+                    // Filename extract karke global path ke saath concatenate karo
+                    final fullLocalPath =
+                        await AppUtility.getFullPath(localVideos[rand]);
+                    final file = File(fullLocalPath);
+                    if (await file.exists()) {
+                      localUrl = fullLocalPath;
+                    } else {
+                      localUrl = localVideos[rand];
+                    }
+                  }
+
+                  // Agar video URL local file hai to global path use karo
                   final fullVideoPath = await AppUtility.getFullPath(videoUrl);
                   final file = File(fullVideoPath);
                   if (await file.exists()) {

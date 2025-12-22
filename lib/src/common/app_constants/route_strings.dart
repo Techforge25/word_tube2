@@ -4,4 +4,5 @@ abstract class RouteStrings {
   static const dispatcher = '/dispatcher';
 
   static const videoPlayer = '/support';
+  static const helpScreen = '/helpScreen';
 }

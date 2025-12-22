@@ -7,6 +7,7 @@ import 'package:word_toob/src/views/screens/splash_screen.dart';
 import 'package:word_toob/src/views/screens/main_dashboard/main_dashboard.dart'
     hide SharedBoardPreviewScreen;
 import 'package:word_toob/src/views/screens/video/video_player.dart';
+import 'package:word_toob/src/views/screens/help/help_screen.dart';
 // import 'package:responsive_framework/responsive_framework.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -49,6 +50,10 @@ class RouteGenerator {
             url: argsMap['url'] as String,
             localUrl: argsMap['localUrl'] as String?,
           ));
+        case RouteStrings.helpScreen:
+          return MaterialPageRoute(
+            builder: (_) => const HelpScreen(),
+          );
         default:
           return _errorRoute();
       }
