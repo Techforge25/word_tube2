@@ -29,6 +29,7 @@ import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import 'dart:developer' as dev;
+import 'package:path/path.dart' as p;
 
 class MainDashboardController extends ChangeNotifier {
   TextEditingController editTitleTextEditingController =
@@ -735,6 +736,7 @@ class MainDashboardController extends ChangeNotifier {
     }
 
     final String remoteUrlToDelete = _videos[index];
+    dev.log("Remote URL to delete: $remoteUrlToDelete");
     String localPathToDelete = "";
 
     _videos.removeAt(index);
@@ -750,10 +752,15 @@ class MainDashboardController extends ChangeNotifier {
     }
 
     if (listDataItem.localVideosPath != null &&
-        index < listDataItem.localVideosPath!.length) {
-      localPathToDelete =
-          listDataItem.localVideosPath![index]; // Path hasil karein
-      listDataItem.localVideosPath!.removeAt(index); // Remove karein
+        listDataItem.localVideosPath!.isNotEmpty) {
+      localPathToDelete = listDataItem.localVideosPath!.firstWhere((element) =>
+          p.basename(element) !=
+          p.basename(localPathToDelete)); // Path hasil karein
+      dev.log("Local path to delete: $localPathToDelete");
+
+      listDataItem.localVideosPath!.removeWhere((element) =>
+          p.basename(element) ==
+          p.basename(localPathToDelete)); // Remove karein
     }
     notifyListeners();
     _deleteVideoFromStorage(remoteUrlToDelete, localPathToDelete, id,
@@ -780,6 +787,32 @@ class MainDashboardController extends ChangeNotifier {
         listData: updatedGridModel.listData,
       );
       dev.log("Database updated after background deletion.");
+
+      // Refresh the grid model from database to ensure Find the Word mode has updated data
+      // Preserve the current board ID to avoid switching boards
+      final currentBoardId = _gridSizedModel.id;
+      await contentProvider.getAllGridSizeModel();
+
+      // Find the board with the same ID (not by index, as indices might change)
+      if (currentBoardId != null) {
+        final refreshedBoardIndex =
+            contentProvider.allGridSizedModel.indexWhere(
+          (board) => board.id == currentBoardId,
+        );
+
+        if (refreshedBoardIndex >= 0) {
+          // Update the local model directly without changing board selection
+          _gridSizedModel =
+              contentProvider.allGridSizedModel[refreshedBoardIndex];
+          _gridIndex = refreshedBoardIndex;
+          notifyListeners();
+          dev.log(
+              "Grid model refreshed after video deletion without changing board.");
+        } else {
+          dev.log(
+              "Could not find board with ID $currentBoardId after refresh.");
+        }
+      }
     } catch (e) {
       dev.log("Error during background deletion: $e");
       // Yahan par error handling kar sakte hain, jaise user ko batana ke delete fail ho gaya

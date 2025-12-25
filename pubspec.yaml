@@ -87,6 +87,8 @@ flutter:
     - assets/images/symbolset-basic/
     - assets/images/symbolset-colors/
     - assets/images/videos/
+    - assets/images/videos/emotion_video/
+    - assets/images/videos/alphabet_videos/
     - assets/images/videos/colors_videos/
     - assets/sounds/
     - assets/

@@ -17,28 +17,36 @@ class MyAssets {
   static String surprised = "${basePath}surprised.jpg";
 
   ///Videos Emotions
-  static String basePathVideo = "assets/images/videos/";
+  static String basePathVideo = "assets/images/videos/emotion_video/";
+  static String happyVideo0 = "${basePathVideo}happy.mp4";
   static String happyVideo1 = "${basePathVideo}Happy1.MOV";
   static String happyVideo2 = "${basePathVideo}Happy2.MOV";
 
+  static String sad0 = "${basePathVideo}sad.mp4";
   static String sad1 = "${basePathVideo}Sad1.MOV";
   static String sad2 = "${basePathVideo}Sad2.MOV";
 
+  static String excited0 = "${basePathVideo}excited.mp4";
   static String excited1 = "${basePathVideo}Excited1.MOV";
   static String excited2 = "${basePathVideo}Excited2.MOV";
 
+  static String surprised0 = "${basePathVideo}surprised.mp4";
   static String surprised1 = "${basePathVideo}Surprised1.MOV";
   static String surprised2 = "${basePathVideo}Surprised2.MOV";
 
+  static String scared0 = "${basePathVideo}scared.mp4";
   static String scared1 = "${basePathVideo}Scared1.MOV";
   static String scared2 = "${basePathVideo}Scared2.MOV";
 
+  static String frustrated0 = "${basePathVideo}frustrated.mp4";
   static String frustrated1 = "${basePathVideo}Frustrated1.MOV";
   static String frustrated2 = "${basePathVideo}Frustrated2.MOV";
 
+  static String mad0 = "${basePathVideo}mad.mp4";
   static String mad1 = "${basePathVideo}Mad1.MOV";
   static String mad2 = "${basePathVideo}Mad2.MOV";
 
+  static String love0 = "${basePathVideo}love.mp4";
   static String love1 = "${basePathVideo}Love1.MOV";
   static String love2 = "${basePathVideo}Love2.MOV";
 
@@ -97,6 +105,35 @@ class MyAssets {
   static String x = "${basePathBasic}x.png";
   static String y = "${basePathBasic}y.png";
   static String z = "${basePathBasic}z.png";
+
+  ///Videos Alphabets
+  static String basePathVideoAlphabet = "assets/images/videos/alphabet_videos/";
+  static String aVideo = "${basePathVideoAlphabet}a.mp4";
+  static String bVideo = "${basePathVideoAlphabet}b.mp4";
+  static String cVideo = "${basePathVideoAlphabet}c.mp4";
+  static String dVideo = "${basePathVideoAlphabet}d.mp4";
+  static String eVideo = "${basePathVideoAlphabet}e.mp4";
+  static String fVideo = "${basePathVideoAlphabet}f.mp4";
+  static String gVideo = "${basePathVideoAlphabet}g.mp4";
+  static String hVideo = "${basePathVideoAlphabet}h.mp4";
+  static String iVideo = "${basePathVideoAlphabet}i.mp4";
+  static String jVideo = "${basePathVideoAlphabet}j.mp4";
+  static String kVideo = "${basePathVideoAlphabet}k.mp4";
+  static String lVideo = "${basePathVideoAlphabet}l.mp4";
+  static String mVideo = "${basePathVideoAlphabet}m.mp4";
+  static String nVideo = "${basePathVideoAlphabet}n.mp4";
+  static String oVideo = "${basePathVideoAlphabet}o.mp4";
+  static String pVideo = "${basePathVideoAlphabet}p.mp4";
+  static String qVideo = "${basePathVideoAlphabet}q.mp4";
+  static String rVideo = "${basePathVideoAlphabet}r.mp4";
+  static String sVideo = "${basePathVideoAlphabet}s.mp4";
+  static String tVideo = "${basePathVideoAlphabet}t.mp4";
+  static String uVideo = "${basePathVideoAlphabet}u.mp4";
+  static String vVideo = "${basePathVideoAlphabet}v.mp4";
+  static String wVideo = "${basePathVideoAlphabet}w.mp4";
+  static String xVideo = "${basePathVideoAlphabet}x.mp4";
+  static String yVideo = "${basePathVideoAlphabet}y.mp4";
+  static String zVideo = "${basePathVideoAlphabet}z.mp4";
 
   ///Preload alphabets
   static String zero = "${basePathBasic}0.png";
