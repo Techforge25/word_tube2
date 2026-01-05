@@ -81,7 +81,7 @@ abstract class AppString {
   static const hot = "hot";
 
   ///Alphabets Board
-  static const alphabetBoard = "Alphabets";
+  static const alphabetBoard = "Alphabet";
 
   static const a = "a";
   static const b = "b";
