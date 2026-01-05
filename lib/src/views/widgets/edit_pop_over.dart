@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gap/gap.dart';
@@ -7,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
+import 'package:word_toob/src/common/utils/app_utility.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import 'package:word_toob/src/views/widgets/custom_bottom_sheet.dart';
 import 'package:word_toob/src/views/widgets/custom_bottom_sheet_video.dart';
@@ -39,6 +41,13 @@ class _EditPopOverState extends State<EditPopOver> {
   @override
   void initState() {
     super.initState();
+    // Automatically enter edit mode when the pop-over is opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MainDashboardController>(context, listen: false)
+          .isEditPressedFun(true);
+      Provider.of<MainDashboardController>(context, listen: false)
+          .setEditTitleControllerText(widget.title);
+    });
   }
 
   @override
@@ -91,19 +100,23 @@ class _EditPopOverState extends State<EditPopOver> {
                               const Gap(10),
                               mainDashboardController.isEditPressed
                                   ? SizedBox(
-                                      width: context.width * 0.1,
                                       child: TextFormField(
                                         onTapOutside: (e) => FocusManager
                                             .instance.primaryFocus
                                             ?.unfocus(),
-
+                                        maxLength: 20,
                                         style: TextStyle(
                                             fontSize: fontSize,
                                             color: AppColor.appPrimaryColor),
-
                                         controller: mainDashboardController
                                             .editTitleTextEditingController,
-                                        // decoration: InputDecoration(),
+                                        decoration: InputDecoration(
+                                          hintText: 'store key',
+                                          hintStyle: TextStyle(
+                                              fontSize: fontSize * 0.9,
+                                              color: Colors.grey.shade700,
+                                              fontWeight: FontWeight.w400),
+                                        ),
                                       ),
                                     )
                                   : Text(
@@ -132,25 +145,262 @@ class _EditPopOverState extends State<EditPopOver> {
                                         decoration: BoxDecoration(
                                           border: Border.all(),
                                         ),
+                                        child: Icon(
+                                          Icons.image_outlined,
+                                          color: Colors.grey,
+                                          size: context.width * 0.1,
+                                        ),
                                       )
                                     : mainDashboardController.imagePath == ""
-                                        ? widget.picture.contains("asset")
+                                        ? widget.picture.isNotEmpty &&
+                                                widget.picture != "null" &&
+                                                (widget.picture
+                                                        .contains("asset") ||
+                                                    widget.picture
+                                                        .contains("assets"))
                                             ? Image.asset(
                                                 widget.picture,
                                                 height: context.width * 0.25,
                                                 width: context.width * 0.25,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return Container(
+                                                    width: context.width * 0.25,
+                                                    height:
+                                                        context.width * 0.25,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  );
+                                                },
                                               )
-                                            : Image.file(
-                                                File(widget.picture),
+                                            : widget.picture.isNotEmpty &&
+                                                    widget.picture != "null" &&
+                                                    widget.picture
+                                                        .startsWith('http')
+                                                ? CachedNetworkImage(
+                                                    imageUrl: widget.picture,
+                                                    height:
+                                                        context.width * 0.25,
+                                                    width: context.width * 0.25,
+                                                    errorWidget:
+                                                        (context, url, error) {
+                                                      return Container(
+                                                        width: context.width *
+                                                            0.25,
+                                                        height: context.width *
+                                                            0.25,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(),
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.broken_image,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      );
+                                                    },
+                                                  )
+                                                : widget.picture.isNotEmpty &&
+                                                        widget.picture != "null"
+                                                    ? Builder(
+                                                        builder: (context) {
+                                                          try {
+                                                            final file = File(
+                                                                widget.picture);
+                                                            if (file
+                                                                .existsSync()) {
+                                                              return Image.file(
+                                                                file,
+                                                                height: context
+                                                                        .width *
+                                                                    0.25,
+                                                                width: context
+                                                                        .width *
+                                                                    0.25,
+                                                                errorBuilder:
+                                                                    (context,
+                                                                        error,
+                                                                        stackTrace) {
+                                                                  return Container(
+                                                                    width: context
+                                                                            .width *
+                                                                        0.25,
+                                                                    height: context
+                                                                            .width *
+                                                                        0.25,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      border: Border
+                                                                          .all(),
+                                                                    ),
+                                                                    child: Icon(
+                                                                      Icons
+                                                                          .broken_image,
+                                                                      color: Colors
+                                                                          .grey,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              );
+                                                            } else {
+                                                              return Container(
+                                                                width: context
+                                                                        .width *
+                                                                    0.25,
+                                                                height: context
+                                                                        .width *
+                                                                    0.25,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  border: Border
+                                                                      .all(),
+                                                                ),
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .image_outlined,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              );
+                                                            }
+                                                          } catch (e) {
+                                                            return Container(
+                                                              width: context
+                                                                      .width *
+                                                                  0.25,
+                                                              height: context
+                                                                      .width *
+                                                                  0.25,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                border: Border
+                                                                    .all(),
+                                                              ),
+                                                              child: Icon(
+                                                                Icons
+                                                                    .broken_image,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                            );
+                                                          }
+                                                        },
+                                                      )
+                                                    : Container(
+                                                        width: context.width *
+                                                            0.25,
+                                                        height: context.width *
+                                                            0.25,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(),
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.image_outlined,
+                                                          color: Colors.grey,
+                                                          size: context.width *
+                                                              0.1,
+                                                        ),
+                                                      )
+                                        : mainDashboardController.imagePath
+                                                .startsWith('http')
+                                            ? CachedNetworkImage(
+                                                imageUrl:
+                                                    mainDashboardController
+                                                        .imagePath,
                                                 height: context.width * 0.25,
                                                 width: context.width * 0.25,
+                                                errorWidget:
+                                                    (context, url, error) {
+                                                  return Container(
+                                                    width: context.width * 0.25,
+                                                    height:
+                                                        context.width * 0.25,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  );
+                                                },
                                               )
-                                        : Image.file(
-                                            File(mainDashboardController
-                                                .imagePath),
-                                            height: context.width * 0.25,
-                                            width: context.width * 0.25,
-                                          ),
+                                            : Builder(
+                                                builder: (context) {
+                                                  try {
+                                                    final file = File(AppUtility
+                                                        .getFullPathFromFileName(
+                                                            mainDashboardController
+                                                                .imagePath));
+                                                    if (file.existsSync()) {
+                                                      return Image.file(
+                                                        file,
+                                                        height: context.width *
+                                                            0.25,
+                                                        width: context.width *
+                                                            0.25,
+                                                        errorBuilder: (context,
+                                                            error, stackTrace) {
+                                                          return Container(
+                                                            width:
+                                                                context.width *
+                                                                    0.25,
+                                                            height:
+                                                                context.width *
+                                                                    0.25,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              border:
+                                                                  Border.all(),
+                                                            ),
+                                                            child: Icon(
+                                                              Icons
+                                                                  .broken_image,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    } else {
+                                                      return Container(
+                                                        width: context.width *
+                                                            0.25,
+                                                        height: context.width *
+                                                            0.25,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(),
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.image_outlined,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      );
+                                                    }
+                                                  } catch (e) {
+                                                    return Container(
+                                                      width:
+                                                          context.width * 0.25,
+                                                      height:
+                                                          context.width * 0.25,
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(),
+                                                      ),
+                                                      child: Icon(
+                                                        Icons.broken_image,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              ),
                               ),
                               const Gap(10),
                               Visibility(
@@ -249,11 +499,13 @@ class _EditPopOverState extends State<EditPopOver> {
                                 children: List.generate(
                                     mainDashboardController
                                         .visibleVideos.length, (index) {
+                                  dev.log(
+                                      "method called video length: ${mainDashboardController.visibleVideos.length}");
                                   final video = mainDashboardController
                                       .visibleVideos[index];
                                   if (mainDashboardController.isEditPressed) {
                                     return Slidable(
-                                      key: Key(index.toString()),
+                                      key: ValueKey(video),
                                       // Use a unique key for each item, such as a video ID or index
                                       // direction: DismissDirection
                                       //     .startToEnd, // Swipe direction
@@ -268,17 +520,33 @@ class _EditPopOverState extends State<EditPopOver> {
                                       // onDismissed: (direction) {
 
                                       // },
+
                                       endActionPane: ActionPane(
                                         motion: const ScrollMotion(),
                                         dismissible:
-                                            DismissiblePane(onDismissed: () {}),
+                                            DismissiblePane(onDismissed: () {
+                                          mainDashboardController
+                                              .removeVideosFromList(
+                                            index,
+                                            widget.gridIndex,
+                                            widget.id,
+                                            widget.index,
+                                            contentProvider,
+                                          );
+                                        }),
                                         extentRatio: 0.25,
                                         children: [
                                           SlidableAction(
                                             onPressed: (context) {
                                               // Handle the removal of the video
                                               mainDashboardController
-                                                  .removeVideosFromList(index);
+                                                  .removeVideosFromList(
+                                                index,
+                                                widget.gridIndex,
+                                                widget.id,
+                                                widget.index,
+                                                contentProvider,
+                                              );
                                             },
                                             backgroundColor: Color(0xFFFE4A49),
                                             foregroundColor: Colors.white,
@@ -293,12 +561,21 @@ class _EditPopOverState extends State<EditPopOver> {
                                             .isEditPressed,
                                         onTapRemove: () =>
                                             mainDashboardController
-                                                .removeVideosFromList(index),
+                                                .removeVideosFromList(
+                                          index,
+                                          widget.gridIndex,
+                                          widget.id,
+                                          widget.index,
+                                          contentProvider,
+                                        ),
                                         video: video,
                                         onTap: () => Navigator.pushNamed(
                                           context,
                                           RouteStrings.videoPlayer,
-                                          arguments: video,
+                                          arguments: {
+                                            'url': video,
+                                            'localUrl': video
+                                          },
                                         ),
                                       ),
                                     );
@@ -307,12 +584,21 @@ class _EditPopOverState extends State<EditPopOver> {
                                       isEditPressed:
                                           mainDashboardController.isEditPressed,
                                       onTapRemove: () => mainDashboardController
-                                          .removeVideosFromList(index),
+                                          .removeVideosFromList(
+                                        index,
+                                        widget.gridIndex,
+                                        widget.id,
+                                        widget.index,
+                                        contentProvider,
+                                      ),
                                       video: video,
                                       onTap: () => Navigator.pushNamed(
                                         context,
                                         RouteStrings.videoPlayer,
-                                        arguments: video,
+                                        arguments: {
+                                          'url': video,
+                                          'localUrl': video
+                                        },
                                       ),
                                     );
                                   }
@@ -417,13 +703,14 @@ class GrayNavBarOnEdit extends StatelessWidget {
                       id: widget.id,
                       itemIndex: widget.index,
                       title: mainDashboardController
-                          .editTitleTextEditingController.text);
+                          .editTitleTextEditingController.text
+                          .trim());
                   mainDashboardController.setGridSizedModel(
                       contentProvider
                           .allGridSizedModel[mainDashboardController.gridIndex],
                       mainDashboardController.gridIndex);
                   mainDashboardController.clearEditTitleControllerText();
-// ignore: use_build_context_synchronously
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                 }
               },

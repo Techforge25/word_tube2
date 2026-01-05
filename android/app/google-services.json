@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "378360936895",
+    "project_id": "wordtube2-9a7f9",
+    "storage_bucket": "wordtube2-9a7f9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:378360936895:android:c206676a04c53b9c51890a",
+        "android_client_info": {
+          "package_name": "com.wordtoob.wordtube2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVnpW44HJssmSRaJSP1CbZCZETk_rZvS8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

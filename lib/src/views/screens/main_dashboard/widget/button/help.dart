@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:word_toob/src/views/widgets/bottom_sheet.dart';
+import 'package:word_toob/src/common/app_constants/route_strings.dart';
 
 class HelpButton extends StatelessWidget {
   const HelpButton({
@@ -13,11 +13,7 @@ class HelpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          builder: (context) => BottomSheetContent(),
-        );
+        Navigator.of(context).pushNamed(RouteStrings.helpScreen);
       },
       child: Text("Help",
           style: Theme.of(context)

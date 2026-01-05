@@ -1,10 +1,15 @@
+// ignore_for_file: prefer_final_fields
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:flutter/services.dart';
-
+import 'package:get/get.dart';
 import 'package:word_toob/src/app_providers/app_setting_provider.dart';
 import 'package:word_toob/src/common/app_constants/assets.dart';
+import 'package:word_toob/src/common/globals.dart' as globals;
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/source/repository/app_repository.dart';
@@ -44,9 +49,60 @@ class ContentProvider extends ChangeNotifier {
   ];
 
   List<Map<String, dynamic>> get imagePathsPreLoad => _imagePathsPreLoad;
+  Future<void> addVideoToGridItem({
+    required int gridSizeModelId,
+    required int itemIndex,
+    required String videoPath,
+  }) async {
+    GridSizeModel? parentGrid = allGridSizedModel
+        .firstWhereOrNull((element) => element.id == gridSizeModelId);
 
-  /// Fetch all grid size models
-  Future<void> getAllGridSizeModel() async {
+    if (parentGrid != null &&
+        parentGrid.listData != null &&
+        itemIndex < parentGrid.listData!.length) {
+      GridModel gridItemToUpdate = parentGrid.listData![itemIndex];
+
+      // Global directory path use karo
+      String? directoryPath = globals.globalDocumentsDirectoryPath;
+      if (directoryPath == null) {
+        final directory = await getApplicationDocumentsDirectory();
+        directoryPath = directory.path;
+        globals.globalDocumentsDirectoryPath = directoryPath;
+      }
+
+      // Filename extract karo aur global path ke saath concatenate karo
+      final fileName = path.basename(videoPath);
+      final newPath = path.join(directoryPath, fileName);
+      final newFile = await File(videoPath).copy(newPath);
+
+      gridItemToUpdate.videosPath ??= [];
+      // Original videoPath save karo (use time par filename extract hoga)
+      gridItemToUpdate.videosPath!.add(videoPath);
+      gridItemToUpdate.localVideosPath ??= [];
+      // Local path bhi original save karo (use time par filename extract hoga)
+      gridItemToUpdate.localVideosPath!.add(newFile.path);
+
+      dev.log(
+          "Adding video: $videoPath to GridItem at index $itemIndex on board $gridSizeModelId",
+          name: 'ContentProvider');
+
+      await updateGridSizeModelData(
+        id: gridSizeModelId,
+        listData: parentGrid.listData, // Pass the updated listData
+      );
+
+      // updateGridSizeModelData already calls getAllGridSizeModel(),
+      // so `allGridSizedModel` will be refreshed automatically.
+      // And `notifyListeners()` is also called within updateGridSizeModelData.
+    } else {
+      dev.log(
+          "Error: Parent GridSizeModel (ID: $gridSizeModelId) or GridItem (Index: $itemIndex) not found for adding video.",
+          name: 'ContentProvider');
+      // Optionally, throw an exception or return a specific error code
+    }
+  }
+
+  Future getAllGridSizeModel() async {
     getAllGridSizeModelStatus = Status.loading;
     notifyListeners();
 
@@ -188,9 +244,26 @@ class ContentProvider extends ChangeNotifier {
       await getAllGridSizeModel();
 
       if (contenProvider.allGridSizedModel.isEmpty) {
+        // If database is empty, save all boards
         await iAppRepository.saveAllGridSizedModel(
           gridSizedModelList: gridSizedModelList,
         );
+      } else {
+        // If database has boards, check for new boards and add only those
+        List<String> existingBoardTitles = contenProvider.allGridSizedModel
+            .map((board) => board.title ?? '')
+            .toList();
+        
+        // Find boards that don't exist in database
+        List<GridSizeModel> newBoards = gridSizedModelList.where((board) {
+          return !existingBoardTitles.contains(board.title);
+        }).toList();
+        
+        // Save each new board
+        for (var newBoard in newBoards) {
+          await iAppRepository.saveGridSizedModel(gridSizedModel: newBoard);
+          dev.log("Added new board: ${newBoard.title}", name: 'ContentProvider');
+        }
       }
 
       await getAllGridSizeModel();

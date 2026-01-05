@@ -81,37 +81,50 @@ class NormalNavBar extends StatelessWidget {
     if (orientation == Orientation.landscape) {
       return context.width * 0.015;
     } else {
-      return context.height * 0.025;
+      fontSize = context.height * 0.025;
+      iconSize = context.height * 0.04;
     }
-  }
 
-  double _calculateIconSize(BuildContext context) {
-    final orientation = MediaQuery.orientationOf(context);
-    if (orientation == Orientation.landscape) {
-      return context.width * 0.025;
-    } else {
-      return context.height * 0.04;
-    }
-  }
+    double gap = 15;
 
-  Widget _buildRightSection(double fontSize, double sizeWidth, double gap) {
-    if (!value.findTheWord) {
-      return RightRow(
-        menuController: menuController,
-        gameMap: _buildGameMap(),
-        fontSize: fontSize + 2,
-        sizeWidth: sizeWidth,
-        value: value,
-        gap: gap,
-      );
-    } else {
-      return FindTheWordRow(
-        fontSize: fontSize + 2,
-        sizeWidth: sizeWidth,
-        mainDashboardController: value,
-        menuController: menuController,
-      );
-    }
+    return Container(
+      height: context.height * 0.12,
+      color: AppColor.white,
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          LeftRow(
+            addMap: addMap,
+            menuController2: menuController2,
+            sizeWidth: sizeWidth,
+            contentProvider: contentProvider,
+            value: value,
+            iconSize: iconSize + 2,
+            fontSize: fontSize + 2,
+          ),
+          Expanded(child: CenterTitle(value: value, fontSize: fontSize + 6)),
+          SizedBox(
+            width: 4,
+          ),
+          !value.findTheWord
+              ? RightRow(
+                  menuController: menuController,
+                  gameMap: gameMap,
+                  fontSize: fontSize + 2,
+                  sizeWidth: sizeWidth,
+                  value: value,
+                  gap: gap,
+                )
+              : FindTheWordRow(
+                  fontSize: fontSize + 2,
+                  sizeWidth: sizeWidth,
+                  mainDashboardController: value,
+                  menuController: menuController,
+                )
+        ],
+      ),
+    );
   }
 }
 
@@ -134,12 +147,14 @@ class FindTheWordRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildTextButton(
-          context,
-          "Repeat",
-          () {
-            mainDashboardController.setCurrentIndex();
-            mainDashboardController.clearFindTheWrongList();
+        TextButton(
+          onPressed: () {
+            if (!mainDashboardController.isRepeateTap) {
+              mainDashboardController.setIsRepeate(true);
+              mainDashboardController.setCurrentIndex();
+              mainDashboardController.clearFindTheWrongList();
+              mainDashboardController.setIsRepeate(false);
+            }
           },
         ),
         SizedBox(width: sizeWidth),

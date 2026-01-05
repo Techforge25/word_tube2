@@ -50,6 +50,25 @@ class GridSizeModel {
       dev.log("GridSizeModel.fromLocal: $e");
     }
   }
+  factory GridSizeModel.fromJson(Map<String, dynamic> json) {
+    try {
+      return GridSizeModel(
+        id: json['id'],
+        gridSizeX: json['gridSizeX'],
+        gridSizeY: json['gridSizeY'],
+        title: json['title'],
+        hideModel: json['hideModel'],
+        listData: (json['listData'] as List<dynamic>?)
+            ?.map((item) => GridModel.fromJson(item as Map<String, dynamic>))
+            .toList(),
+        duplicateCount: json['duplicateCount'] ?? 1,
+        currentSelected: json['currentSelected'] ?? false,
+      );
+    } catch (e) {
+      dev.log("GridSizeModel.fromJson: $e");
+      return GridSizeModel(); // fallback empty model
+    }
+  }
 
   /// Convert GridSizeModel to JSON data
   Map<String, dynamic> toJson() {

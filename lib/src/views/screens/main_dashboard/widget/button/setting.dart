@@ -54,83 +54,78 @@ class _SettingButtonState extends State<SettingButton> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Gap(25),
-                      Text(
-                        "Tiles",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: widget.fontSize + 4,
-                              color: AppColor.appPrimaryColor.withOpacity(0.5),
-                            ),
-                      ),
+                      // const Gap(25),
+                      // Text(
+                      //   "Tiles",
+                      //   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      //         fontSize: widget.fontSize + 4,
+                      //         color: AppColor.appPrimaryColor.withOpacity(0.5),
+                      //       ),
+                      // ),
                       Gap(widget.gap),
 
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: Column(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                widget.value.wordsOnlyShowSettings(1);
-                                menuController.close();
-                              },
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      "Symbols & Word",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            fontSize: widget.fontSize + 4,
-                                            color: AppColor.appPrimaryColor,
-                                          ),
-                                    ),
+                      Column(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              widget.value.wordsOnlyShowSettings(1);
+                              menuController.close();
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    "Symbols & Word",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          fontSize: widget.fontSize + 4,
+                                          color: AppColor.appPrimaryColor,
+                                        ),
                                   ),
-                                  widget.value.settingsWordOnlyShow == 1
-                                      ? const Icon(
-                                          Icons.check,
-                                          color: AppColor.green,
-                                        )
-                                      : Container()
-                                ],
-                              ),
+                                ),
+                                widget.value.settingsWordOnlyShow == 1
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: AppColor.green,
+                                      )
+                                    : Container()
+                              ],
                             ),
-                            Gap(widget.gap),
-                            InkWell(
-                              onTap: () {
-                                widget.value.wordsOnlyShowSettings(2);
-                                menuController.close();
-                              },
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      "Word Only",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            fontSize: widget.fontSize + 4,
-                                            color: AppColor.appPrimaryColor,
-                                          ),
-                                    ),
+                          ),
+                          Gap(widget.gap),
+                          InkWell(
+                            onTap: () {
+                              widget.value.wordsOnlyShowSettings(2);
+                              menuController.close();
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    "Word Only",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          fontSize: widget.fontSize + 4,
+                                          color: AppColor.appPrimaryColor,
+                                        ),
                                   ),
-                                  widget.value.settingsWordOnlyShow == 2
-                                      ? const Icon(
-                                          Icons.check,
-                                          color: AppColor.green,
-                                        )
-                                      : Container()
-                                ],
-                              ),
+                                ),
+                                widget.value.settingsWordOnlyShow == 2
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: AppColor.green,
+                                      )
+                                    : Container()
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       Gap(widget.gap),
 
@@ -257,8 +252,8 @@ class _SettingButtonState extends State<SettingButton> {
                       //               color: AppColor.appPrimaryColor
                       //                   .withOpacity(0.5))),
                       // ),
-                      TextButton(
-                        onPressed: () async {
+                      InkWell(
+                        onTap: () async {
                           menuController.close();
                           await voicesPopup(
                             context,
@@ -268,23 +263,24 @@ class _SettingButtonState extends State<SettingButton> {
                                 widget.value.onVoiceTap(v, context),
                           );
                         },
-                        child: Text(
-                          "Change Voice",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                fontSize: widget.fontSize + 4,
-                                color:
-                                    AppColor.appPrimaryColor.withOpacity(0.5),
-                              ),
+                        child: Container(
+                          width: double.infinity,
+                          child: Text(
+                            "Change Voice",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontSize: widget.fontSize + 4,
+                                  color:
+                                      AppColor.appPrimaryColor.withOpacity(0.5),
+                                ),
+                          ),
                         ),
                       ),
-
                       Gap(widget.gap),
-
-                      TextButton(
-                        onPressed: () async {
+                      InkWell(
+                        onTap: () async {
                           menuController.close();
                           final box = context.findRenderObject() as RenderBox?;
                           await Share.share(
@@ -293,16 +289,19 @@ class _SettingButtonState extends State<SettingButton> {
                                 box!.localToGlobal(Offset.zero) & box.size,
                           );
                         },
-                        child: Text(
-                          "Share",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                fontSize: widget.fontSize + 4,
-                                color:
-                                    AppColor.appPrimaryColor.withOpacity(0.5),
-                              ),
+                        child: Container(
+                          width: double.infinity,
+                          child: Text(
+                            "Share",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontSize: widget.fontSize + 4,
+                                  color:
+                                      AppColor.appPrimaryColor.withOpacity(0.5),
+                                ),
+                          ),
                         ),
                       ),
                     ],

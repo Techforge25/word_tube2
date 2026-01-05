@@ -21,11 +21,10 @@ class CustomMenuAnchor extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuAnchor(
       controller: menuController,
-      style: MenuStyle(
-        backgroundColor: WidgetStateProperty.all(backgroundColor),
-      ),
-      builder: (context, controller, child) => GestureDetector(
-        onTap: () {
+      style:
+          MenuStyle(backgroundColor: WidgetStateProperty.all(backgroundColor)),
+      builder: (context, controller, child) => TextButton(
+        onPressed: () {
           if (controller.isOpen) {
             controller.close();
           } else {

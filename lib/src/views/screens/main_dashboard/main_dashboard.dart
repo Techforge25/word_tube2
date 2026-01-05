@@ -16,6 +16,93 @@ import 'package:word_toob/src/common/app_constants/general.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/views/screens/main_dashboard/widget/button/edit.dart';
 
+class SharedBoardPreviewScreen extends StatelessWidget {
+  final GridSizeModel board;
+
+  const SharedBoardPreviewScreen({super.key, required this.board});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Board Preview"),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Board Title: ${board.title}"),
+            Text("Grid Size: ${board.gridSizeX}x${board.gridSizeY}"),
+            ElevatedButton(
+              onPressed: () async {
+                // Logic to add the board
+                final contentProvider = sl<ContentProvider>();
+                final mainDashboardController = sl<MainDashboardController>();
+
+                // Save the board
+                await contentProvider.saveGridSizedModel(gridSizedModel: board);
+
+                // Refresh the list to get the newly saved board with its ID
+                await contentProvider.getAllGridSizeModel();
+
+                // Find the newly saved board (it should have the same title)
+                GridSizeModel? savedBoard;
+                int? savedBoardIndex;
+
+                for (int i = 0;
+                    i < contentProvider.allGridSizedModel.length;
+                    i++) {
+                  if (contentProvider.allGridSizedModel[i].title ==
+                          board.title &&
+                      contentProvider.allGridSizedModel[i].id != null) {
+                    savedBoard = contentProvider.allGridSizedModel[i];
+                    savedBoardIndex = i;
+                    break;
+                  }
+                }
+
+                // If board was found, set it as current and navigate to main dashboard
+                if (savedBoard != null && savedBoardIndex != null) {
+                  // Set this board as selected
+                  await contentProvider.updateGridSizeModelData(
+                    id: savedBoard.id!,
+                    currentSelected: true,
+                  );
+
+                  // Unselect all other boards
+                  for (var otherBoard in contentProvider.allGridSizedModel) {
+                    if (otherBoard.id != savedBoard.id &&
+                        otherBoard.currentSelected == true) {
+                      await contentProvider.updateGridSizeModelData(
+                        id: otherBoard.id!,
+                        currentSelected: false,
+                      );
+                    }
+                  }
+
+                  // Refresh again to get updated state
+                  await contentProvider.getAllGridSizeModel();
+
+                  // Set the board in controller
+                  await mainDashboardController.setGridSizedModel(
+                      savedBoard, savedBoardIndex);
+
+                  // Navigate to main dashboard - it will automatically show the new board
+                  Navigator.of(context).pushReplacementNamed('/');
+                } else {
+                  // Fallback: just navigate if board not found
+                  Navigator.of(context).pushReplacementNamed('/');
+                }
+              },
+              child: Text("Add to My Boards"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
 
@@ -141,9 +228,14 @@ class _MainDashboardState extends State<MainDashboard> {
       },
       {
         "name": "Duplicate Board",
-        "onTap": () => _contentProvider.saveGridSizedModel(
-              gridSizedModel: _mainDashBoard.duplicateGridSizedModel,
-            )
+        "onTap": () async {
+          // _contentProvider.saveGridSizedModel(
+          //   gridSizedModel: _mainDashBoard.duplicateGridSizedModel,
+          // );
+          // _mainDashBoard.setEdit(true);
+
+          await _mainDashBoard.duplicateCurrentBoard(_contentProvider, context);
+        }
       }
     ];
 

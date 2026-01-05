@@ -44,12 +44,13 @@ class _GridViewWidgetState extends State<GridViewWidget>
   void _initializeAnimation() {
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: Duration(milliseconds: 600),
     );
 
-    _animation = Tween<double>(begin: 0.1, end: 0.5).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.1,
+      end: 0.5,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -58,69 +59,100 @@ class _GridViewWidgetState extends State<GridViewWidget>
     super.dispose();
   }
 
-  /// Handle image tap animation and feedback
+  // // Define the function that triggers the animation
+  // void _onImageTap(String image) {
+  //   widget.value.setFindWordImagePath(image);
+  //   _controller.reset();
+  //   _controller.forward();
+  //   Future.delayed(const Duration(milliseconds: 1500), () async {
+  //     widget.value.setFindWordImage(false);
+
+  //     if (widget.value.foundSuccess) {
+  //       widget.value.clearFindTheWrongList();
+  //       widget.value.setFoundSuccess(false);
+  //     } else {
+  //       widget.value.speakForWrong();
+  //     }
+  //   });
+  // }
+
   void _onImageTap(String image) {
     widget.value.setFindWordImagePath(image);
     _controller.reset();
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 5), () async {
+    if (widget.value.foundSuccess) {
+      widget.value.playCorrectSound();
+    } else {
+      widget.value.speakForWrong();
+    }
+
+    // Thodi der baad image ko hide kar do
+    Future.delayed(const Duration(milliseconds: 1500), () async {
       widget.value.setFindWordImage(false);
 
       if (widget.value.foundSuccess) {
         widget.value.clearFindTheWrongList();
         widget.value.setFoundSuccess(false);
-      } else {
-        widget.value.speakForWrong();
       }
     });
   }
 
-  /// Handle grid item tap with game logic
+  bool isGridTapped = false;
   Future<void> _onGridTap(String title, int index, GridModel grid) async {
+    if (isGridTapped) return; // Prevent multiple taps
+    isGridTapped = true;
+
+    if (widget.value.findTheWordWrongList.contains(index)) {
+      isGridTapped = false;
+      return;
+    }
+    if (title == "null" || title.isEmpty) {
+      isGridTapped = false;
+      return;
+    }
+
     if (widget.value.targetFindWord == title) {
-      await _handleCorrectGuess(title, grid);
+      widget.value.setFindWordImage(true);
+      widget.value.setFoundSuccess(true);
+      _onImageTap(MyAssets.correct);
+      Future.delayed(const Duration(milliseconds: 1700), () async {
+        if (!widget.value.editPressedYello) {
+          if (grid.videosPath?.isNotEmpty ?? false) {
+            var rand = Random().nextInt(grid.videosPath!.length);
+
+            await widget.value.flutterTts.speak(title);
+            Navigator.pushNamed(
+              context,
+              RouteStrings.videoPlayer,
+              arguments: {
+                'url': grid.videosPath?[rand],
+                'localUrl': (grid.localVideosPath != null &&
+                        rand < grid.localVideosPath!.length)
+                    ? grid.localVideosPath![rand]
+                    : null,
+              },
+            ).then((_) {
+              if (widget.value.findTheWord) {
+                widget.value.setRandomIndex();
+              }
+            });
+          } else {
+            dev.log("Error: No video found");
+            // Sirf word bolo agar video hi nahi hai
+            await widget.value.flutterTts.speak(title);
+            widget.value.setRandomIndex();
+          }
+        }
+        isGridTapped = false;
+      });
     } else {
-      _handleWrongGuess(index);
+      // ❌ Wrong case
+      widget.value.setFindTheWordWrongList(index);
+      widget.value.setFindWordImage(true);
+      _onImageTap(MyAssets.wrong);
+      isGridTapped = false;
     }
-  }
-
-  /// Handle correct word guess
-  Future<void> _handleCorrectGuess(String title, GridModel grid) async {
-    await widget.value.flutterTts.speak(title);
-    widget.value.setFindWordImage(true);
-    widget.value.setFoundSuccess(true);
-    _onImageTap(MyAssets.correct);
-
-    Future.delayed(const Duration(milliseconds: 3500), () {
-      _playVideoIfAvailable(grid);
-    });
-  }
-
-  /// Play video if available for correct guess
-  void _playVideoIfAvailable(GridModel grid) {
-    if (!widget.value.editPressedYello) {
-      if (grid.videosPath?.isNotEmpty ?? false) {
-        final rand = Random().nextInt(grid.videosPath?.length ?? 0 + 1);
-        dev.log(grid.videosPath!.length.toString());
-
-        Navigator.pushNamed(
-          context,
-          RouteStrings.videoPlayer,
-          arguments: grid.videosPath?[rand],
-        );
-      } else {
-        dev.log("Error occurred: no video available");
-        widget.value.setRandomIndex();
-      }
-    }
-  }
-
-  /// Handle wrong word guess
-  void _handleWrongGuess(int index) {
-    widget.value.setFindTheWordWrongList(index);
-    widget.value.setFindWordImage(true);
-    _onImageTap(MyAssets.wrong);
   }
 
   @override
@@ -133,70 +165,65 @@ class _GridViewWidgetState extends State<GridViewWidget>
           Column(
             children: [
               const Gap(5),
-              _buildFindWordText(fontSize),
-              const Gap(5),
+              Visibility(
+                visible: widget.value.findTheWord,
+                child: Column(
+                  children: [
+                    Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          (widget
+                                      .value
+                                      .gridSizedModel
+                                      .listData?[widget.value.randomListIndex]
+                                      .title ==
+                                  null)
+                              ? "No items available. Please add items first."
+                              : "Find '${widget.value.gridSizedModel.listData![widget.value.randomListIndex].title}'",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                  color: AppColor.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontSize),
+                        )),
+                    const Gap(5),
+                  ],
+                ),
+              ),
               Expanded(
-                child: _buildGridContent(fontSize),
+                child: widget.value.isMobile
+                    ? gridBoard(
+                        value: widget.value,
+                        contentProvider: widget.contentProvider,
+                        fontSize: fontSize,
+                        onTap: _onGridTap,
+                      )
+                    : mainBoardList(
+                        context: context,
+                        value: widget.value,
+                        contentProvider: widget.contentProvider,
+                        fontSize: fontSize,
+                        onTap: _onGridTap,
+                      ),
               ),
             ],
           ),
-          _buildFindWordImage(),
-        ],
-      ),
-    );
-  }
-
-  /// Build the "Find Word" instruction text
-  Widget _buildFindWordText(double fontSize) {
-    return Visibility(
-      visible: widget.value.findTheWord,
-      child: Align(
-        alignment: Alignment.center,
-        child: Text(
-          "Find '${widget.value.gridSizedModel.listData?[widget.value.randomListIndex].title}'",
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColor.black,
-                fontWeight: FontWeight.bold,
-                fontSize: fontSize + 4,
+          if (widget.value.findWordImage)
+            Align(
+              alignment: Alignment.center,
+              child: ScaleTransition(
+                // Scale value for zoom
+                scale: _animation,
+                child: Image.asset(
+                  widget.value.findWordImagePath,
+                  width: 400,
+                  height: 400,
+                ),
               ),
-        ),
-      ),
-    );
-  }
-
-  /// Build the main grid content based on device type
-  Widget _buildGridContent(double fontSize) {
-    if (widget.value.isMobile) {
-      return gridBoard(
-        value: widget.value,
-        contentProvider: widget.contentProvider,
-        fontSize: fontSize,
-        onTap: _onGridTap,
-      );
-    } else {
-      return mainBoardList(
-        context: context,
-        value: widget.value,
-        contentProvider: widget.contentProvider,
-        fontSize: fontSize,
-        onTap: _onGridTap,
-      );
-    }
-  }
-
-  /// Build the find word image overlay
-  Widget _buildFindWordImage() {
-    if (!widget.value.findWordImage) return const SizedBox.shrink();
-
-    return Align(
-      alignment: Alignment.center,
-      child: ScaleTransition(
-        scale: _animation,
-        child: Image.asset(
-          widget.value.findWordImagePath,
-          width: 200,
-          height: 200,
-        ),
+            ),
+        ],
       ),
     );
   }

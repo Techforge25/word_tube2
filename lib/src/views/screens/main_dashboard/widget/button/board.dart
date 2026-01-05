@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
+import 'package:word_toob/src/source/data_source/data_sharing_services.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/views/widgets/custom_menu_widget.dart';
 import 'dart:developer' as dev;
@@ -56,7 +57,7 @@ class MyBoardsButton extends StatelessWidget {
               ],
             ),
             child: ListTile(
-              onTap: () {
+              onTap: () async {
 // setting playing mode off
                 value.setFindTheWord(false);
                 value.setRandomListIndex(0);

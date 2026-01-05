@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
@@ -12,305 +14,173 @@ Widget gridBoard({
   required double fontSize,
   required void Function(String title, int index, GridModel grid) onTap,
 }) {
-  return GridView.builder(
-    // shrinkWrap: true,
-    physics: const BouncingScrollPhysics(),
-    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+  final int itemCount = value.gridSizedModel.listData?.length ?? 0;
 
-    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: value.gridSizedModel.gridSizeY ?? 4,
-      childAspectRatio: 1,
-    ),
+  // Condition: Agar item count 84 hai to dynamic grid, warna simple grid.
+  if (itemCount == 84 || itemCount == 60) {
+    // Yeh aapka naya dynamic layout hai jo sirf 84 items ke liye chalega.
+    return _buildDynamicGridFor84Grid(
+      value: value,
+      contentProvider: contentProvider,
+      fontSize: fontSize,
+      onTap: onTap,
+      itemCount: itemCount,
+    );
+  } else {
+    // Yeh purana wala layout hai jo baqi sab lengths ke liye chalega.
+    return _buildSimpleGrid(
+      value: value,
+      contentProvider: contentProvider,
+      fontSize: fontSize,
+      onTap: onTap,
+      itemCount: itemCount,
+    );
+  }
+}
 
-    itemCount: value.gridSizedModel.listData?.length,
-    itemBuilder: (context, index) {
-      final GridModel grid =
-          value.gridSizedModel.listData?[index] ?? GridModel();
-      // final findTheWrongWord =
-      //     ! value.findTheWordWrongList.contains(index);
+Widget _buildDynamicGridFor84Grid({
+  required MainDashboardController value,
+  required ContentProvider contentProvider,
+  required double fontSize,
+  required void Function(String title, int index, GridModel grid) onTap,
+  required int itemCount,
+}) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      if (itemCount == 0) return const SizedBox();
+      final screenWidth = constraints.maxWidth;
+      final screenHeight = constraints.maxHeight;
 
-      if (value.findTheWord || value.freePlay == false) {
-        // return Builder(
-        //   builder: (context) => InkWell(
-        //     onTap: () {
-        //       if ( value.targetFindWord == grid.title) {
-        //          value.setFindWordImage(true);
-        //          value.setFoundSuccess(true);
-        //         _onImageTap(MyAssets.correct);
-        //       } else {
-        //          value.setFindTheWordWrongList(index);
-        //          value.setFindWordImage(true);
-        //         _onImageTap(MyAssets.wrong);
-        //       }
-        //     },
-        //     child: Container(
-        //       padding: EdgeInsets.symmetric(
-        //         horizontal: 5,
-        //         vertical: 1,
-        //       ),
-        //       decoration: BoxDecoration(
-        //         color: findTheWrongWord
-        //             ? AppColor.cardColor
-        //             : AppColor.transparent,
-        //         borderRadius: BorderRadius.circular(10),
-        //         border: Border.all(
-        //           color: findTheWrongWord
-        //               ? Colors.white
-        //               : Colors.transparent,
-        //           width: 2,
-        //         ),
-        //       ),
-        //       child: Center(
-        //         child: Padding(
-        //           padding: EdgeInsets.symmetric(
-        //             vertical: context.height * 0.02,
-        //             horizontal: context.width * 0.02,
-        //           ),
-        //           child: Column(
-        //             mainAxisAlignment: MainAxisAlignment.start,
-        //             children: [
-        //               Text(
-        //                 findTheWrongWord ? grid.title ?? '?' : "",
-        //                 maxLines: 2,
-        //                 style: Theme.of(context)
-        //                     .textTheme
-        //                     .bodySmall
-        //                     ?.copyWith(
-        //                       color: AppColor.white,
-        //                       fontWeight: FontWeight.bold,
-        //                       // Adjust the font size if necessary
-        //                       fontSize: fontSize,
-        //                     ),
-        //               ),
-        //               // Add spacing between text and image
-        //               SizedBox(height: context.height * 0.02),
-        //               findTheWrongWord
-        //                   ? Flexible(
-        //                       child: grid.imagepath != null
-        //                           ? grid.imagepath!
-        //                                   .contains("assets")
-        //                               ? Image.asset(
-        //                                   grid.imagepath!,
-        //                                   height: context.height *
-        //                                       0.5,
-        //                                   width: context.height *
-        //                                       0.5,
-        //                                 )
-        //                               : Image.file(
-        //                                   File(grid.imagepath!),
-        //                                   height: context.height *
-        //                                       0.5,
-        //                                   width: context.height *
-        //                                       0.5,
-        //                                 )
-        //                           : SizedBox(),
-        //                     )
-        //                   : SizedBox(),
-        //             ],
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // );
-        return gameGridCard(
-          context: context,
-          value: value,
-          contentProvider: contentProvider,
-          grid: grid,
-          index: index,
-          fontSize: fontSize,
-          onTap: () => onTap(grid.title ?? '', index, grid),
-        );
-      } else {
-        return CommonFunctions.getCheckforGridShow(
-          isEditPressedYellow: value.editPressedYello,
-          hideImage: grid.hideImage ?? false,
-          hideTitle: grid.hidetitle ?? false,
-        )
-            ? basicGrid(
-                value: value,
-                contentProvider: contentProvider,
-                grid: grid,
-                index: index,
-                fontSize: fontSize,
-              )
-            // ? Builder(
-            //     builder: (context) => Stack(
-            //       children: [
-            //         GestureDetector(
-            //           onLongPress: () =>
-            //                value.hideOrShowEachGrid(
-            //              contentProvider,
-            //             index,
-            //             hideTitle: true,
-            //             hideImage: true,
-            //           ),
-            //           onTap: () {
-            //             // value.setItemOnEditState(index,context,title: "Happy",picture: MyAssets.happy );
-            //              value.setItemOnEditState(
-            //               hide: grid.hidetitle ?? false,
-            //               index,
-            //               context,
-            //               title: grid.title ?? '',
-            //               picture: grid.imagepath ?? "",
-            //               id:  value.gridSizedModel.id ??
-            //                   -1,
-            //               videoPath: grid.videosPath ?? [],
-            //               gridIndex:  value.gridIndex,
-            //             );
-
-            //             //  value.setLottie();
-            //              value.flutterTts
-            //                 .speak(grid.title ?? "");
-
-            //             if (! value.editPressedYello) {
-            //               if (grid.videosPath?.isNotEmpty ??
-            //                   false) {
-            //                 var rand = Random().nextInt(
-            //                     grid.videosPath?.length ?? 0 + 1);
-
-            //                 dev.log(grid.videosPath!.length
-            //                     .toString());
-            //                 Navigator.pushNamed(
-            //                     context, RouteStrings.videoPlayer,
-            //                     arguments:
-            //                         grid.videosPath?[rand]);
-            //               } else {
-            //                 dev.log("Error occured no item  ");
-            //               }
-            //             }
-            //           },
-            //           child: Container(
-            //               margin: EdgeInsets.symmetric(
-            //                   horizontal: 2, vertical: 1),
-            //               decoration: BoxDecoration(
-            //                 color: AppColor.cardColor,
-            //                 borderRadius:
-            //                     BorderRadius.circular(10),
-            //                 border: Border.all(
-            //                   color:
-            //                        value.editPressedYello &&
-            //                               (grid.videosPath
-            //                                       ?.isNotEmpty ??
-            //                                   false)
-            //                           ? Colors.green
-            //                           : Colors.white,
-            //                   width: 2,
-            //                 ),
-            //               ),
-            //               child: Center(
-            //                 child: Padding(
-            //                   padding: EdgeInsets.symmetric(
-            //                     vertical: context.height * 0.02,
-            //                     horizontal: context.width * 0.02,
-            //                   ),
-            //                   child: Column(
-            //                     mainAxisAlignment:
-            //                         MainAxisAlignment.start,
-            //                     children: [
-            //                       Flexible(
-            //                         child: Text(
-            //                           grid.title ?? '?',
-            //                           maxLines: 2,
-            //                           style: Theme.of(context)
-            //                               .textTheme
-            //                               .bodySmall
-            //                               ?.copyWith(
-            //                                 color: AppColor.white,
-            //                                 // Adjust the font size if necessary
-            //                                 fontWeight:
-            //                                     FontWeight.bold,
-            //                                 fontSize: fontSize,
-            //                               ),
-            //                         ),
-            //                       ),
-            //                       // Add spacing between text and image
-            //                       SizedBox(
-            //                         height: context.height * 0.02,
-            //                       ),
-            //                       if ( value
-            //                               .settingsWordOnlyShow ==
-            //                           1)
-            //                         Flexible(
-            //                           flex: 3,
-            //                           child: grid.imagepath !=
-            //                                   null
-            //                               ? grid.imagepath!
-            //                                       .contains(
-            //                                           "assets")
-            //                                   ? Image.asset(
-            //                                       grid.imagepath!,
-            //                                       height: context
-            //                                               .height *
-            //                                           0.5,
-            //                                       width: context
-            //                                               .height *
-            //                                           0.5,
-            //                                     )
-            //                                   : Image.file(
-            //                                       File(grid
-            //                                           .imagepath!),
-            //                                       height: context
-            //                                               .height *
-            //                                           0.5,
-            //                                       width: context
-            //                                               .height *
-            //                                           0.5,
-            //                                     )
-            //                               : Container(),
-            //                         )
-            //                       else
-            //                         Container(),
-            //                     ],
-            //                   ),
-            //                 ),
-            //               )),
-            //         ),
-            //         if ( value.editPressedYello &&
-            //             grid.hideImage == true &&
-            //             grid.hidetitle == true)
-            //           Builder(
-            //             builder: (context) => GestureDetector(
-            //               onLongPress: () {
-            //                  value.hideOrShowEachGrid(
-            //                    contentProvider,
-            //                   index,
-            //                   hideTitle: false,
-            //                   hideImage: false,
-            //                 );
-            //               },
-            //               onTap: () {
-            //                  value.setItemOnEditState(
-            //                     hide: grid.hidetitle ?? false,
-            //                     gridIndex:  value.gridIndex,
-            //                     index,
-            //                     context,
-            //                     title: grid.title ?? "",
-            //                     picture: grid.imagepath ?? "",
-            //                     id:  value.gridSizedModel
-            //                             .id ??
-            //                         -1,
-            //                     videoPath: grid.videosPath ?? []);
-            //               },
-            //               child: Container(
-            //                 margin: EdgeInsets.symmetric(
-            //                     horizontal: 2, vertical: 1),
-            //                 decoration: BoxDecoration(
-            //                   color: AppColor.lightBlue
-            //                       .withOpacity(0.5),
-            //                   borderRadius:
-            //                       BorderRadius.circular(10),
-            //                   // border: Border.all(color: Colors.white, width: 2),
-            //                 ), // Light blue overlay with opacity
-            //               ),
-            //             ),
-            //           ),
-            //       ],
-            //     ),
-            //   )
-            : Container();
+      // Best column count calculate karne ka logic
+      int bestCrossAxisCount = 1;
+      for (int i = 1; i <= itemCount; i++) {
+        double itemSize = screenWidth / i;
+        int rowCount = (itemCount / i).ceil();
+        double gridHeight = itemSize * rowCount;
+        if (gridHeight <= screenHeight) {
+          bestCrossAxisCount = i;
+          break;
+        }
       }
+
+      return GridView.count(
+        crossAxisCount: bestCrossAxisCount,
+        physics: const NeverScrollableScrollPhysics(),
+        childAspectRatio: 1, // Square cells ke liye
+        mainAxisSpacing: 4.0,
+        crossAxisSpacing: 4.0,
+        padding: const EdgeInsets.all(4.0),
+        children: List.generate(itemCount, (index) {
+          final GridModel grid =
+              value.gridSizedModel.listData?[index] ?? GridModel();
+
+          if (value.findTheWord || value.freePlay == false) {
+            return gameGridCard(
+              context: context,
+              value: value,
+              contentProvider: contentProvider,
+              grid: grid,
+              index: index,
+              fontSize: fontSize,
+              onTap: () => onTap(grid.title ?? '', index, grid),
+            );
+          } else {
+            return CommonFunctions.getCheckforGridShow(
+              isEditPressedYellow: value.editPressedYello,
+              hideImage: grid.hideImage ?? false,
+              hideTitle: grid.hidetitle ?? false,
+            )
+                ? basicGrid(
+                    value: value,
+                    contentProvider: contentProvider,
+                    grid: grid,
+                    index: index,
+                    fontSize: fontSize,
+                    screenHeight: screenHeight,
+                    screenWidth: screenWidth,
+                    isFor84And64Grid: true)
+                : Container();
+          }
+        }),
+      );
+    },
+  );
+}
+
+Widget _buildSimpleGrid({
+  required MainDashboardController value,
+  required ContentProvider contentProvider,
+  required double fontSize,
+  required void Function(String title, int index, GridModel grid) onTap,
+  required int itemCount,
+}) {
+  int gridSizeX = value.gridSizedModel.gridSizeX ?? 1;
+  final listData = value.gridSizedModel.listData;
+
+  if (listData == null || listData.isEmpty) {
+    return Container();
+  }
+
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final itemCount = value.gridSizedModel.listData?.length ?? 0;
+
+      if (itemCount == 0) return const SizedBox();
+
+      // Rows & Cols auto adjust
+      final crossAxisCount = sqrt(itemCount).ceil();
+      final rowCount = (itemCount / crossAxisCount).ceil();
+
+      // Cell ka aspect ratio calculate
+      final cellWidth = constraints.maxWidth / crossAxisCount;
+      final cellHeight = constraints.maxHeight / rowCount;
+      final aspectRatio = cellWidth / cellHeight;
+      print("crossAxisCount" + crossAxisCount.toString());
+      return GridView.count(
+        crossAxisCount: crossAxisCount,
+        physics: const NeverScrollableScrollPhysics(),
+        childAspectRatio: aspectRatio,
+        children: List.generate(itemCount, (index) {
+          final GridModel grid =
+              value.gridSizedModel.listData?[index] ?? GridModel();
+
+          if (value.findTheWord || value.freePlay == false) {
+            return ((grid.hideImage == false) &&
+                    (grid.hidetitle == false) &&
+                    (grid.title?.isNotEmpty ?? false))
+                ? gameGridCard(
+                    context: context,
+                    value: value,
+                    contentProvider: contentProvider,
+                    grid: grid,
+                    index: index,
+                    fontSize: fontSize,
+                    onTap: () => onTap(
+                      grid.title ?? '',
+                      index,
+                      grid,
+                    ),
+                  )
+                : Container();
+          } else {
+            return CommonFunctions.getCheckforGridShow(
+              isEditPressedYellow: value.editPressedYello,
+              hideImage: grid.hideImage ?? false,
+              hideTitle: grid.hidetitle ?? false,
+            )
+                ? basicGrid(
+                    value: value,
+                    contentProvider: contentProvider,
+                    grid: grid,
+                    index: index,
+                    fontSize: fontSize,
+                    screenWidth: constraints.maxWidth,
+                    screenHeight: constraints.maxHeight,
+                  )
+                : Container();
+          }
+        }),
+      );
     },
   );
 }

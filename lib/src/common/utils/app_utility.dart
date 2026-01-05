@@ -10,10 +10,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +27,7 @@ import 'package:word_toob/src/common/app_constants/general.dart' show printLog;
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/views/theme/app_color.dart';
 import '../../source/models/grid_model.dart';
+import 'package:word_toob/src/common/globals.dart' as globals;
 import 'dart:developer' as dev;
 
 abstract class AppUtility {
@@ -148,13 +152,89 @@ abstract class AppUtility {
   static Future<XFile?> imageFromCamera() async {
     var image = await ImagePicker()
         .pickImage(source: ImageSource.camera, imageQuality: 40);
+    if (image != null) {
+      await GallerySaver.saveImage(image.path);
+      dev.log("image saved to gallery: ${image.path}");
+    }
     return image;
   }
 
   static Future<XFile?> imageFromGallery() async {
     var image = await ImagePicker()
         .pickImage(source: ImageSource.gallery, imageQuality: 30);
+
     return image;
+  }
+
+  /// Global directory path use karke full path banata hai
+  /// Agar path already complete hai (http, assets, ya full path), to wese hi return karta hai
+  /// Warna filename extract karke global directory path ke saath concatenate karta hai
+  static Future<String> getFullPath(String filePath) async {
+    // 1. Agar path HTTP URL hai, to wese hi return karo
+    if (filePath.startsWith('http')) {
+      return filePath;
+    }
+
+    // 2. Agar path asset hai, to wese hi return karo
+    if (filePath.startsWith('assets/') || filePath.startsWith('asset')) {
+      return filePath;
+    }
+
+    // 3. Agar path pehle se complete hai (Android ya Temp ya full path), aur file exist karti hai to wese hi return karo
+    if (filePath.startsWith('/var') ||
+        filePath.startsWith('/data') ||
+        filePath.startsWith('/private') ||
+        filePath.startsWith('/Users') ||
+        filePath.length > 100) {
+      // File exist karti hai ya nahi check karo
+      if (await File(filePath).exists()) {
+        return filePath;
+      }
+      // Agar file exist nahi karti to filename extract karke global path ke saath concatenate karo
+    }
+
+    // 4. Filename extract karo (basename)
+    final fileName = path.basename(filePath);
+
+    // 5. Global directory path use karo (agar initialize nahi hai to fresh lo)
+    String? directoryPath = globals.globalDocumentsDirectoryPath;
+    if (directoryPath == null) {
+      final directory = await getApplicationDocumentsDirectory();
+      directoryPath = directory.path;
+      globals.globalDocumentsDirectoryPath = directoryPath;
+    }
+
+    // 6. Naya path banao: GlobalFolder + Filename
+    final fullPath = path.join(directoryPath, fileName);
+    return fullPath;
+  }
+
+  /// Filename extract karta hai kisi bhi path se
+  static String extractFileName(String filePath) {
+    return path.basename(filePath);
+  }
+
+  static String getFullPathFromFileName(String filePath) {
+    String directoryPath = globals.globalDocumentsDirectoryPath!;
+    final fileName = extractFileName(filePath);
+    final fullPath = path.join(directoryPath, fileName);
+    return fullPath;
+  }
+
+  static Future<File> saveImagePermanently(File imageFile) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final name = path.basename(imageFile.path);
+    final image = File('${directory.path}/$name');
+
+    return File(imageFile.path).copy(image.path);
+  }
+
+  static Future<File> saveVideoPermanently(File videoFile) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final name = path.basename(videoFile.path);
+    final video = File('${directory.path}/$name');
+
+    return File(videoFile.path).copy(video.path);
   }
 
   static Future<XFile?> pickImage(BuildContext context) async {
@@ -255,6 +335,10 @@ abstract class AppUtility {
   static Future<XFile?> videoFromCamera() async {
     try {
       final video = await ImagePicker().pickVideo(source: ImageSource.camera);
+      if (video != null) {
+        await GallerySaver.saveVideo(video.path);
+        dev.log("Video saved to gallery: ${video.path}");
+      }
       return video;
     } on PlatformException catch (e) {
       if (e.code == 'camera_access_denied' || e.code == 'photo_access_denied') {
@@ -275,6 +359,10 @@ abstract class AppUtility {
           try {
             final video =
                 await ImagePicker().pickVideo(source: ImageSource.camera);
+            if (video != null) {
+              await GallerySaver.saveVideo(video.path);
+              dev.log("Video saved to gallery: ${video.path}");
+            }
             return video;
           } catch (e) {
             printLog("Error on retry: $e");
@@ -293,7 +381,7 @@ abstract class AppUtility {
 
   static Future<XFile?> videoFromGallery() async {
     var video = await ImagePicker().pickVideo(source: ImageSource.gallery);
-    dev.log(video!.path);
+
     return video;
   }
 
@@ -898,8 +986,8 @@ abstract class AppUtility {
                   Expanded(
                     child: ListView(
                       children: list.asMap().entries.map((entry) {
-                        int index = entry.key; // The index
-                        var item = entry.value; // The item
+                        int index = entry.key;
+                        var item = entry.value;
 
                         return TextButton(
                           onPressed: () async {
@@ -910,7 +998,8 @@ abstract class AppUtility {
                               gridSizeY: item.gridSizeY,
                               listData: List.generate(
                                 item.listData?.length ?? 0,
-                                (i) => GridModel(),
+                                (i) => GridModel(
+                                    hideImage: false, hidetitle: false),
                               ),
                             );
 
@@ -1161,10 +1250,6 @@ Future<bool> checkInternetConnection() async {
   return false;
 }
 
-
-
-
-
 // class RatingBuilderWidget extends StatelessWidget {
 //   const RatingBuilderWidget({
 //     super.key,
@@ -1200,4 +1285,3 @@ Future<bool> checkInternetConnection() async {
 //     );
 //   }
 // }
-

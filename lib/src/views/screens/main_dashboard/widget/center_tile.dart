@@ -19,6 +19,8 @@ class CenterTitle extends StatelessWidget {
 
     return Text(
       value.gridSizedModel.title ?? "",
+      textAlign: TextAlign.center,
+      overflow: TextOverflow.ellipsis,
       style: Theme.of(context)
           .textTheme
           .bodyMedium
