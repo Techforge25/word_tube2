@@ -80,6 +80,37 @@ abstract class AppString {
   static const juice = "juice";
   static const hot = "hot";
 
+
+//First 25 words Espanish
+static const first25WordsEsp = "F25Es/En";
+  static const mommyEsp = "Mami";
+  static const yesEsp = "Sí";
+  static const byeEsp = "adiós";
+  static const helloEsp = "Hola";
+  static const noFirst25WordEsp = "No";
+  static const eyeEsp = "ojo";
+  static const ballEsp = "Balon";
+  static const thankYouEsp = "Gracias";
+  static const bookEsp = "libro";
+  static const noseEsp = "nariz";
+  static const daddyEsp = "papá";
+  static const cookieEsp = "Falleta";
+  static const hatEsp = "Gorra";
+  static const shoeEsp = "zapato";
+  static const moreEsp = "más";
+  static const catEsp = "Gato";
+  static const dogEsp = "Perro";
+  static const babyEsp = "bebé";
+  static const carEsp = "Carro";
+  static const bathEsp = "Bañera";
+  static const allGoneEsp = "Ya Acabé";
+  static const banananEsp = "Plátano";
+  static const milkEsp = "leche";
+  static const juiceEsp = "jugo";
+  static const hotEsp = "caliente";
+
+
+
   ///Alphabets Board
   static const alphabetBoard = "Alphabet";
 

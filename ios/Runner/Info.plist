@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>WordTube: Learn with AI</string>
+	<string>WordTube 2</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>

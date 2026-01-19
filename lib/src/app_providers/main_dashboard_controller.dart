@@ -410,7 +410,7 @@ class MainDashboardController extends ChangeNotifier {
             ? jsonDecode(savedVoice)
             : _voices
                 .where(
-                    (v) => (v['gender'] == 'female' && v['locale'] == 'en-US'))
+                    (v) => (v['gender'] == 'female' && v['locale'] == 'en-US' ))
                 .first;
 
         try {

@@ -148,11 +148,6 @@ class _MainDashboardState extends State<MainDashboard> {
         "gridSizeY": 5,
       },
       {
-        "name": "Alphabets",
-        "gridSizeX": 5,
-        "gridSizeY": 6,
-      },
-      {
         "name": "Numbers",
         "gridSizeX": 5,
         "gridSizeY": 5,
@@ -189,13 +184,13 @@ class _MainDashboardState extends State<MainDashboard> {
       },
       {
         "name": "60 words",
-        "gridSizeX": 10,
-        "gridSizeY": 6,
+        "gridSizeX": 5,
+        "gridSizeY": 12,
       },
       {
         "name": "84 words",
-        "gridSizeX": 12,
-        "gridSizeY": 7,
+        "gridSizeX": 6,
+        "gridSizeY": 14,
       },
     ];
 
