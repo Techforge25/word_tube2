@@ -16,6 +16,10 @@ void main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+
+  // Initialize dependency injection
   await setup();
+
+  // Launch the app
   runApp(const MyApp());
 }

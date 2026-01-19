@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_getters_setters
 import 'package:isar/isar.dart';
 
+/// Model representing a grid item with title, image, videos, and visibility settings
 @embedded
 class GridModel {
   int? _id;
@@ -65,7 +66,7 @@ class GridModel {
     _id = id;
   }
 
-  // fromJson method
+  /// Create a GridModel from JSON data
   factory GridModel.fromJson(Map<String, dynamic> json) {
     return GridModel(
       title: json['title'],
@@ -82,7 +83,7 @@ class GridModel {
     );
   }
 
-  // toJson method
+  /// Convert GridModel to JSON data
   Map<String, dynamic> toJson() {
     return {
       'title': _title,

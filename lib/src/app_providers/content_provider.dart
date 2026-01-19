@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_final_fields
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -12,6 +13,7 @@ import 'package:word_toob/src/common/globals.dart' as globals;
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/source/models/grid_size_model.dart';
 import 'package:word_toob/src/source/repository/app_repository.dart';
+
 import 'dart:developer' as dev;
 
 class ContentProvider extends ChangeNotifier {
@@ -19,43 +21,33 @@ class ContentProvider extends ChangeNotifier {
 
   ContentProvider({required this.iAppRepository});
 
+  // Grid size models
   List<GridSizeModel> _allGridSizedModel = [];
   List<GridSizeModel> get allGridSizedModel => _allGridSizedModel;
 
+  // Status tracking
   Status getAllGridSizeModelStatus = Status.initial;
   Status updateGridSizeModelStatus = Status.initial;
   Status updateGridListDataStatus = Status.initial;
   Status saveAllGridSizeModelStatus = Status.initial;
   Status saveGridSizeModelStatus = Status.initial;
 
+  // Data for loading
   List<Uint8List> imagesToBeLoaded = [];
   List<String> namesToBeLoaded = [];
 
+  // Pre-loaded image paths for emotions
   List<Map<String, dynamic>> _imagePathsPreLoad = [
-    {
-      "name": "Happy",
-      "image": MyAssets.happyP,
-    },
-    {
-      "name": "Sad",
-      "image": MyAssets.sad,
-    },
-    {
-      "name": "Mad",
-      "image": MyAssets.mad,
-    },
+    {"name": "Happy", "image": MyAssets.happyP},
+    {"name": "Sad", "image": MyAssets.sad},
+    {"name": "Mad", "image": MyAssets.mad},
     {"name": "Excited", "image": MyAssets.excited},
-    {
-      "name": "Frustrated",
-      "image": MyAssets.frustrated,
-    },
-    {
-      "name": "Scared",
-      "image": MyAssets.scared,
-    },
+    {"name": "Frustrated", "image": MyAssets.frustrated},
+    {"name": "Scared", "image": MyAssets.scared},
     {"name": "Love", "image": MyAssets.love},
     {"name": "Surprised", "image": MyAssets.surprised},
   ];
+
   List<Map<String, dynamic>> get imagePathsPreLoad => _imagePathsPreLoad;
   Future<void> addVideoToGridItem({
     required int gridSizeModelId,
@@ -113,32 +105,35 @@ class ContentProvider extends ChangeNotifier {
   Future getAllGridSizeModel() async {
     getAllGridSizeModelStatus = Status.loading;
     notifyListeners();
+
     try {
       _allGridSizedModel = await iAppRepository.getAllGridSizedModel();
-      // log(_allGridSizedModel[0].listData.toString());
-      notifyListeners();
       getAllGridSizeModelStatus = Status.loaded;
     } on Exception catch (e) {
       getAllGridSizeModelStatus = Status.error;
       dev.log(e.toString());
     }
+
     notifyListeners();
   }
 
-  Future getFirstGridSizeModel() async {
+  /// Fetch the first grid size model
+  Future<void> getFirstGridSizeModel() async {
     getAllGridSizeModelStatus = Status.loading;
     notifyListeners();
+
     try {
       _allGridSizedModel = await iAppRepository.getFirstGridSizedModel();
-
       getAllGridSizeModelStatus = Status.loaded;
     } on Exception catch (e) {
       getAllGridSizeModelStatus = Status.error;
       dev.log(e.toString());
     }
+
     notifyListeners();
   }
 
+  /// Update grid size model data
   Future<void> updateGridSizeModelData({
     required int id,
     String? title,
@@ -151,6 +146,7 @@ class ContentProvider extends ChangeNotifier {
   }) async {
     updateGridSizeModelStatus = Status.loading;
     notifyListeners();
+
     try {
       await iAppRepository
           .updateGridSizedModel(
@@ -163,23 +159,23 @@ class ContentProvider extends ChangeNotifier {
         gridSizeY: gridSizeY,
         gridSizeX: gridSizeX,
       )
-          .then(
-        (value) async {
-          await getAllGridSizeModel();
-        },
-      );
-      notifyListeners();
+          .then((value) async {
+        await getAllGridSizeModel();
+      });
+
       updateGridSizeModelStatus = Status.loaded;
     } on Exception catch (e) {
       updateGridSizeModelStatus = Status.error;
       dev.log(e.toString());
     }
+
     notifyListeners();
   }
 
+  /// Update list data item
   Future<void> updateListDataItem({
-    required int? id, // ID of the GridSizedModel
-    required int itemIndex, // Index of the listData item to update
+    required int? id,
+    required int itemIndex,
     String? title,
     String? imagePath,
     List<String>? videosPath,
@@ -188,6 +184,7 @@ class ContentProvider extends ChangeNotifier {
   }) async {
     updateGridListDataStatus = Status.loading;
     notifyListeners();
+
     try {
       await iAppRepository
           .updateGridSizedModelListDataItem(
@@ -199,51 +196,53 @@ class ContentProvider extends ChangeNotifier {
         videosPath: videosPath,
         hideImage: hideImage,
       )
-          .then(
-        (value) async {
-          await getAllGridSizeModel();
-          dev.log("getAllGridSizeModel function is called");
-        },
-      );
-      notifyListeners();
+          .then((value) async {
+        await getAllGridSizeModel();
+        dev.log("getAllGridSizeModel function is called");
+      });
 
-      notifyListeners();
       updateGridListDataStatus = Status.loaded;
     } on Exception catch (e) {
       updateGridListDataStatus = Status.error;
       dev.log(e.toString());
     }
+
     notifyListeners();
   }
 
+  /// Delete a grid
   Future<void> deleteGrid({required int id}) async {
     updateGridListDataStatus = Status.loading;
     notifyListeners();
+
     try {
-      await iAppRepository.deleteRecord(id: id).then(
-        (value) async {
-          int i = _allGridSizedModel.indexWhere((a) => a.id! == id);
-          _allGridSizedModel.removeAt(i);
-        },
-      );
+      await iAppRepository.deleteRecord(id: id).then((value) async {
+        final index = _allGridSizedModel.indexWhere((a) => a.id! == id);
+        if (index != -1) {
+          _allGridSizedModel.removeAt(index);
+        }
+      });
 
       updateGridListDataStatus = Status.loaded;
     } on Exception catch (e) {
       updateGridListDataStatus = Status.error;
-      dev.log(e.toString(), name: 'First Grid Error');
+      dev.log(e.toString(), name: 'Delete Grid Error');
     }
 
     notifyListeners();
   }
 
-  Future saveAllGridSizedModel({
+  /// Save all grid sized models
+  Future<void> saveAllGridSizedModel({
     required List<GridSizeModel> gridSizedModelList,
     required ContentProvider contenProvider,
   }) async {
     saveAllGridSizeModelStatus = Status.loading;
     notifyListeners();
+
     try {
       await getAllGridSizeModel();
+
       if (contenProvider.allGridSizedModel.isEmpty) {
         // If database is empty, save all boards
         await iAppRepository.saveAllGridSizedModel(
@@ -268,35 +267,31 @@ class ContentProvider extends ChangeNotifier {
       }
 
       await getAllGridSizeModel();
-      notifyListeners();
-
       saveAllGridSizeModelStatus = Status.loaded;
     } on Exception catch (e) {
       saveAllGridSizeModelStatus = Status.error;
       dev.log(e.toString());
-      // whenExceptionCatch(e);
     }
+
     notifyListeners();
   }
 
-  Future saveGridSizedModel({required GridSizeModel gridSizedModel}) async {
+  /// Save a single grid sized model
+  Future<void> saveGridSizedModel(
+      {required GridSizeModel gridSizedModel}) async {
     saveGridSizeModelStatus = Status.loading;
     notifyListeners();
+
     try {
       await getAllGridSizeModel();
       await iAppRepository.saveGridSizedModel(gridSizedModel: gridSizedModel);
       await getAllGridSizeModel();
-      // GridSizeModel grid=   allGridSizedModel.firstWhere((grid) => grid.currentSelected==true,orElse:()=> allGridSizedModel[0]);
-      // notifyListeners();
-      //  mainDashBoard.setGridSizedModel(grid);
-      notifyListeners();
-
       saveGridSizeModelStatus = Status.loaded;
     } on Exception catch (e) {
       saveGridSizeModelStatus = Status.error;
       dev.log(e.toString());
-      // whenExceptionCatch(e);
     }
+
     notifyListeners();
   }
 }

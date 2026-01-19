@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
@@ -61,8 +62,8 @@ class RouteGenerator {
   }
 
   static Route<dynamic> _errorRoute() {
-    return MaterialPageRoute(builder: (_) {
-      return Scaffold(
+    return MaterialPageRoute(
+      builder: (_) => Scaffold(
         appBar: AppBar(
           title: const Text('Error'),
         ),

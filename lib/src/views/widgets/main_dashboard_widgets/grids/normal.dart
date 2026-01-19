@@ -84,8 +84,6 @@ Widget basicGrid({
               gridIndex: value.gridIndex,
             );
 
-            //  value.setLottie();
-
             if (!value.editPressedYello) {
               if (grid.videosPath?.isNotEmpty ?? false) {
                 final videos = grid.videosPath!;

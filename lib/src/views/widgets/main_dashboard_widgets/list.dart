@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'package:word_toob/src/app_providers/content_provider.dart';
 import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
 import 'package:word_toob/src/common/utils/common_functions.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/grids/game.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/grids/normal.dart';
-// import 'dart:developer' as dev;
 
+/// Main board list widget that displays grid items in a list format
 Widget mainBoardList({
   required BuildContext context,
   required MainDashboardController value,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:word_toob/src/views/theme/app_color.dart';
 
+/// Custom menu anchor widget that provides a dropdown menu functionality
 class CustomMenuAnchor extends StatelessWidget {
   final List<Widget> menuItems;
   final Widget titleWidget;
@@ -36,6 +38,7 @@ class CustomMenuAnchor extends StatelessWidget {
   }
 }
 
+/// Custom menu item button with consistent styling
 class CustomMenuItemButton extends StatelessWidget {
   final Widget child;
   final VoidCallback? onPressed;
@@ -51,9 +54,11 @@ class CustomMenuItemButton extends StatelessWidget {
     return MenuItemButton(
       style: ButtonStyle(
         textStyle: WidgetStateProperty.resolveWith(
-          (states) => TextStyle(color: Colors.white),
+          (states) => const TextStyle(color: Colors.white),
         ),
-        padding: WidgetStateProperty.all(EdgeInsetsDirectional.all(10)),
+        padding: WidgetStateProperty.all(
+          const EdgeInsetsDirectional.all(10),
+        ),
         backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
         foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
       ),

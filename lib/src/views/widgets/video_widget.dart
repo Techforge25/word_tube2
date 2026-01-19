@@ -1,12 +1,14 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 
-// ignore: must_be_immutable
+/// Widget that displays a video thumbnail with video player controls
 class VideoThumbnail extends StatefulWidget {
-  String videoPath;
-  VideoThumbnail(this.videoPath, {super.key});
+  final String videoPath;
+
+  const VideoThumbnail(this.videoPath, {super.key});
 
   @override
   State<VideoThumbnail> createState() => _VideoThumbnailState();
@@ -14,16 +16,22 @@ class VideoThumbnail extends StatefulWidget {
 
 class _VideoThumbnailState extends State<VideoThumbnail> {
   late VideoPlayerController _controller;
-
   late ChewieController _chewieController;
 
   @override
   void initState() {
     super.initState();
+    _initializeVideoController();
+  }
+
+  void _initializeVideoController() {
     _controller = VideoPlayerController.file(File(widget.videoPath))
       ..initialize().then((_) {
-        setState(() {}); // when the thumbnail will show.
+        if (mounted) {
+          setState(() {}); // Update UI when thumbnail is ready
+        }
       });
+
     _chewieController = ChewieController(
       videoPlayerController: _controller,
       autoInitialize: true,
@@ -35,9 +43,9 @@ class _VideoThumbnailState extends State<VideoThumbnail> {
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
     _chewieController.dispose();
+    super.dispose();
   }
 
   @override

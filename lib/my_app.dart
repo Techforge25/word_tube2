@@ -31,7 +31,10 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late StreamSubscription _intentDataStreamSubscription;
   @override
-  initState() {
+  void initState() {
+    super.initState();
+
+    // Set preferred orientations to landscape only
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,

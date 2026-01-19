@@ -41,16 +41,7 @@ flutter {
 // YEH WALA HISSA ADD KIYA HAI ERROR FIX KARNE KE LIYE
 configurations.all {
     resolutionStrategy {
-        // Core and Core-KTX dono ko force karna zaroori hai
-        force 'androidx.core:core:1.13.1'
-        force 'androidx.core:core-ktx:1.13.1'
-        
-        // Baki purane fixes bhi rehne dein
-        force 'androidx.browser:browser:1.8.0'
         force 'androidx.activity:activity:1.9.3'
         force 'androidx.activity:activity-ktx:1.9.3'
-        force 'androidx.fragment:fragment:1.8.5'
-        force 'androidx.lifecycle:lifecycle-common:2.8.7'
-        force 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
     }
 }

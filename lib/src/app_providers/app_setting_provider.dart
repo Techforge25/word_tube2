@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:word_toob/src/common/app_constants/app_keys.dart';
 
 enum Status { initial, error, loading, loaded }
@@ -6,9 +7,12 @@ enum Status { initial, error, loading, loaded }
 class AppSettingsProvider extends ChangeNotifier {
   ThemeMode _activeTheme = ThemeMode.light;
 
-  ///theme
+  /// Get the current active theme
   ThemeMode get activeTheme {
-    String theme = "light";
+    // TODO: Implement proper theme persistence logic
+    // Currently hardcoded to light theme
+    const theme = "light";
+
     switch (theme) {
       case AppKeys.dark:
         _activeTheme = ThemeMode.dark;
@@ -20,6 +24,7 @@ class AppSettingsProvider extends ChangeNotifier {
         _activeTheme = ThemeMode.light;
         break;
     }
+
     return _activeTheme;
   }
 }

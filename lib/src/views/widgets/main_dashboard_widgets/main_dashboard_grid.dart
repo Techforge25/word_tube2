@@ -3,19 +3,23 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+
 import 'package:word_toob/src/common/app_constants/route_strings.dart';
 import 'package:word_toob/src/source/models/grid_model.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/board/board.dart';
 import 'package:word_toob/src/views/widgets/main_dashboard_widgets/list.dart';
-import '../../../app_providers/content_provider.dart';
-import '../../../app_providers/main_dashboard_controller.dart';
-import '../../../common/app_constants/assets.dart';
-import '../../theme/app_color.dart';
+import 'package:word_toob/src/app_providers/content_provider.dart';
+import 'package:word_toob/src/app_providers/main_dashboard_controller.dart';
+import 'package:word_toob/src/common/app_constants/assets.dart';
+import 'package:word_toob/src/views/theme/app_color.dart';
+
 import 'dart:developer' as dev;
 
+/// Main grid view widget for the dashboard
 class GridViewWidget extends StatefulWidget {
   final MainDashboardController value;
   final ContentProvider contentProvider;
+
   const GridViewWidget({
     super.key,
     required this.value,
@@ -34,7 +38,10 @@ class _GridViewWidgetState extends State<GridViewWidget>
   @override
   void initState() {
     super.initState();
+    _initializeAnimation();
+  }
 
+  void _initializeAnimation() {
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 600),
@@ -48,7 +55,6 @@ class _GridViewWidgetState extends State<GridViewWidget>
 
   @override
   void dispose() {
-    // Dispose the controller when the widget is removed
     _controller.dispose();
     super.dispose();
   }
@@ -151,22 +157,7 @@ class _GridViewWidgetState extends State<GridViewWidget>
 
   @override
   Widget build(BuildContext context) {
-    late double fontSize;
-    // late double iconSize;
-    Orientation orientation = MediaQuery.orientationOf(context);
-
-    if (orientation == Orientation.landscape) {
-      if (context.height > 500) {
-        fontSize = context.height * 0.025;
-      } else {
-        fontSize = (context.height * 0.025) + 4;
-      }
-
-      // iconSize = context.width * 0.025;
-    } else {
-      fontSize = context.height * 0.025;
-      // iconSize = context.height * 0.04;
-    }
+    final fontSize = _calculateFontSize(context);
 
     return Expanded(
       child: Stack(
@@ -235,5 +226,20 @@ class _GridViewWidgetState extends State<GridViewWidget>
         ],
       ),
     );
+  }
+
+  /// Calculate font size based on orientation and context
+  double _calculateFontSize(BuildContext context) {
+    final orientation = MediaQuery.orientationOf(context);
+
+    if (orientation == Orientation.landscape) {
+      if (context.height > 500) {
+        return context.height * 0.025;
+      } else {
+        return (context.height * 0.025) + 4;
+      }
+    } else {
+      return context.height * 0.025;
+    }
   }
 }
