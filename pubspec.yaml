@@ -59,6 +59,7 @@ dependencies:
   flutter_cache_manager: ^3.4.1 
   async: ^2.13.0
   syncfusion_flutter_pdfviewer: ^28.1.6
+  translator: ^1.0.4+1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -90,9 +91,9 @@ flutter:
     - assets/images/videos/emotion_video/
     - assets/images/videos/alphabet_videos/
     - assets/images/videos/colors_videos/
+    - assets/images/videos/first25words_videos/
     - assets/sounds/
     - assets/
-    - .env
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

@@ -145,13 +145,12 @@ Widget basicGrid({
           },
           child: (isFor84And64Grid)
               ? Container(
-                  margin: EdgeInsets.symmetric(horizontal: 1, vertical: 1),
-                  //padding: EdgeInsets.symmetric(horizontal: 1.5),
+                  margin: EdgeInsets.symmetric(horizontal: 1, vertical: 01),
                   height: double.maxFinite,
                   width: double.maxFinite,
                   decoration: BoxDecoration(
-                    color: AppColor.cardColor,
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColor.white,
+                    borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: grid.videosPath?.isNotEmpty ?? false
                           ? Colors.green
@@ -197,12 +196,12 @@ Widget basicGrid({
                     ],
                   ))
               : Container(
-                  margin: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                  margin: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
                   height: size,
                   width: size,
                   decoration: BoxDecoration(
-                    color: AppColor.cardColor,
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColor.white,
+                    borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: grid.videosPath?.isNotEmpty ?? false
                           ? Colors.green
@@ -213,7 +212,7 @@ Widget basicGrid({
                   child: Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                        vertical: context.height * 0.01,
+                        vertical: context.height * 0.0001,
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -223,14 +222,14 @@ Widget basicGrid({
                             maxLines: 2,
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColor.white,
+                                      color: AppColor.black,
                                       // Adjust the font size if necessary
 
-                                      fontSize: fontSize,
+                                      fontSize: 16,
                                     ),
                           ),
                           // Add spacing between text and image
-                          SizedBox(height: context.height * 0.008),
+                          SizedBox(height: context.height * 0.0008),
                           if (value.settingsWordOnlyShow == 1)
                             Flexible(
                               child: grid.imagepath != null &&
@@ -240,12 +239,15 @@ Widget basicGrid({
                                           imageUrl: grid.imagepath!,
                                           height: context.height * 0.5,
                                           width: context.height * 0.5,
+                                          fit: BoxFit.contain,
                                         )
                                       : grid.imagepath!.startsWith("assets")
                                           ? Image.asset(
                                               grid.imagepath!,
                                               height: context.height * 0.5,
                                               width: context.height * 0.5,
+                                              fit: BoxFit.contain,
+                                              alignment: Alignment.center,
                                             )
                                           : Image.file(
                                               File(AppUtility
@@ -253,6 +255,7 @@ Widget basicGrid({
                                                       grid.imagepath!)),
                                               height: context.height * 0.5,
                                               width: context.height * 0.5,
+                                              fit: BoxFit.contain,
                                             )
                                   : Container(),
                             )
@@ -301,58 +304,3 @@ Widget basicGrid({
     ),
   );
 }
-
-/// Normal Grid View
-/* Container(
-              margin: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-              height: size,
-              width: size,
-              decoration: BoxDecoration(
-                color: AppColor.cardColor,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: grid.videosPath?.isNotEmpty ?? false
-                      ? Colors.green
-                      : Colors.white,
-                  width: 2,
-                ),
-              ),
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: context.height * 0.02,
-                    horizontal: context.width * 0.02,
-                  ),
-                  child: Stack(
-                    children: [
-                      if (grid.imagepath != null)
-                        Positioned.fill(
-                          child: grid.imagepath!.contains("assets")
-                              ? Image.asset(
-                                  grid.imagepath!,
-                                  fit: BoxFit.contain,
-                                )
-                              : Image.file(
-                                  File(grid.imagepath!),
-                                  fit: BoxFit.contain,
-                                ),
-                        ),
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: Text(
-                          grid.title ?? '?',
-                          maxLines: 2,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColor.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontSize,
-                                  ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
-        */

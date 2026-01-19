@@ -85,7 +85,7 @@ class _EditWidgetState extends State<EditWidget> {
                 padding: EdgeInsets.all(context.height * 0.02),
                 controller: widget.controler,
                 inputFormatters: [
-                  LengthLimitingTextInputFormatter(8),
+                  LengthLimitingTextInputFormatter(20),
                 ],
               ),
             ),

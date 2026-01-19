@@ -125,6 +125,7 @@ class SharedBoardPreviewScreen extends StatelessWidget {
           ),
         ],
       ),
+      
       body: LayoutBuilder(
         builder: (context, constraints) {
           final itemCount = board.listData?.length ?? 0;
@@ -138,6 +139,7 @@ class SharedBoardPreviewScreen extends StatelessWidget {
           final aspectRatio = cellWidth / cellHeight;
 
           return GridView.count(
+            padding: EdgeInsets.zero,
             crossAxisCount: crossAxisCount,
             physics: const NeverScrollableScrollPhysics(),
             childAspectRatio: aspectRatio,
